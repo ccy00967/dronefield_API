@@ -1,0 +1,115 @@
+from rest_framework import generics
+from rest_framework import permissions
+from exterminator.serializers import ExterminatorAcceptSerializer
+from exterminator.serializers import ExterminateStateUpdateSerializer
+
+from exterminator.permissions import OnlyExterminatorCanReadUpdate
+from exterminator.permissions import CheckExterminateState
+from exterminator.permissions import OnlyOwnerExterminatorCanUpdate
+
+from farmrequest.models import CustomerRequest
+from farmrequest.serializers import CustomerRequestSerializer
+
+from customer.models import ArableLandInfo
+from rest_framework.response import Response
+
+
+#방제사 정보 업데이트 - 방제 선점
+class ExterminatorAcceptCreateAPIView(generics.CreateAPIView):
+    queryset = CustomerRequest.objects.all()
+    serializer_class = ExterminatorAcceptSerializer
+    #lookup_field = 'orderid'
+    name = "exterminator-accept-deal"
+    permission_classes = (
+        permissions.IsAuthenticatedOrReadOnly,
+        OnlyExterminatorCanReadUpdate,
+        CheckExterminateState,
+    )
+
+    def perform_create(self, serializer):
+        orderIdList = self.request.data.get('orderidlist')
+
+        for orderid in orderIdList:
+            CustomerRequest.objects.filter(orderid=orderid).update(exterminatorinfo=self.request.user, exterminateState=1)
+        #return Response({"message" : "결제가 완료되었습니다."}, status = status.HTTP_201_CREATED)
+
+
+#방제사 정보 업데이트 - 방제 취소
+class ExterminatorAcceptUpdateDeleteView(generics.RetrieveDestroyAPIView):
+    queryset = CustomerRequest.objects.all()
+    serializer_class = ExterminatorAcceptSerializer
+    #lookup_field = 'orderid'
+    name = "exterminator-accept-cancel"
+
+    def perform_destroy(self, instance):
+        #serializer.save(exterminatorinfo=self.request.user)
+        serializer = self.get_serializer(instance, data=self.request.data)
+        serializer.save(exterminatorinfo=None, exterminateState=0)
+        #instance.delete()
+
+    permission_classes = (
+        permissions.IsAuthenticatedOrReadOnly,
+        OnlyExterminatorCanReadUpdate,
+        CheckExterminateState,
+    )
+
+
+# 방제 신청서 전부 가져오기
+class ExterminatorGetRequestsListView(generics.ListAPIView):
+    queryset = CustomerRequest.objects.all()
+    serializer_class = CustomerRequestSerializer
+    name = "exterminator-get-lists"
+    permission_classes = (
+        permissions.IsAuthenticatedOrReadOnly,
+        OnlyExterminatorCanReadUpdate,
+    )
+
+    
+# 방제 신청서 cd로 전부 가져오기 - 위에 전부 가져오기랑 합칠수 있을듯
+class ExterminatorGetRequestsWithCdListView(generics.ListAPIView):
+    queryset = CustomerRequest.objects.all()
+    serializer_class = CustomerRequestSerializer
+    lookup_field = 'cd'
+    name = "exterminator-get-cd-lists"
+    permission_classes = (
+        permissions.IsAuthenticatedOrReadOnly,
+        OnlyExterminatorCanReadUpdate,
+    )
+
+    def get_queryset(self):
+        return CustomerRequest.objects.filter(landInfo__cd__startswith=str(self.kwargs['cd']))
+    
+
+# 본인이 담당한 신청서만 가져오기 - 0,1,2,3 상태 넣기 - lookup field에
+class ExterminatorGetOwnRequestsListView(generics.ListAPIView):
+    queryset = CustomerRequest.objects.all()
+    serializer_class = CustomerRequestSerializer
+    lookup_field = 'state'
+    name = "exterminator-get-own-lists"
+    permission_classes = (
+        permissions.IsAuthenticatedOrReadOnly,
+        OnlyExterminatorCanReadUpdate,
+    )
+
+    def get_queryset(self):
+        if self.kwargs['state'] == 1: # 작업준비중
+            return CustomerRequest.objects.filter(exterminatorinfo=self.request.user, exterminateState = 1)
+        if self.kwargs['state'] == 2: # 작업중
+            return CustomerRequest.objects.filter(exterminatorinfo=self.request.user, exterminateState = 2)
+        if self.kwargs['state'] == 3: # 작업완료
+            return CustomerRequest.objects.filter(exterminatorinfo=self.request.user, exterminateState = 3)
+        return CustomerRequest.objects.filter(exterminatorinfo=self.request.user)
+    
+
+# 방제 상태 변환하기
+class ExterminateStateUpdate(generics.RetrieveUpdateAPIView):
+    queryset = CustomerRequest.objects.all()
+    serializer_class = ExterminateStateUpdateSerializer
+    lookup_field = 'orderid'
+    name = "exterminate-state-update"
+    permission_classes = (
+        permissions.IsAuthenticatedOrReadOnly,
+        OnlyOwnerExterminatorCanUpdate,
+        OnlyExterminatorCanReadUpdate,
+    )
+
