@@ -26,4 +26,4 @@
 * 실행 종료하기
 * docker-compose down
 * 만들어진 컨테이너 실행하기 - 굳이 도커 명령어로 안해도 된다 도커 UI에서 실행가능 -
-* docker-compose up
+* docker-compose up# dronefield_API
