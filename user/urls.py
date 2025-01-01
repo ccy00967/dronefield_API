@@ -1,19 +1,12 @@
 from django.urls import path
 from rest_framework_simplejwt import views as jwt_views
 
-from .views import (
-    niceCrytoToken,
-    getNicePassUserData,
-    emailValidationSend,
-    validationCheck,
-    passwordReset,
-)
+from .views import (niceCrytoToken,getNicePassUserData,
+                    emailValidationSend,validationCheck,
+                    passwordReset,)
 
-from .views import (
-    UserRegistrationView,
-    UserLoginView,
-    UserDataUpdateView,
-)
+from .views import (UserRegistrationView,UserLoginView,
+                    UserDataUpdateView,)
 
 
 '''

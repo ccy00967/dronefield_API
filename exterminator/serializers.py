@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from trade.models import CustomerRequest
-from auth.models import CustomUser
+from user.models import CustomUser
 
 
 # 신청서에 방제사 정보 업데이트
