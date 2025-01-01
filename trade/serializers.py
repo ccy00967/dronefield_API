@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from trade.models import CustomerRequest
-from user.serializers import UserListSerializer
+from auth.serializers import UserListSerializer
 from payments.serializers import TossPaymentsSerializer
 from farmer.serializers import ArableLandInfoSerializer
 

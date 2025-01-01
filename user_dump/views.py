@@ -5,10 +5,10 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from .models import CustomUser
-from .models import Exterminator
+from ..auth.models import CustomUser
+from ..auth.models import Exterminator
 
-from .serializers import (
+from ..auth.serializers import (
     UserRegistrationSerializer,
     UserLoginSerializer, 
     UserListSerializer,
@@ -17,11 +17,11 @@ from .serializers import (
     ExterminatorSerializer,
 )
 
-from user.permissions import OnlyOwnerCanUpdate
-from user.permissions import OnlyManagerCanAccess
+from auth.permissions import OnlyOwnerCanUpdate
+from auth.permissions import OnlyManagerCanAccess
 
-from validation.views import isNicePassDone
-from validation.views import isEmailValidate
+from auth.views import isNicePassDone
+from auth.views import isEmailValidate
 
 from drf_yasg.utils import swagger_auto_schema
 from . import swagger_doc
