@@ -1,5 +1,3 @@
 from django.db import models
 
 # Create your models here.
-
-# 수정필요 - 방제사 정보 모델 필요
