@@ -1,5 +1,5 @@
 from django.urls import path
-from farmrequest import views
+from trade import views
 
 urlpatterns = [
     # 신청서 등록 - 농지정보 필요

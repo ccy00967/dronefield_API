@@ -26,7 +26,7 @@ RUN pip install -r requirements.txt
 # copy project
 COPY . .
 
-RUN python manage.py collectstatic --settings=config.settings.docker
+RUN python manage.py collectstatic --settings=core.settings
 RUN chmod -R 755 ./static
 
 # run entrypoint.sh

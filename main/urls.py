@@ -40,21 +40,15 @@ schema_view = get_schema_view(
 
 urlpatterns = [
     # path(r'swagger(?P<format>\.json|\.yaml)', schema_view.without_ui(cache_timeout=0), name='schema-json'),
-    path(
-        r"swagger",
-        schema_view.with_ui("swagger", cache_timeout=0),
-        name="schema-swagger-ui",
-    ),
-    path(
-        r"redoc", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc-v1"
-    ),
+    path(r"swagger",schema_view.with_ui("swagger", cache_timeout=0),name="schema-swagger-ui"),
+    path(r"redoc", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc-v1"),
     path("admin/", admin.site.urls),
     path("user/", include("user.urls")),
     path("validation/", include("validation.urls")),
-    path("customer/", include("customer.urls")),
+    path("farmer/", include("farmer.urls")),
     path("exterminator/", include("exterminator.urls")),
-    path("farmrequest/", include("farmrequest.urls")),
-    path("payments/", include("common.urls")),
+    path("trade/", include("trade.urls")),
+    path("payments/", include("payments.urls")),
     # re_path(r'.*', TemplateView.as_view(template_name = 'index.html'), name="react-web"),
     #
     # RENEWAL URI - Need to Fix included - 새로 생성, 수정필요 포함

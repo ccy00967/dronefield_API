@@ -6,7 +6,7 @@
 from rest_framework.permissions import BasePermission
 
 # import jwt
-# from config.settings.base import SIMPLE_JWT
+# from core.settings.base import SIMPLE_JWT
 # from rest_framework_simplejwt.authentication import JWTAuthentication
 
 # 이때 토큰은 자동으로 decode된다
