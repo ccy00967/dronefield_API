@@ -28,7 +28,7 @@ from common.nice_fuc import access_token
 from user.models import CustomUser
 from .permissions import OnlyOwnerCanUpdate
 from rest_framework import generics
-from .models import Exterminator
+from exterminator.models import Exterminator
 
 from user.serializers import (
     UserRegistrationSerializer,
@@ -40,6 +40,7 @@ from user.serializers import (
 )
 
 
+#회원가입입
 class UserRegistrationView(generics.GenericAPIView):
     serializer_class = UserRegistrationSerializer
     permission_classes = (AllowAny,)

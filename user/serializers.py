@@ -1,5 +1,5 @@
 from .models import CustomUser
-from .models import Exterminator
+from exterminator.models import Exterminator
 from rest_framework import serializers
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import update_last_login
@@ -16,7 +16,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from user.models import CustomUser
-from user.models import Exterminator
+from exterminator.models import Exterminator
 
 from user.permissions import OnlyOwnerCanUpdate
 from user.permissions import OnlyManagerCanAccess
