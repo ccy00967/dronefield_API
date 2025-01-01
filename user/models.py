@@ -25,18 +25,18 @@ ROLE_CHOICES = (
     (CUSTOMER, "Customer"),
 )
 GENDERS = (
-    ('0', '여성(Woman)'),
-    ('1', '남성(Man)'),
+    ("0", "여성(Woman)"),
+    ("1", "남성(Man)"),
 )
 NATION = (
-    ('0', "내국인"),
-    ('1', "외국인"),
+    ("0", "내국인"),
+    ("1", "외국인"),
 )
 
 
 # 헬퍼 클래스
 class CustomUserManager(BaseUserManager):
- 
+
     # 일반 유저
     def create_user(self, email, password, **extra_fields):
 
@@ -50,15 +50,17 @@ class CustomUserManager(BaseUserManager):
         if not re.search(r"\d", password):
             raise ValueError("비밀번호는 하나 이상의 숫자가 포함되어야 합니다.")
         if not re.search(r"[!@#$%^&*()]", password):
-            raise ValueError("비밀번호는 적어도 하나 이상의 특수문자(!@#$%^&*())가 포함되어야 합니다.")
-        
+            raise ValueError(
+                "비밀번호는 적어도 하나 이상의 특수문자(!@#$%^&*())가 포함되어야 합니다."
+            )
+
         email = self.normalize_email(email)
 
         user = self.model(
             email=email,
             **extra_fields,
-            )
-        
+        )
+
         user.set_password(password)
 
         user.save(using=self._db)
@@ -81,26 +83,30 @@ class CustomUserManager(BaseUserManager):
 # AbstractBaseUser를 상속해서 유저 커스텀
 class CustomUser(AbstractBaseUser, PermissionsMixin):
 
-    uuid = models.UUIDField(db_index=True, unique=True ,default=uuid.uuid4, editable=False)
+    uuid = models.UUIDField(
+        db_index=True, unique=True, default=uuid.uuid4, editable=False
+    )
 
     # 나이스 pass에서 받은 정보
     name = models.CharField(max_length=16, blank=False, default="", unique=False)
     birthdate = models.CharField(max_length=8, blank=False, null=False)
     gender = models.CharField(max_length=1, choices=GENDERS, blank=False, null=False)
-    nationalinfo = models.CharField(max_length=1, choices=NATION, blank=False, null=False)
-    #mobileco = models.CharField(max_length=1, blank=False, null=False)
+    nationalinfo = models.CharField(
+        max_length=1, choices=NATION, blank=False, null=False
+    )
+    # mobileco = models.CharField(max_length=1, blank=False, null=False)
     mobileno = models.CharField(max_length=14, unique=True, blank=False, null=False)
 
     # 드론평야 추가 정보
     role = models.PositiveSmallIntegerField(
         choices=ROLE_CHOICES, blank=True, null=True, default=4
     )
-    #nickname = models.CharField(max_length=15, blank=True, default="", unique=True)
+    # nickname = models.CharField(max_length=15, blank=True, default="", unique=True)
     email = models.EmailField(max_length=30, unique=True, null=False, blank=False)
-    
+
     address = models.ForeignKey(
-        'common.Address',
-        related_name = 'useraddress',
+        "common.Address",
+        related_name="useraddress",
         on_delete=models.CASCADE,
         blank=True,
         null=True,
@@ -123,16 +129,17 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         return self.email
 
 
+# 수정필요 - 농민, 방제사 각각의 APP에 위의 User정보를 외래키로 저장 [User] <- [농민], [방제사]
 # 방제사 정보 추가하기
-class Exterminator(models.Model): 
+class Exterminator(models.Model):
 
     user = models.ForeignKey(
         CustomUser,
-        related_name= 'exterminatorInfo',
+        related_name="exterminatorInfo",
         on_delete=models.PROTECT,
     )
 
-    #조종자격증
+    # 조종자격증
     license = models.CharField(max_length=30, blank=False, null=False)
     # 기체모델
     model_no = models.CharField(max_length=30, blank=False, null=False)
