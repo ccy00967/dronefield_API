@@ -8,6 +8,25 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from common.models import Address
 from common.serializers import AddressSerializer
 
+from rest_framework import status
+from rest_framework import generics
+from rest_framework.response import Response
+from rest_framework.permissions import AllowAny, IsAuthenticated
+
+from rest_framework_simplejwt.views import TokenObtainPairView
+
+from user.models import CustomUser
+from user.models import Exterminator
+
+from user.permissions import OnlyOwnerCanUpdate
+from user.permissions import OnlyManagerCanAccess
+
+#from user.views import isNicePassDone
+#from user.views import isEmailValidate
+
+from drf_yasg.utils import swagger_auto_schema
+from . import swagger_doc
+
 # 토큰에 원하는 정보 담기
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod

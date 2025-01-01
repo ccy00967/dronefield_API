@@ -11,19 +11,33 @@ from django.http import HttpResponse
 from rest_framework.decorators import api_view
 from rest_framework.decorators import parser_classes
 from rest_framework.parsers import JSONParser
+from rest_framework.permissions import IsAuthenticated
 
 from drf_yasg.utils import swagger_auto_schema
 from . import swagger_doc
+from rest_framework.permissions import AllowAny
 
-from ..common.nice_fuc import encrypt_data
-from ..common.nice_fuc import decrypt_data
-from ..common.nice_fuc import clientID
-from ..common.nice_fuc import secretKey
-from ..common.nice_fuc import APIUrl
-from ..common.nice_fuc import productID
-from ..common.nice_fuc import access_token
+from common.nice_fuc import encrypt_data
+from common.nice_fuc import decrypt_data
+from common.nice_fuc import clientID
+from common.nice_fuc import secretKey
+from common.nice_fuc import APIUrl
+from common.nice_fuc import productID
+from common.nice_fuc import access_token
 #from .nice_fuc import returnURL
-from auth.models import CustomUser
+from user.models import CustomUser
+from .permissions import OnlyOwnerCanUpdate
+from rest_framework import generics
+from .models import Exterminator
+
+from user.serializers import (
+    UserRegistrationSerializer,
+    UserLoginSerializer, 
+    UserListSerializer,
+    CustomTokenObtainPairSerializer,
+    ManageUserListSerializer,
+    ExterminatorSerializer,
+)
 
 
 class UserRegistrationView(generics.GenericAPIView):
