@@ -1,6 +1,6 @@
 from rest_framework import serializers
-from customer.models import ArableLandInfo
-from farmrequest.models import CustomerRequest
+from farmer.models import ArableLandInfo
+from trade.models import CustomerRequest
 from common.models import Address
 from common.serializers import AddressSerializer
 

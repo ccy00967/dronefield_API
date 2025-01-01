@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.admin",
     
     # 서드파티 앱
     "rest_framework",
@@ -60,12 +61,15 @@ INSTALLED_APPS = [
     "drf_yasg",
     
     # 커스텀 앱
-    "common.apps.CommonConfig",
-    "user.apps.UserConfig",
-    "validation.apps.ValidationConfig",
-    "customer.apps.CustomerConfig",
-    "exterminator.apps.ExterminatorConfig",
-    "farmrequest.apps.FarmrequestConfig",
+    #"common.apps.CommonConfig",
+    "user",
+    "validation",
+    #"customer",
+    "exterminator",
+    "trade",
+    "common",
+    "payments",
+    "farmer"
 ]
 
 MIDDLEWARE = [
@@ -83,8 +87,8 @@ MIDDLEWARE = [
 # ===========================
 # URL 및 WSGI 설정
 # ===========================
-ROOT_URLCONF = "config.urls"
-WSGI_APPLICATION = "config.wsgi.application"
+ROOT_URLCONF = "main.urls"
+WSGI_APPLICATION = "core.wsgi.application"
 
 # ===========================
 # 템플릿 설정

@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class FarmrequestConfig(AppConfig):
+class tradeConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'farmrequest'
+    name = 'trade'

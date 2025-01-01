@@ -2,15 +2,15 @@ import math
 from rest_framework import generics
 from rest_framework import permissions
 
-from farmrequest.models import CustomerRequest
-from farmrequest.serializers import CustomerRequestSerializer
-from farmrequest.serializers import CustomerRequestBriefSerializer
-from farmrequest.serializers import CustomerCheckExterminateStateSerializer
+from trade.models import CustomerRequest
+from trade.serializers import CustomerRequestSerializer
+from trade.serializers import CustomerRequestBriefSerializer
+from trade.serializers import CustomerCheckExterminateStateSerializer
 
-from customer.models import ArableLandInfo
+from farmer.models import ArableLandInfo
 
-from farmrequest.permissions import OnlyOwnerCanUpdate
-from farmrequest.permissions import isBeforePay
+from trade.permissions import OnlyOwnerCanUpdate
+from trade.permissions import isBeforePay
 
 
 # 신청서 등록

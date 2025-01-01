@@ -1,8 +1,8 @@
 from rest_framework import serializers
-from farmrequest.models import CustomerRequest
+from trade.models import CustomerRequest
 from user.serializers import UserListSerializer
-from common.serializers import TossPaymentsSerializer
-from customer.serializers import ArableLandInfoSerializer
+from payments.serializers import TossPaymentsSerializer
+from farmer.serializers import ArableLandInfoSerializer
 
 
 # 신청서

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from farmrequest.models import CustomerRequest
+from trade.models import CustomerRequest
 from user.models import CustomUser
 
 
