@@ -29,19 +29,25 @@ from user.models import CustomUser
 from .permissions import OnlyOwnerCanUpdate
 from rest_framework import generics
 from exterminator.models import Exterminator
-
+from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import AuthenticationFailed
 from user.serializers import (
     UserRegistrationSerializer,
     UserLoginSerializer, 
-    UserListSerializer,
+    ProfileSerializer,
     CustomTokenObtainPairSerializer,
     ManageUserListSerializer,
     ExterminatorSerializer,
 )
 
+from core.settings import DEBUG
+import logging
 
-#회원가입입
-class UserRegistrationView(generics.GenericAPIView):
+logger = logging.getLogger(__name__)
+
+#회원가입
+class UserRegistrationAPIView(generics.GenericAPIView):
     serializer_class = UserRegistrationSerializer
     permission_classes = (AllowAny,)
 
@@ -54,36 +60,36 @@ class UserRegistrationView(generics.GenericAPIView):
     def post(self, request):
         # 나중에 permission으로 이동하기
         # NicePass 본인인증 여부 확인
-        if(request.session.get(isNicePassDone) != True):
-            print("나이스 본인인증이 안됨!")
-            return Response({"message": "nicepass validation need first"}, status=status.HTTP_401_UNAUTHORIZED)
-        # 이메일 인증 여부 확인
-        if(request.session.get(isEmailValidate) != True):
-            print("이메일 인증이 안됨!")
-            return Response({"message": "email validation need first"}, status=status.HTTP_401_UNAUTHORIZED)
-        # 방제사라면 인증후 직접 바꾸어줌
-        if(request.data["role"] == 3):
-            print("방제사는 나중에 서류 확인 후 activate 시켜줌")
-            is_active = False
-        else : 
-            is_active = True
-
-        serializer = self.serializer_class(data=request.data)
-        valid = serializer.is_valid(raise_exception=True)
-
-        if valid:
+        is_active = True
+        if not DEBUG:
+            if(request.session.get(isNicePassDone) != True):
+                print("나이스 본인인증이 안됨!")
+                return Response({"message": "nicepass validation need first"}, status=status.HTTP_401_UNAUTHORIZED)
+            # 이메일 인증 여부 확인
+            if(request.session.get(isEmailValidate) != True):
+                print("이메일 인증이 안됨!")
+                return Response({"message": "email validation need first"}, status=status.HTTP_401_UNAUTHORIZED)
+            # 방제사라면 인증후 직접 바꾸어줌
+            if(request.data["role"] == 3):
+                print("방제사는 나중에 서류 확인 후 activate 시켜줌")
+                is_active = False
+            else : 
+                is_active = True
+        
+        serializer = UserRegistrationSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
             # 데이터베이스에 유저정보 저장(serializer create실행)
             serializer.save(
-                name = request.session.get("name"),
-                birthdate = request.session.get("birthdate"),
-                gender = request.session.get("gender"),
-                nationalinfo = request.session.get("nationalinfo"),
-                mobileno = request.session.get("mobileno"),
-                email = request.session.get("email"),
+                name = request.data.get("name"),
+                birthdate = request.data.get("birthdate"),
+                gender = request.data.get("gender"),
+                nationalinfo = request.data.get("nationalinfo"),
+                mobileno = request.data.get("mobileno"),
+                email = request.data.get("email"),
                 is_active=is_active,
             )
+            
             request.session.flush() #세션의 모든 것을 삭제
-            request.session.save()
 
             response = {
                 "success": True,
@@ -91,12 +97,11 @@ class UserRegistrationView(generics.GenericAPIView):
             }
             return Response(response, status=status.HTTP_201_CREATED)
 
-
 # 이메일과 비밀번호로 로그인
-class UserLoginView(generics.GenericAPIView):
+class UserLoginAPIView(generics.GenericAPIView):
     serializer_class = UserLoginSerializer
-    permission_classes = (AllowAny,)
-
+    permission_classes = [AllowAny]
+    
     @swagger_auto_schema(
         operation_id='로그인',
         operation_description='유저 로그인',
@@ -104,90 +109,50 @@ class UserLoginView(generics.GenericAPIView):
         responses=swagger_doc.UserLoginResponse,
     )
     def post(self, request):
-        serializer = self.serializer_class(data=request.data)
-        valid = serializer.is_valid(raise_exception=True)
+        serializer = self.get_serializer(data=request.data)
 
-        if valid:
-            status_code = status.HTTP_200_OK
-            # 유저로그인시리얼라이저의 validation 참고해서 작성
+        try:
+            serializer.is_valid(raise_exception=True)
             response = {
-                "access": serializer.data["access"],
-                "refresh": serializer.data["refresh"],
-                "uuid" : serializer.data["uuid"],
+                "access": serializer.validated_data["access"],
+                "refresh": serializer.validated_data["refresh"],
+                "uuid": serializer.validated_data["uuid"],
             }
-
-            return Response(response, status=status_code)
-        return Response({"message": "Login Not Success"}, status=status.HTTP_401_UNAUTHORIZED)
-
+            return Response(response, status=status.HTTP_200_OK)
+        
+        except AuthenticationFailed as e:
+            return Response({"error": str(e)}, status=status.HTTP_401_UNAUTHORIZED)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 # 사용자 정보를 수정 - 오직 자기자신의 정보만 수정가능 - access토큰으로 인증
-class UserDataUpdateView(generics.RetrieveAPIView):
+class ProfileAPIView(generics.RetrieveAPIView):
     queryset = CustomUser.objects.all()
-    serializer_class = UserListSerializer
-    lookup_field = "uuid"
+    serializer_class = ProfileSerializer
+    permission_classes = [IsAuthenticated, OnlyOwnerCanUpdate]
+    
+    # @swagger_auto_schema(
+    #     operation_id='프로필',
+    #     operation_description='유저 프로필',
+    #     tags=['user'],
+    #     responses=swagger_doc.ProfileResponse,
+    # )
+    def get(self, request):
+        serializer = self.get_serializer(request.user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-    permission_classes = [
-        IsAuthenticated,
-        OnlyOwnerCanUpdate,
-    ]
-
-
-class ExterminatorView(generics.ListAPIView):
-    queryset = Exterminator.objects.all()
-    serializer_class = ExterminatorSerializer
-    lookup_field = "uuid"
-
-    permission_classes = [
-        IsAuthenticated,
-        OnlyOwnerCanUpdate,
-    ]
-
-'''
-# 관리자용 유저정보 수정
-# 농민에서 방제사로 변경등에 필요
-class ManageUserListView(generics.ListAPIView):
-    queryset = CustomUser.objects.all()
-    serializer_class = ManageUserListSerializer
-
-    permission_classes = [
-        IsAuthenticated,
-        OnlyManagerCanAccess,
-    ]
+    def patch(self, request):
+        serializer = self.get_serializer(request.user, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        print(request.data)
+        print(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+ 
 
 
-class ManageUserRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = CustomUser.objects.all()
-    serializer_class = ManageUserListSerializer
-    lookup_field = "uuid"
-    permission_classes = [
-        IsAuthenticated,
-        OnlyManagerCanAccess,
-    ]
-
-# 방제사 정보 업데이트 - 관리자계정으로 일반계정을 방제사로 업데이트
-class ManageExterminatorRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = CustomUser.objects.all()
-    serializer_class = ExterminatorSerializer
-    lookup_field = "uuid"
-    permission_classes = [
-        IsAuthenticated,
-        OnlyManagerCanAccess,
-    ]
-
-    def perform_create(self, serializer):
-        #!중요 - 바로 시리얼라이저의 모델 requestowner에게 전달된다
-        serializer.save(user=CustomUser.objects.get(uuid=self.lookup_field))
-'''
-
-    # 중요!
-    # 토큰을 입력받으면 자동으로 디코딩되어 request에 담기는 것 같다
-    # 결론) 뷰에는 queryset으로 데이터를 가져오고
-    # 보여질 데이터는 시리얼라이저에서 제한하기
-    # 퍼미션스파일에 여러가지 퍼미션을 만들어서 유져용, 어드민용을 만들기!
-    # 즉, 뷰파일을 깔끔하게 유지하고 로직들을 전부 퍼미션 파일로 옮긴다
 
 
-#===============================
 Email = "email"
 ValidateKey = "validatekey"
 isNicePassDone = "isNicePassDone"
@@ -347,8 +312,7 @@ def getNicePassUserData(request):
         }, status = status.HTTP_200_OK)
 
 
-# 일반 api에 달기
-# 인증 이메일 발송 인증번호를 포함
+#TODO : SMTP 인증번호 설정 필요
 @swagger_auto_schema(
     method="POST",
     operation_id='인증번호 발송',
@@ -357,28 +321,52 @@ def getNicePassUserData(request):
     responses=swagger_doc.EmailResponse,
 )
 @api_view(('POST',))
-#@parser_classes((JSONParser,))
 def emailValidationSend(request):
-    if request.method == 'POST':
-        validatekey = str(uuid.uuid1().int)[0:6] #uuid 랜덤값 생성(만약 문자열이라면 str)
+    try:
+        receive_email = request.data.get("email")
 
-        reciveEmail = request.data["email"]
+        # 이메일 유효성 검사
+        if not receive_email:
+            return Response({"error": "Email is required."}, status=status.HTTP_400_BAD_REQUEST)
 
-        request.session[Email] = reciveEmail # 인증할 이메일을 세션에 저장
-        request.session[ValidateKey] = validatekey
-        request.session.save() # 위 세션 저장
+        # 6자리 인증번호 생성
+        validate_key = str(uuid.uuid4().int)[:6]
 
-        subject = "드론평야 인증번호입니다"	# 타이틀
-        to = [reciveEmail]                  # 수신할 이메일 주소
-        # html파일은 client에 존재함
-        message = render_to_string('emailvalidation.html', {
-                    'validatekey': validatekey,
-                })
-        EmailMessage(subject=subject, body=message, to=to).send()
+        # 세션에 이메일과 인증번호 저장
+        request.session["email"] = receive_email
+        request.session["validate_key"] = validate_key
+        request.session.set_expiry(300)  # 5분 후 세션 만료
+        request.session.save()
 
-        return Response({"message": "email sended"}, status = status.HTTP_201_CREATED)
-    
-    return Response({"message": "email send error"}, status = status.HTTP_500_INTERNAL_SERVER_ERROR)
+        # 이메일 제목 및 HTML 메시지
+        subject = "드론평야 인증번호입니다"
+        message = f"""
+        <html>
+        <body>
+            <h2>드론평야 인증번호</h2>
+            <p>안녕하세요!</p>
+            <p>비밀번호 재설정을 위해 아래의 인증번호를 입력해주세요.</p>
+            <h3 style="color:blue;">인증번호: <strong>{validate_key}</strong></h3>
+            <p>이 인증번호는 5분 동안 유효합니다.</p>
+        </body>
+        </html>
+        """
+
+        # 이메일 전송
+        email = EmailMessage(subject=subject, body=message, to=[receive_email])
+        email.content_subtype = "html"
+        email.send()
+
+        logger.info(f"Verification email sent to {receive_email} (Code: {validate_key})")
+
+        return Response({"message": "Email sent successfully."}, status=status.HTTP_201_CREATED)
+
+    except Exception as e:
+        logger.error(f"Failed to send email to {receive_email}. Error: {str(e)}")
+        return Response(
+            {"message": "Failed to send email."},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
 
 # 계정 활성화 - 클라이언트에서 "validatekey"로 가져옴
@@ -394,7 +382,6 @@ def emailValidationSend(request):
 def validationCheck(request) :
     if request.method == 'POST':
         if(request.session.get(ValidateKey) == request.data[ValidateKey]):
-            # 이메일 인증성공 - 회원가입에서 확인할 값
             request.session[isEmailValidate] = True
             request.session.save()
             return Response({"message": "email validated"}, status = status.HTTP_200_OK)
@@ -410,14 +397,30 @@ def validationCheck(request) :
     request_body=swagger_doc.PasswordResetRequest,
     responses=swagger_doc.PasswordResetResponse,
 )
-@api_view(('POST',))
-@parser_classes((JSONParser,))
-def passwordReset(request) :
-    if request.method == 'POST':
-        if(request.session.get(ValidateKey) == request.data[ValidateKey]):
-            user = CustomUser.objects.get(email=request.data["email"])
-            user.set_password(raw_password=request.data["password"])
-            user.save()  
-            return Response({"message": "password updated"}, status = status.HTTP_200_OK)
+@api_view(['POST'])
+@parser_classes([JSONParser])
+def password_reset(request):
+    try:
+        validate_key = request.session.get("validate_key")  # 세션에서 인증키 가져오기
+        if validate_key is None:
+            return Response({"message": "Session expired or invalid"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        # 세션의 키와 클라이언트가 보낸 키를 비교
+        if validate_key == request.data.get("validate_key"):
+            user = CustomUser.objects.filter(email=request.data.get("email")).first()
+            if not user:
+                return Response({"message": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
+            # 비밀번호 재설정
+            user.set_password(request.data.get("password"))
+            user.save()
+
+            # 세션 초기화 (보안 강화)
+            request.session.pop("validate_key", None)
+            return Response({"message": "Password updated successfully"}, status=status.HTTP_200_OK)
         else:
-            return Response({"message": "validate key error"}, status = status.HTTP_401_UNAUTHORIZED)
+            return Response({"message": "Invalid validation key"}, status=status.HTTP_401_UNAUTHORIZED)
+
+    except Exception as e:
+        logger.error(f"Password reset error: {str(e)}")
+        return Response({"message": "Internal server error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
