@@ -112,4 +112,13 @@ class ExterminateStateUpdate(generics.RetrieveUpdateAPIView):
         OnlyOwnerExterminatorCanUpdate,
         OnlyExterminatorCanReadUpdate,
     )
+#TODO : 방제사 정보 업데이트 - 추가 예정
+# class ExterminatorView(generics.ListAPIView):
+#     queryset = Exterminator.objects.all()
+#     serializer_class = ExterminatorSerializer
+#     lookup_field = "uuid"
 
+#     permission_classes = [
+#         IsAuthenticated,
+#         OnlyOwnerCanUpdate,
+#     ]

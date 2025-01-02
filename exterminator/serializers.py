@@ -27,3 +27,16 @@ class ExterminateStateUpdateSerializer(serializers.ModelSerializer):
             'orderid',
             'exterminateState',
         )
+  
+#TODO: 방제사 정보 가져오기      
+# class ExterminatorSerializer(serializers.ModelSerializer):
+#     user = ManageUserListSerializer()
+ 
+#     class Meta:
+#         model = Exterminator
+#         fields = (
+#             'user',
+#             'license',
+#             'model_no', 
+#             'wrkr_no',
+#         )
