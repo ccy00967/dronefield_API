@@ -5,9 +5,9 @@ from exterminator.models import ExterminatorLicense
 
 
 class ExterminatorLicenseSerializer(serializers.ModelSerializer):
-    license_number = serializers.CharField(max_length=30, blank=False)
-    model_number = serializers.CharField(max_length=30, blank=False)
-    worker_registration_number = serializers.CharField(max_length=30, blank=False)
+    license_number = serializers.CharField(max_length=30, required=True)
+    model_number = serializers.CharField(max_length=30, required=True)
+    worker_registration_number = serializers.CharField(max_length=30, required=True)
 
     class Meta:
         model = ExterminatorLicense

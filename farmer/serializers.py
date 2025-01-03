@@ -24,4 +24,10 @@ class ArableLandInfoSerializer(serializers.ModelSerializer):
             **validated_data,
         )
         return arableland
+    
+    def update(self, instance, validated_data):
+        address = validated_data.pop('address')
+        addressinfo = instance.address
+        addressinfo.address = address.get('address', addressinfo.address)
+        addressinfo.save()
 

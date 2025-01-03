@@ -1,9 +1,9 @@
 from rest_framework import generics
 from rest_framework import permissions
-from exterminator.serializers import ExterminatorAcceptSerializer
-from exterminator.serializers import ExterminateStateUpdateSerializer
+#from exterminator.serializers import ExterminatorAcceptSerializer
+#from exterminator.serializers import ExterminateStateUpdateSerializer
 
-from exterminator.permissions import OnlyExterminatorCanReadUpdate
+#from exterminator.permissions import OnlyExterminatorCanReadUpdate
 from exterminator.permissions import CheckExterminateState
 from exterminator.permissions import OnlyOwnerExterminatorCanUpdate
 
