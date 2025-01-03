@@ -5,9 +5,9 @@ from user.models import CustomUser
 
 # Drone Exterminator License
 class ExterminatorLicense(models.Model):
-    license_number = models.CharField(max_length=30, blank=False)
-    model_number = models.CharField(max_length=30, blank=False)
-    worker_registration_number = models.CharField(max_length=30, blank=False)
+    license_number = models.CharField(max_length=30, blank=False, null=False)
+    model_number = models.CharField(max_length=30, blank=False, null=False)
+    worker_registration_number = models.CharField(max_length=30, blank=False, null=False)
 
     def __str__(self):
         return f"{self.license_number} - {self.model_number}"
