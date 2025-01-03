@@ -28,6 +28,16 @@ class ArableLandInfoSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         address = validated_data.pop('address')
         addressinfo = instance.address
-        addressinfo.address = address.get('address', addressinfo.address)
+
+        addressinfo.roadaddress = address.get('roadaddress', addressinfo.roadaddress)
+        addressinfo.jibunAddress = address.get('jibunAddress', addressinfo.jibunAddress)
+        addressinfo.detailAddress = address.get('detailAddress', addressinfo.detailAddress)
+
         addressinfo.save()
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
+        instance.save()
+        return instance
 
