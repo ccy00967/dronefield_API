@@ -38,7 +38,7 @@ from user.serializers import (
     ProfileSerializer,
     CustomTokenObtainPairSerializer,
     ManageUserListSerializer,
-    ExterminatorSerializer,
+    #ExterminatorSerializer,
 )
 
 from core.settings import DEBUG
