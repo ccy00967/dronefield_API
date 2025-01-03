@@ -63,13 +63,14 @@ INSTALLED_APPS = [
     # 커스텀 앱
     #"common.apps.CommonConfig",
     "user",
-    "validation",
+    #"validation",
     #"customer",
     "exterminator",
     "trade",
     "common",
     "payments",
-    "farmer"
+    "farmer",
+    #"account",
 ]
 
 MIDDLEWARE = [
