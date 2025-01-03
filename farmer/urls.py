@@ -1,5 +1,5 @@
 from django.urls import path
-from customer import views
+from farmer import views
 
 urlpatterns = [
     # 농지등록, 목록 가져오기

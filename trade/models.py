@@ -48,7 +48,7 @@ class CustomerRequest(models.Model):
 
     # 농지정보
     landInfo = models.ForeignKey(
-        'customer.ArableLandInfo',
+        'farmer.ArableLandInfo',
         related_name = 'request_landInfo',
         on_delete=models.PROTECT,
     )
@@ -109,7 +109,7 @@ class CustomerRequest(models.Model):
 
     # 신청서 토스 결제정보 - 총 가격 ex) 신청서 여러개
     requestTosspayments = models.ForeignKey(
-        'common.TossPayments',
+        'payments.TossPayments',
         related_name = 'request_tosspayments',
         on_delete=models.PROTECT,
         null=True,
@@ -118,7 +118,7 @@ class CustomerRequest(models.Model):
 
     # 예약금 토스 결제정보 - 총 가격 ex) 예약금 여러개
     reservateTosspayments = models.ForeignKey(
-        'common.TossPayments',
+        'payments.TossPayments',
         related_name = 'reservate_tosspayments',
         on_delete=models.PROTECT,
         null=True,

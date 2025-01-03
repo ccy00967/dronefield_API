@@ -1,10 +1,10 @@
 from rest_framework import generics
 
-from customer.models import ArableLandInfo
-from customer.serializers import ArableLandInfoSerializer
+from farmer.models import ArableLandInfo
+from farmer.serializers import ArableLandInfoSerializer
 
 from rest_framework import permissions
-from customer.permissions import OnlyOwnerCanUpdate
+from farmer.permissions import OnlyOwnerCanUpdate
 
 
 

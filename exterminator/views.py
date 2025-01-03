@@ -7,10 +7,10 @@ from exterminator.permissions import OnlyExterminatorCanReadUpdate
 from exterminator.permissions import CheckExterminateState
 from exterminator.permissions import OnlyOwnerExterminatorCanUpdate
 
-from farmrequest.models import CustomerRequest
-from farmrequest.serializers import CustomerRequestSerializer
+from trade.models import CustomerRequest
+from trade.serializers import CustomerRequestSerializer
 
-from customer.models import ArableLandInfo
+from farmer.models import ArableLandInfo
 from rest_framework.response import Response
 
 
@@ -112,4 +112,13 @@ class ExterminateStateUpdate(generics.RetrieveUpdateAPIView):
         OnlyOwnerExterminatorCanUpdate,
         OnlyExterminatorCanReadUpdate,
     )
+#TODO : 방제사 정보 업데이트 - 추가 예정
+# class ExterminatorView(generics.ListAPIView):
+#     queryset = Exterminator.objects.all()
+#     serializer_class = ExterminatorSerializer
+#     lookup_field = "uuid"
 
+#     permission_classes = [
+#         IsAuthenticated,
+#         OnlyOwnerCanUpdate,
+#     ]

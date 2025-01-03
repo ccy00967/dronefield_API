@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from farmrequest.models import CustomerRequest
+from trade.models import CustomerRequest
 from user.models import CustomUser
 
 
@@ -27,3 +27,16 @@ class ExterminateStateUpdateSerializer(serializers.ModelSerializer):
             'orderid',
             'exterminateState',
         )
+  
+#TODO: 방제사 정보 가져오기      
+# class ExterminatorSerializer(serializers.ModelSerializer):
+#     user = ManageUserListSerializer()
+ 
+#     class Meta:
+#         model = Exterminator
+#         fields = (
+#             'user',
+#             'license',
+#             'model_no', 
+#             'wrkr_no',
+#         )
