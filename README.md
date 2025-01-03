@@ -9,7 +9,7 @@
 * settings 파일을 여러 버전으로 관리 시작함
 * python manage.py runserver --settings=[세팅폴더의 세팅파일이름]
 * ex) 로컬 개발환경에서 사용
-* python manage.py runserver --settings=config.settings.local
+* python manage.py runserver --settings=core.settings.local
 
 모듈 한번에 다운받기 - 가상환경을 올리지 않고 소스코드만 올리기 위함
 * requirements.txt 위치를 찾아서 실행, 이때 pip실행위치는 가상환경이어야한다 (pwd가 자신의 디렉토리이름 이어야함)
@@ -27,3 +27,124 @@
 * docker-compose down
 * 만들어진 컨테이너 실행하기 - 굳이 도커 명령어로 안해도 된다 도커 UI에서 실행가능 -
 * docker-compose up# dronefield_API
+
+
+
+```
+dronefield_API
+├─ .dockerignore
+├─ .gitignore
+├─ Dockerfile
+├─ README.md
+├─ address
+│  ├─ __init__.py
+│  ├─ admin.py
+│  ├─ apps.py
+│  ├─ migrations
+│  │  └─ __init__.py
+│  ├─ models.py
+│  ├─ tests.py
+│  └─ views.py
+├─ auth
+│  ├─ __init__.py
+│  ├─ admin.py
+│  ├─ apps.py
+│  ├─ migrations
+│  │  └─ __init__.py
+│  ├─ models.py
+│  ├─ tests.py
+│  └─ views.py
+├─ common
+│  ├─ __init__.py
+│  ├─ admin.py
+│  ├─ apps.py
+│  ├─ models.py
+│  ├─ permissions.py
+│  ├─ serializers.py
+│  ├─ tests.py
+│  ├─ urls.py
+│  └─ views.py
+├─ core
+│  ├─ __init__.py
+│  ├─ asgi.py
+│  ├─ settings.py
+│  └─ wsgi.py
+├─ customer
+│  ├─ __init__.py
+│  ├─ admin.py
+│  ├─ apps.py
+│  ├─ models.py
+│  ├─ permissions.py
+│  ├─ serializers.py
+│  ├─ tests.py
+│  ├─ urls.py
+│  └─ views.py
+├─ entrypoint.sh
+├─ exterminator
+│  ├─ __init__.py
+│  ├─ admin.py
+│  ├─ apps.py
+│  ├─ models.py
+│  ├─ permissions.py
+│  ├─ serializers.py
+│  ├─ tests.py
+│  ├─ urls.py
+│  └─ views.py
+├─ farmer
+│  ├─ __init__.py
+│  ├─ admin.py
+│  ├─ apps.py
+│  ├─ migrations
+│  │  └─ __init__.py
+│  ├─ models.py
+│  ├─ tests.py
+│  └─ views.py
+├─ trade
+│  ├─ __init__.py
+│  ├─ admin.py
+│  ├─ apps.py
+│  ├─ models.py
+│  ├─ permissions.py
+│  ├─ serializers.py
+│  ├─ tests.py
+│  ├─ urls.py
+│  └─ views.py
+├─ main
+│  └─ urls.py
+├─ manage.py
+├─ payments
+│  ├─ __init__.py
+│  ├─ admin.py
+│  ├─ apps.py
+│  ├─ migrations
+│  │  └─ __init__.py
+│  ├─ models.py
+│  ├─ tests.py
+│  └─ views.py
+├─ requirements.txt
+├─ templates
+│  └─ emailvalidation.html
+├─ user
+│  ├─ __init__.py
+│  ├─ admin.py
+│  ├─ apps.py
+│  ├─ models.py
+│  ├─ permissions.py
+│  ├─ serializers.py
+│  ├─ swagger_doc.py
+│  ├─ tests.py
+│  ├─ urls.py
+│  └─ views.py
+└─ validation
+   ├─ __init__.py
+   ├─ admin.py
+   ├─ apps.py
+   ├─ models.py
+   ├─ nice_fuc.py
+   ├─ permissions.py
+   ├─ swagger_doc.py
+   ├─ tests.py
+   ├─ urls.py
+   └─ views.py
+
+```

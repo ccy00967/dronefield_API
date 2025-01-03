@@ -11,7 +11,7 @@ then
     echo "PostgreSQL started"
 fi
 
-#python manage.py flush --settings=config.settings.docker --no-input 
-python manage.py migrate --settings=config.settings.docker
+#python manage.py flush --settings=core.settings.docker --no-input 
+python manage.py migrate --settings=core.settins
 
 exec "$@"
