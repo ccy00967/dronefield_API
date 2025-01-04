@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 def application_with_content_length_handling(environ, start_response):
     try:
         request_body_size = int(environ.get('CONTENT_LENGTH', 0))
-    except (KeyError, ValueError):
+    except:
         request_body_size = 0
     
     logger.info(f"Request body size: {request_body_size}")
