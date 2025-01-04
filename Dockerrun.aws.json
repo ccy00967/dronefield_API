@@ -1,0 +1,15 @@
+{
+    "AWSEBDockerrunVersion": "1",
+    "Image": {
+      "Name": "public.ecr.aws/docker/library/python:3.12-slim",
+      "Update": "true"
+    },
+    "Ports": [
+      {
+        "ContainerPort": "8000"
+      }
+    ],
+    "Volumes": [],
+    "Logging": "/var/log/nginx"
+  }
+  
