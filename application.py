@@ -1,14 +1,20 @@
-from core.wsgi import application as django_application
+import os
+from django.core.wsgi import get_wsgi_application
+import logging
 
-def application(environ, start_response):
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'myproject.settings')
+
+application = get_wsgi_application()
+
+logger = logging.getLogger(__name__)
+
+def application_with_content_length_handling(environ, start_response):
     try:
-        # 요청 본문 크기를 안전하게 처리
-        request_body_size = int(environ.get('CONTENT_LENGTH', 0) or 0)
-        request_body = environ['wsgi.input'].read(request_body_size)
-
-        # Django WSGI 애플리케이션 호출
-        return django_application(environ, start_response)
-
-    except Exception as e:
-        start_response('500 Internal Server Error', [('Content-Type', 'text/plain')])
-        return [str(e).encode()]
+        request_body_size = int(environ.get('CONTENT_LENGTH', 0))
+    except (KeyError, ValueError):
+        request_body_size = 0
+    
+    logger.info(f"Request body size: {request_body_size}")
+    
+    # 기본 WSGI 애플리케이션 호출
+    return application(environ, start_response)
