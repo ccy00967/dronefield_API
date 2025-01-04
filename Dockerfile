@@ -1,33 +1,27 @@
-# base image는 python:3.9로 시작한다.
-FROM python:3.9-alpine
+# 베이스 이미지 설정
+FROM python:3.12-slim
 
-#ENV PYTHONIOENCODING=utf-8
+# 작업 디렉터리 설정
+WORKDIR /app
 
-WORKDIR /usr/src/app
+# 시스템 의존성 설치
+RUN apt-get update && apt-get install -y \
+    postgresql-client gcc python3-dev musl-dev libpq-dev \
+    && apt-get clean
 
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
-ENV PYTHONIOENCODING=utf-8
+# 종속성 설치
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# install system dependencies
-#RUN apt-get update && apt-get install -y netcat-traditional
-RUN apk add postgresql-dev gcc python3-dev musl-dev
-
-# install dependencies
-RUN pip install --upgrade pip
-COPY ../requirements.txt .
-RUN pip install -r requirements.txt
-
-#COPY entrypoint.sh
-#COPY ./entrypoint.sh .
-#RUN sed -i 's/\r$//g' /usr/src/app/entrypoint.sh
-#RUN chmod +x /usr/src/app/entrypoint.sh
-
-# copy project
+# 애플리케이션 코드 복사
 COPY . .
 
-RUN python manage.py collectstatic --settings=core.settings
-RUN chmod -R 755 ./static
+# 환경 변수 설정
+ENV PYTHONUNBUFFERED=1
+ENV DJANGO_SETTINGS_MODULE=core.settings
 
-# run entrypoint.sh
-ENTRYPOINT ["/usr/src/app/entrypoint.sh"]
+# 포트 노출
+EXPOSE 8000
+
+# 엔트리포인트 설정
+ENTRYPOINT ["/app/entrypoint.sh"]
