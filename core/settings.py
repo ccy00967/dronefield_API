@@ -41,7 +41,7 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 # 기본 설정
 # ===========================
 DEBUG = True
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')
 
 # ===========================
 # 애플리케이션 정의
