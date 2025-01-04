@@ -201,11 +201,18 @@ CSRF_COOKIE_SAMESITE = 'None'
 CORS_ALLOW_CREDENTIALS = True
 CORS_ORIGIN_WHITELIST = [
     "http://127.0.0.1:3000",
+    "http://127.0.0.1:8000",
     "http://localhost:3000",
+    "http://localhost:8000",
     "https://dronefield.co.kr",
     "https://dronefield.co.kr:8080",
+    "https://api.dronefield.co.kr",
+    "https://api.dronefield.co.kr:8080",
+    
 ]
-CORS_ALLOWED_ORIGINS = CORS_ORIGIN_WHITELIST
+
+CORS_ALLOW_ALL_ORIGINS = True
+#CORS_ALLOWED_ORIGINS = CORS_ORIGIN_WHITELIST
 CSRF_TRUSTED_ORIGINS = CORS_ORIGIN_WHITELIST
 
 CORS_ALLOW_METHODS = ["DELETE", "GET", "OPTIONS", "PATCH", "POST", "PUT"]

@@ -1,9 +1,9 @@
 from django.urls import path
 from rest_framework_simplejwt import views as jwt_views
 
-from .views import (niceCrytoToken,getNicePassUserData,
-                    emailValidationSend,validationCheck,
-                    password_reset,)
+from .views import (niceCryptoToken,emailValidationSend,
+                    validationCheck,password_reset,
+                    niceCallback)
 
 from .views import (UserRegistrationAPIView,UserLoginAPIView,
                     ProfileAPIView,)
@@ -27,12 +27,8 @@ urlpatterns = [
     path('validatekeycheck/', validationCheck), # 인증번호 인증
     path('passwordreset/', password_reset), # 비밀번호 재설정
     
-    path('callnicepass/', niceCrytoToken), # 나이스 표준창 호출하기
-    path('nicepasscallback/', getNicePassUserData),  # 나이스 본인 인증정보 받기
-    
-    
-    
-   
+    path('nice-token/', niceCryptoToken), # 나이스 표준창 호출하기
+    path('nice-callback/', niceCallback), # 나이스 콜백
     
     # FIX : 미사용
     #path('manager/users/', ManageUserListView.as_view(), name='manage_get_users'),
