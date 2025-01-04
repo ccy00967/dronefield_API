@@ -33,57 +33,47 @@
 ```
 dronefield_API
 ├─ .dockerignore
+├─ .ebextensions
+│  ├─ 01_packages.config
+│  ├─ 02_gunicorn.config
+│  ├─ docker.config
+│  └─ nginx.config
 ├─ .gitignore
 ├─ Dockerfile
+├─ Dockerfile.copy
+├─ Dockerrun.aws.json
 ├─ README.md
-├─ address
-│  ├─ __init__.py
-│  ├─ admin.py
-│  ├─ apps.py
-│  ├─ migrations
-│  │  └─ __init__.py
-│  ├─ models.py
-│  ├─ tests.py
-│  └─ views.py
-├─ auth
-│  ├─ __init__.py
-│  ├─ admin.py
-│  ├─ apps.py
-│  ├─ migrations
-│  │  └─ __init__.py
-│  ├─ models.py
-│  ├─ tests.py
-│  └─ views.py
+├─ application.py
 ├─ common
 │  ├─ __init__.py
 │  ├─ admin.py
 │  ├─ apps.py
+│  ├─ migrations
+│  │  ├─ 0001_initial.py
+│  │  └─ __init__.py
 │  ├─ models.py
-│  ├─ permissions.py
+│  ├─ nice_fuc.py
+│  ├─ response.py
 │  ├─ serializers.py
 │  ├─ tests.py
-│  ├─ urls.py
 │  └─ views.py
+├─ config
 ├─ core
 │  ├─ __init__.py
 │  ├─ asgi.py
 │  ├─ settings.py
 │  └─ wsgi.py
 ├─ customer
-│  ├─ __init__.py
-│  ├─ admin.py
-│  ├─ apps.py
-│  ├─ models.py
-│  ├─ permissions.py
-│  ├─ serializers.py
-│  ├─ tests.py
-│  ├─ urls.py
-│  └─ views.py
-├─ entrypoint.sh
+│  └─ migrations
+│     ├─ 0001_initial.py
+│     └─ 0002_initial.py
+├─ entrypoint.sh.copy
+├─ entypoint.sh
 ├─ exterminator
 │  ├─ __init__.py
 │  ├─ admin.py
 │  ├─ apps.py
+│  ├─ migrations
 │  ├─ models.py
 │  ├─ permissions.py
 │  ├─ serializers.py
@@ -94,11 +84,32 @@ dronefield_API
 │  ├─ __init__.py
 │  ├─ admin.py
 │  ├─ apps.py
-│  ├─ migrations
-│  │  └─ __init__.py
 │  ├─ models.py
+│  ├─ permissions.py
+│  ├─ serializers.py
 │  ├─ tests.py
+│  ├─ urls.py
 │  └─ views.py
+├─ farmrequest
+│  └─ migrations
+│     ├─ 0001_initial.py
+│     └─ 0002_initial.py
+├─ main
+│  └─ urls.py
+├─ manage.py
+├─ payments
+│  ├─ __init__.py
+│  ├─ admin.py
+│  ├─ apps.py
+│  ├─ models.py
+│  ├─ permissions.py
+│  ├─ serializers.py
+│  ├─ tests.py
+│  ├─ urls.py
+│  └─ views.py
+├─ requirements.txt
+├─ templates
+│  └─ emailvalidation.html
 ├─ trade
 │  ├─ __init__.py
 │  ├─ admin.py
@@ -109,41 +120,20 @@ dronefield_API
 │  ├─ tests.py
 │  ├─ urls.py
 │  └─ views.py
-├─ main
-│  └─ urls.py
-├─ manage.py
-├─ payments
-│  ├─ __init__.py
-│  ├─ admin.py
-│  ├─ apps.py
-│  ├─ migrations
-│  │  └─ __init__.py
-│  ├─ models.py
-│  ├─ tests.py
-│  └─ views.py
-├─ requirements.txt
-├─ templates
-│  └─ emailvalidation.html
-├─ user
-│  ├─ __init__.py
-│  ├─ admin.py
-│  ├─ apps.py
-│  ├─ models.py
-│  ├─ permissions.py
-│  ├─ serializers.py
-│  ├─ swagger_doc.py
-│  ├─ tests.py
-│  ├─ urls.py
-│  └─ views.py
-└─ validation
+└─ user
    ├─ __init__.py
    ├─ admin.py
    ├─ apps.py
+   ├─ migrations
+   │  ├─ 0001_initial.py
+   │  └─ __init__.py
    ├─ models.py
-   ├─ nice_fuc.py
    ├─ permissions.py
+   ├─ serializers.py
    ├─ swagger_doc.py
-   ├─ tests.py
+   ├─ test
+   │  ├─ nice.html
+   │  └─ tests.py
    ├─ urls.py
    └─ views.py
 

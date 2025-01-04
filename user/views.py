@@ -140,6 +140,7 @@ class ProfileAPIView(generics.RetrieveAPIView):
     def get(self, request):
         serializer = self.get_serializer(request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
+        return redirect_request(req, fp, code, msg, hdrs, newurl)
 
     def patch(self, request):
         serializer = self.get_serializer(request.user, data=request.data, partial=True)
@@ -153,31 +154,172 @@ class ProfileAPIView(generics.RetrieveAPIView):
 
 
 
-Email = "email"
-ValidateKey = "validatekey"
-isNicePassDone = "isNicePassDone"
-isEmailValidate = "isEmailValidate"
+# Email = "email"
+# ValidateKey = "validatekey"
+# isNicePassDone = "isNicePassDone"
+# isEmailValidate = "isEmailValidate"
 
-# 나이스 표준창 호출
-@swagger_auto_schema(
-    method="POST",
-    operation_id='나이스 표준창 호출',
-    operation_description='나이스 표준창 호출',
-    #request_body=swagger_doc.EmailRequest,
-    #responses=swagger_doc.EmailResponse,
-)
-@api_view(('POST',))
-#@parser_classes((JSONParser,))
-def niceCrytoToken(request):
+# # 나이스 표준창 호출
+# @swagger_auto_schema(
+#     method="POST",
+#     operation_id='나이스 표준창 호출',
+#     operation_description='나이스 표준창 호출',
+#     #request_body=swagger_doc.EmailRequest,
+#     #responses=swagger_doc.EmailResponse,
+# )
+# @api_view(('POST',))
+# #@parser_classes((JSONParser,))
+# def niceCrytoToken(request):
+#     if request.method == 'POST':
+
+#         returnURL = request.data["returnURL"]
+        
+#         now = str(int(time.time()))
+#         req_dtim = datetime.now().strftime("%Y%m%d%H%M%S")
+#         req_no = "REQ" + req_dtim + str(random.randint(0, 10000)).zfill(4)
+#         # 요청고유번호(req_no)의 경우 업체 정책에 따라 거래 고유번호 설정 후 사용하면 됩니다.
+#         # 제공된 값은 예시입니다.
+
+#         url = APIUrl + "/digital/niceid/api/v1.0/common/crypto/token"
+#         auth = access_token + ":" + now + ":" + clientID
+#         base64_auth = base64.b64encode(auth.encode("utf-8")).decode("utf-8")
+#         headers = {
+#             "Content-Type": "application/json",
+#             "Authorization": "bearer " + base64_auth,
+#             "productID": productID,
+#         }
+#         datas = {
+#             "dataHeader": {"CNTY_CD": "ko", "TRAN_ID": ""},
+#             "dataBody": {"req_dtim": req_dtim, "req_no": req_no, "enc_mode": "1"},
+#         }
+#         response = requests.post(url, data=json.dumps(datas), headers=headers)
+#         sitecode = response.json()["dataBody"]["site_code"]
+#         token_version_id = response.json()["dataBody"]["token_version_id"]
+#         token_val = response.json()["dataBody"]["token_val"]
+#         result = req_dtim + req_no + token_val
+#         resultVal = base64.b64encode(hashlib.sha256(result.encode()).digest()).decode(
+#             "utf-8"
+#         )
+
+#         key = resultVal[:16]
+#         iv = resultVal[-16:]
+#         hmac_key = resultVal[:32]
+
+#         plain_data = (
+#             "{"
+#             f'"requestno":"{req_no}",'
+#             f'"returnurl":" {returnURL}",'
+#             f'"sitecode":"{sitecode}"'
+#             "}"
+#         )
+
+#         enc_data = encrypt_data(plain_data, key, iv)
+
+#         h = hmac.new(
+#             key=hmac_key.encode(), msg=enc_data.encode("utf-8"), digestmod=hashlib.sha256
+#         ).digest()
+#         integrity_value = base64.b64encode(h).decode("utf-8")
+
+#         # 인증 완료 후 success페이지에서 사용을 위한 key값은 DB,세션등 업체 정책에 맞춰 관리 후 사용하면 됩니다.
+#         # 예시에서 사용하는 방법은 세션이며, 세션을 사용할 경우 반드시 인증 완료 후 세션이 유실되지 않고 유지되도록 확인 바랍니다.
+#         # key, iv, hmac_key 값들은 token_version_id에 따라 동일하게 생성되는 고유값입니다.
+#         # success페이지에서 token_version_id가 일치하는지 확인 바랍니다.
+#         request.session["token_version_id"] = token_version_id
+#         request.session["req_no"] = req_no
+#         request.session["key"] = key
+#         request.session["iv"] = iv
+#         request.session["hmac_key"] = hmac_key
+#         request.session.save() # 위 세션 저장
+
+#         return Response({
+#             "token_version_id": token_version_id,
+#             "enc_data" : enc_data,
+#             "integrity_value" : integrity_value,
+#         }, status = status.HTTP_200_OK)
+        
+#     return Response({"message": "표준창 호출 실패!"}, status = status.HTTP_404_NOT_FOUND)
+
+
+# # 본인인증 데이터 세션 저장
+# @swagger_auto_schema(
+#     method="POST",
+#     operation_id='본인인증 복호화',
+#     operation_description='본인인증 데이터 세션저장',
+#     #request_body=swagger_doc.EmailRequest,
+#     #responses=swagger_doc.EmailResponse,
+# )
+# @api_view(('GET','POST',))
+# #@parser_classes((JSONParser,))
+# def getNicePassUserData(request):
+#     s_token_version_id = request.session.get("token_version_id")
+#     key = request.session.get("key")
+#     iv = request.session.get("iv")
+#     hmac_key = request.session.get("hmac_key")
+#     req_no = request.session.get("req_no")
+
+#     enc_data = ""
+#     token_version_id = ""
+#     integrity_value = ""
+
+#     # 인증 완료 후 기본적으로 크롬에서는 GET 그 외의 브라우저에서는 POST방식으로 데이터를 전달 하고 있습니다.
+#     # 업체 서버 설정이 있는 경우 GET/POST 상관 없이 데이터를 전달 받을 수 있는지 확인 바랍니다.
+#     # 하나의 method로 통일해야 하는 경우 GET으로 설정 가능하며 main페이지에서 plain_data에서 methodtype으로 설정가능합니다. (가이드 확인)
+#     # 인증 완료 후 전달 드리는 값들이 누락, 유실없이 정상적으로 받고 있는지 확인 바랍니다.
+#     if request.method == "GET":
+#         enc_data = request.data["enc_data"]
+#         token_version_id = request.data["token_version_id"]
+#         integrity_value = request.data["integrity_value"]
+#     if request.method == "POST":
+#         enc_data = request.data["enc_data"]
+#         token_version_id = request.data["token_version_id"]
+#         integrity_value = request.data["integrity_value"]
+
+#     h = hmac.new(
+#         key=hmac_key.encode(), msg=enc_data.encode("utf-8"), digestmod=hashlib.sha256
+#     ).digest()
+#     integrity = base64.b64encode(h).decode("utf-8")
+
+#     if integrity != integrity_value:
+#         return Response({"message": "무결성 값이 다릅니다. 데이터가 변경된 것이 아닌지 확인 바랍니다."}, status = status.HTTP_404_NOT_FOUND)
+#     else:
+#         dec_data = json.loads(decrypt_data(enc_data, key, iv))
+
+#         if req_no != dec_data["requestno"]:
+#             print("세션값이 다릅니다. 올바른 경로로 접근하시기 바랍니다.")
+#             return HttpResponse('<script type="text/javascript">'
+#                             + 'window.close();'
+#                             '</script>')
+#         else:
+#             request.session["name"] = dec_data["name"]
+#             request.session["birthdate"] = dec_data["birthdate"]
+#             request.session["gender"] = dec_data["gender"]
+#             request.session["nationalinfo"] = dec_data["nationalinfo"]
+#             request.session["mobileno"] = dec_data["mobileno"]
+#             #request.session["mobileco"] = dec_data["mobileco"]
+
+#             # 나이스 인증완료 - 회원가입에서 확인할 값
+#             request.session[isNicePassDone] = True
+
+#             request.session.save() # 위 세션 저장
+
+#         return Response({
+#             #"authtype"      : authtype,
+#             "name"          : dec_data["name"],
+#             "birthdate"     : dec_data["birthdate"],
+#             "gender"        : dec_data["gender"],
+#             "nationalinfo"  : dec_data["nationalinfo"],
+#             "mobileno"      : dec_data["mobileno"],
+#             #"mobileco"      : dec_data["mobileco"]
+#         }, status = status.HTTP_200_OK)
+
+@api_view(['POST'])
+def niceCryptoToken(request):
     if request.method == 'POST':
-
-        returnURL = request.data["returnURL"]
+        returnURL = request.data.get("returnURL", "")
         
         now = str(int(time.time()))
         req_dtim = datetime.now().strftime("%Y%m%d%H%M%S")
         req_no = "REQ" + req_dtim + str(random.randint(0, 10000)).zfill(4)
-        # 요청고유번호(req_no)의 경우 업체 정책에 따라 거래 고유번호 설정 후 사용하면 됩니다.
-        # 제공된 값은 예시입니다.
 
         url = APIUrl + "/digital/niceid/api/v1.0/common/crypto/token"
         auth = access_token + ":" + now + ":" + clientID
@@ -191,126 +333,100 @@ def niceCrytoToken(request):
             "dataHeader": {"CNTY_CD": "ko", "TRAN_ID": ""},
             "dataBody": {"req_dtim": req_dtim, "req_no": req_no, "enc_mode": "1"},
         }
+
         response = requests.post(url, data=json.dumps(datas), headers=headers)
-        sitecode = response.json()["dataBody"]["site_code"]
-        token_version_id = response.json()["dataBody"]["token_version_id"]
-        token_val = response.json()["dataBody"]["token_val"]
+        
+        if response.status_code != 200:
+            return Response({"message": "API 호출 실패"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        response_data = response.json()["dataBody"]
+        sitecode = response_data["site_code"]
+        token_version_id = response_data["token_version_id"]
+        token_val = response_data["token_val"]
+        
         result = req_dtim + req_no + token_val
-        resultVal = base64.b64encode(hashlib.sha256(result.encode()).digest()).decode(
-            "utf-8"
-        )
+        resultVal = base64.b64encode(hashlib.sha256(result.encode()).digest()).decode("utf-8")
 
         key = resultVal[:16]
         iv = resultVal[-16:]
         hmac_key = resultVal[:32]
 
-        plain_data = (
-            "{"
-            f'"requestno":"{req_no}",'
-            f'"returnurl":" {returnURL}",'
-            f'"sitecode":"{sitecode}"'
-            "}"
-        )
+        plain_data = json.dumps({
+            "requestno": req_no,
+            "returnurl": returnURL,
+            "sitecode": sitecode,
+        })
 
         enc_data = encrypt_data(plain_data, key, iv)
-
-        h = hmac.new(
-            key=hmac_key.encode(), msg=enc_data.encode("utf-8"), digestmod=hashlib.sha256
-        ).digest()
+        h = hmac.new(key=hmac_key.encode(), msg=enc_data.encode("utf-8"), digestmod=hashlib.sha256).digest()
         integrity_value = base64.b64encode(h).decode("utf-8")
 
-        # 인증 완료 후 success페이지에서 사용을 위한 key값은 DB,세션등 업체 정책에 맞춰 관리 후 사용하면 됩니다.
-        # 예시에서 사용하는 방법은 세션이며, 세션을 사용할 경우 반드시 인증 완료 후 세션이 유실되지 않고 유지되도록 확인 바랍니다.
-        # key, iv, hmac_key 값들은 token_version_id에 따라 동일하게 생성되는 고유값입니다.
-        # success페이지에서 token_version_id가 일치하는지 확인 바랍니다.
         request.session["token_version_id"] = token_version_id
         request.session["req_no"] = req_no
         request.session["key"] = key
         request.session["iv"] = iv
         request.session["hmac_key"] = hmac_key
-        request.session.save() # 위 세션 저장
+        request.session.save()
 
         return Response({
             "token_version_id": token_version_id,
-            "enc_data" : enc_data,
-            "integrity_value" : integrity_value,
-        }, status = status.HTTP_200_OK)
-        
-    return Response({"message": "표준창 호출 실패!"}, status = status.HTTP_404_NOT_FOUND)
+            "enc_data": enc_data,
+            "integrity_value": integrity_value,
+        }, status=status.HTTP_200_OK)
 
+@api_view(['POST', 'GET'])
+def niceCallback(request):
+    try:
+        # 1. 요청 데이터 추출
+        enc_data = request.data.get("enc_data", "")
+        token_version_id = request.data.get("token_version_id", "")
+        integrity_value = request.data.get("integrity_value", "")
 
-# 본인인증 데이터 세션 저장
-@swagger_auto_schema(
-    method="POST",
-    operation_id='본인인증 복호화',
-    operation_description='본인인증 데이터 세션저장',
-    #request_body=swagger_doc.EmailRequest,
-    #responses=swagger_doc.EmailResponse,
-)
-@api_view(('GET','POST',))
-#@parser_classes((JSONParser,))
-def getNicePassUserData(request):
-    s_token_version_id = request.session.get("token_version_id")
-    key = request.session.get("key")
-    iv = request.session.get("iv")
-    hmac_key = request.session.get("hmac_key")
-    req_no = request.session.get("req_no")
+        # 2. 세션에서 암호화 및 복호화 키 불러오기
+        key = request.session.get("key")
+        iv = request.session.get("iv")
+        hmac_key = request.session.get("hmac_key")
+        req_no = request.session.get("req_no")  # 요청 번호
 
-    enc_data = ""
-    token_version_id = ""
-    integrity_value = ""
+        if not key or not iv or not hmac_key:
+            return Response({"message": "세션 정보 없음"}, status=400)
 
-    # 인증 완료 후 기본적으로 크롬에서는 GET 그 외의 브라우저에서는 POST방식으로 데이터를 전달 하고 있습니다.
-    # 업체 서버 설정이 있는 경우 GET/POST 상관 없이 데이터를 전달 받을 수 있는지 확인 바랍니다.
-    # 하나의 method로 통일해야 하는 경우 GET으로 설정 가능하며 main페이지에서 plain_data에서 methodtype으로 설정가능합니다. (가이드 확인)
-    # 인증 완료 후 전달 드리는 값들이 누락, 유실없이 정상적으로 받고 있는지 확인 바랍니다.
-    if request.method == "GET":
-        enc_data = request.data["enc_data"]
-        token_version_id = request.data["token_version_id"]
-        integrity_value = request.data["integrity_value"]
-    if request.method == "POST":
-        enc_data = request.data["enc_data"]
-        token_version_id = request.data["token_version_id"]
-        integrity_value = request.data["integrity_value"]
+        # 3. 무결성 검증
+        h = hmac.new(
+            key=hmac_key.encode(),
+            msg=enc_data.encode("utf-8"),
+            digestmod=hashlib.sha256
+        ).digest()
 
-    h = hmac.new(
-        key=hmac_key.encode(), msg=enc_data.encode("utf-8"), digestmod=hashlib.sha256
-    ).digest()
-    integrity = base64.b64encode(h).decode("utf-8")
+        integrity = base64.b64encode(h).decode("utf-8")
 
-    if integrity != integrity_value:
-        return Response({"message": "무결성 값이 다릅니다. 데이터가 변경된 것이 아닌지 확인 바랍니다."}, status = status.HTTP_404_NOT_FOUND)
-    else:
+        if integrity != integrity_value:
+            return Response({"message": "데이터 무결성 검증 실패"}, status=400)
+
+        # 4. 데이터 복호화
         dec_data = json.loads(decrypt_data(enc_data, key, iv))
 
-        if req_no != dec_data["requestno"]:
-            print("세션값이 다릅니다. 올바른 경로로 접근하시기 바랍니다.")
-            return HttpResponse('<script type="text/javascript">'
-                            + 'window.close();'
-                            '</script>')
-        else:
-            request.session["name"] = dec_data["name"]
-            request.session["birthdate"] = dec_data["birthdate"]
-            request.session["gender"] = dec_data["gender"]
-            request.session["nationalinfo"] = dec_data["nationalinfo"]
-            request.session["mobileno"] = dec_data["mobileno"]
-            #request.session["mobileco"] = dec_data["mobileco"]
+        # 5. 요청 번호 검증 (위조 방지)
+        if req_no != dec_data.get("requestno"):
+            return Response({"message": "요청 번호 불일치"}, status=400)
 
-            # 나이스 인증완료 - 회원가입에서 확인할 값
-            request.session[isNicePassDone] = True
+        # 6. 본인인증 정보 세션에 저장
+        request.session["name"] = dec_data.get("name")
+        request.session["birthdate"] = dec_data.get("birthdate")
+        request.session["gender"] = dec_data.get("gender")
+        request.session["mobileno"] = dec_data.get("mobileno")
+        request.session.save()
 
-            request.session.save() # 위 세션 저장
-
+        # 7. 사용자 정보 반환
         return Response({
-            #"authtype"      : authtype,
-            "name"          : dec_data["name"],
-            "birthdate"     : dec_data["birthdate"],
-            "gender"        : dec_data["gender"],
-            "nationalinfo"  : dec_data["nationalinfo"],
-            "mobileno"      : dec_data["mobileno"],
-            #"mobileco"      : dec_data["mobileco"]
-        }, status = status.HTTP_200_OK)
+            "name": dec_data.get("name"),
+            "birthdate": dec_data.get("birthdate"),
+            "gender": dec_data.get("gender"),
+            "mobileno": dec_data.get("mobileno"),
+        }, status=200)
 
+    except Exception as e:
+        return Response({"message": f"오류 발생: {str(e)}"}, status=500)
 
 #TODO : SMTP 인증번호 설정 필요
 @swagger_auto_schema(
