@@ -6,12 +6,9 @@ def application(environ, start_response):
         request_body_size = int(environ.get('CONTENT_LENGTH', 0) or 0)
         request_body = environ['wsgi.input'].read(request_body_size)
 
-        start_response('200 OK', [('Content-Type', 'text/plain')])
-        return [b"Request processed successfully"]
+        # Django WSGI 애플리케이션 호출
+        return django_application(environ, start_response)
 
     except Exception as e:
         start_response('500 Internal Server Error', [('Content-Type', 'text/plain')])
         return [str(e).encode()]
-
-# Django 애플리케이션이 기본 WSGI 애플리케이션으로 작동하도록 설정
-application = django_application
