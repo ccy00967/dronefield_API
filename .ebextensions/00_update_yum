@@ -1,3 +1,0 @@
-commands:
-  00_update_yum:
-    command: sudo yum update -y
