@@ -1,5 +1,5 @@
-def application(environ, start_response):
-    try:
-        request_body_size = int(environ.get('CONTENT_LENGTH', 0))
-    except (ValueError):
-        request_body_size = 0
+from django.core.wsgi import get_wsgi_application
+import os
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
+application = get_wsgi_application()
