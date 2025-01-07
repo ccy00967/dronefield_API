@@ -1,6 +1,0 @@
-# .platform/packages.yml
-
-packages:
-  yum:
-    gcc: []                  # psycopg2 컴파일 등에 필요할 수 있음
-    postgresql15-devel: []   # PostgreSQL 헤더/라이브러리
