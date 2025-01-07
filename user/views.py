@@ -90,13 +90,20 @@ class UserRegistrationAPIView(generics.GenericAPIView):
         serializer = UserRegistrationSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             # 데이터베이스에 유저정보 저장(serializer create실행)
+            # 로직 수정필요 : request.session.get으로 바꿔야 세션에서 nice pass 데이터를 가져옴
             serializer.save(
-                name=request.data.get("name"),
-                birthdate=request.data.get("birthdate"),
-                gender=request.data.get("gender"),
-                nationalinfo=request.data.get("nationalinfo"),
-                mobileno=request.data.get("mobileno"),
-                email=request.data.get("email"),
+                # name=request.data.get("name"),
+                # birthdate=request.data.get("birthdate"),
+                # gender=request.data.get("gender"),
+                # nationalinfo=request.data.get("nationalinfo"),
+                # mobileno=request.data.get("mobileno"),
+                # email=request.data.get("email"),
+                name=request.session.get("name"),
+                birthdate=request.session.get("birthdate"),
+                gender=request.session.get("gender"),
+                nationalinfo=request.session.get("nationalinfo"),
+                mobileno=request.session.get("mobileno"),
+                email=request.session.get("email"),
                 is_active=is_active,
             )
 
