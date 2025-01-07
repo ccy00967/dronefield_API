@@ -1,5 +1,5 @@
-from drf_yasg import openapi
-
+#from drf_yasg import openapi
+'''
 # 이메일
 EmailRequest = openapi.Schema(
         type=openapi.TYPE_OBJECT,
@@ -84,7 +84,7 @@ PasswordResetResponse = {
         )),
     }
 
-from drf_yasg import openapi
+#from drf_yasg import openapi
 
 
 #회원가입
@@ -131,3 +131,4 @@ UserLoginResponse = {
                 }
             )),
         }
+'''

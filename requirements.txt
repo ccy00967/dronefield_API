@@ -5,7 +5,7 @@ Django==5.1.4
 django-cors-headers==4.6.0
 djangorestframework==3.15.2
 djangorestframework_simplejwt==5.4.0
-drf-yasg==1.21.8
+#drf-yasg==1.21.8
 idna==3.10
 inflection==0.5.1
 Naked==0.1.32

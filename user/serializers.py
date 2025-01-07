@@ -24,7 +24,7 @@ from user.permissions import OnlyManagerCanAccess
 #from user.views import isNicePassDone
 #from user.views import isEmailValidate
 
-from drf_yasg.utils import swagger_auto_schema
+#from drf_yasg.utils import swagger_auto_schema
 from . import swagger_doc
 
 # 토큰에 원하는 정보 담기
