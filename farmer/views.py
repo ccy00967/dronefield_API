@@ -7,53 +7,51 @@ from rest_framework import permissions
 from farmer.permissions import OnlyOwnerCanUpdate
 from rest_framework.response import Response
 from rest_framework import status
-from common.models import Address
 
+# from common.models import Address
 
 
 # 농지목록 조회
-class ArableLandInfoListView(generics.ListCreateAPIView):
+class ArableLandInfoListView(generics.ListAPIView):
     queryset = ArableLandInfo.objects.all()
     serializer_class = ArableLandInfoSerializer
-    name = 'land_info_list'
-    permission_classes = (
-        permissions.IsAuthenticatedOrReadOnly,
-    )
+    name = "land_info_list"
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
     # 주소정보 모델 인스턴생 생성및 저장
-    def perform_create(self, serializer):
-        address = serializer.validated_data.pop('address')
-        addressinfo = Address.objects.create(**address)
-        arableland = ArableLandInfo.objects.create(
-            address=addressinfo,
-            **serializer.validated_data,
-        )
-        return arableland
+    # def perform_create(self, serializer):
+    #     address = serializer.validated_data.pop('address')
+    #     addressinfo = Address.objects.create(**address)
+    #     arableland = ArableLandInfo.objects.create(
+    #         address=addressinfo,
+    #         **serializer.validated_data,
+    #     )
+    #     return arableland
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        if self.request.query_params.get('owner'):
-            owner = self.request.query_params.get('owner')
+        if self.request.query_params.get("owner"):
+            owner = self.request.query_params.get("owner")
             queryset = queryset.filter(owner__uuid=owner)
         return queryset
+
 
 class ArableLandInfoCreateView(generics.CreateAPIView):
     queryset = ArableLandInfo.objects.all()
     serializer_class = ArableLandInfoSerializer
-    name = 'land_info_create'
-    permission_classes = (
-        permissions.IsAuthenticatedOrReadOnly,
-    )
+    name = "land_info_create"
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
-    # 주소정보 모델 인스턴생 생성및 저장
+    # 신청한 유저 정보를 함께 저장
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
+
 
 # 농지 정보 조회, 수정, 삭제
 class ArableLandInfoAPIView(generics.GenericAPIView):
     queryset = ArableLandInfo.objects.all()
     serializer_class = ArableLandInfoSerializer
-    name = 'land_info_update_delete'
+    name = "land_info_update_delete"
     permission_classes = (
         permissions.IsAuthenticatedOrReadOnly,
         OnlyOwnerCanUpdate,
@@ -72,14 +70,15 @@ class ArableLandInfoAPIView(generics.GenericAPIView):
 
     def patch(self, request, uuid):
         land_info = self.get_object(uuid)
-        serializer = ArableLandInfoSerializer(land_info, data=request.data, partial=True)
+        serializer = ArableLandInfoSerializer(
+            land_info, data=request.data, partial=True
+        )
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
 
+    # 신청서에 등록된 농지는 삭제 요청 불가능 하게 만들기
     def delete(self, request, uuid):
         land_info = self.get_object(uuid)
         land_info.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-    
-

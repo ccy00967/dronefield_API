@@ -12,20 +12,20 @@ access_token = "ec1dcd1c-02d8-48da-8018-5c0ff193f030"  # 기관토큰(access_tok
 
 
 def encrypt_data(plain_text, key, iv):
-    from Crypto.Cipher import AES
+    # from Crypto.Cipher import AES
 
     cipher = AES.new(key.encode(), AES.MODE_CBC, iv.encode())
     pad = 16 - len(plain_text) % 16
     plain_text += chr(pad) * pad
     encrypted = cipher.encrypt(plain_text.encode())
-    return base64.b64encode(encrypted).decode('utf-8')
+    return base64.b64encode(encrypted).decode("utf-8")
 
 
 def decrypt_data(enc_text, key, iv):
-    from Crypto.Cipher import AES
+    # from Crypto.Cipher import AES
 
     cipher = AES.new(key.encode(), AES.MODE_CBC, iv.encode())
     enc_text = base64.b64decode(enc_text)
-    decrypted = cipher.decrypt(enc_text).decode('utf-8')
+    decrypted = cipher.decrypt(enc_text).decode("utf-8")
     pad = ord(decrypted[-1])
     return decrypted[:-pad]

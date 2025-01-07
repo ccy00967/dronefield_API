@@ -2,10 +2,9 @@ import math
 from rest_framework import generics
 from rest_framework import permissions
 
-from trade.models import CustomerRequest
-from trade.serializers import CustomerRequestSerializer
-from trade.serializers import CustomerRequestBriefSerializer
-from trade.serializers import CustomerCheckExterminateStateSerializer
+from trade.models import Request
+from trade.serializers import RequestSerializer
+from trade.serializers import CheckExterminateStateSerializer
 
 from farmer.models import ArableLandInfo
 
@@ -15,51 +14,52 @@ from trade.permissions import isBeforePay
 
 # 신청서 등록
 # 토스 페이먼츠 적용대상 - 신청서 모델 생성후 토스 정보를 받아서 토스 모델 생성연결
-class CustomerRequestCreateAPIView(generics.CreateAPIView):
-    queryset = CustomerRequest.objects.all()
-    serializer_class = CustomerRequestSerializer
+class RequestCreateAPIView(generics.CreateAPIView):
+    queryset = Request.objects.all()
+    serializer_class = RequestSerializer
     # landInfo의 uuid
     lookup_field = "landuuid"
-    #name = "customer-request-list"
-    permission_classes = (
-        permissions.IsAuthenticatedOrReadOnly,
-    )
+    name = "request-list"
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
     def perform_create(self, serializer):
-        landinfo = ArableLandInfo.objects.get(uuid=self.kwargs.get('landuuid'))
-        setAveragePrice = self.request.data['setAveragePrice']
+        landinfo = ArableLandInfo.objects.get(uuid=self.kwargs.get("landuuid"))
+        # setAveragePrice = self.request.data["setAveragePrice"]
         serializer.save(
-            owner=self.request.user, 
+            owner=self.request.user,
             landInfo=landinfo,
-            requestAmount= math.ceil(float(setAveragePrice) * float(landinfo.lndpclAr) * 0.3025),
+            # requestAmount=math.ceil(
+            #     float(setAveragePrice) * float(landinfo.lndpclAr) * 0.3025
+            # ),
         )
 
     # def get_queryset(self):
     #     user = self.request.user
-    #     return CustomerRequest.objects.filter(owner=user)    
+    #     return CustomerRequest.objects.filter(owner=user)
+
 
 # 신청서 목록
-# 토스 페이먼츠 적용대상 - 신청서 모델 생성후 토스 정보를 받아서 토스 모델 생성연결
-class CustomerRequestListAPIView(generics.ListAPIView):
-    queryset = CustomerRequest.objects.all()
-    serializer_class = CustomerRequestSerializer
+class RequestListAPIView(generics.ListAPIView):
+    queryset = Request.objects.all()
+    serializer_class = RequestSerializer
+    name = "request-lists"
     permission_classes = (
         permissions.IsAuthenticatedOrReadOnly,
-        #OnlyOwnerCanUpdate,
-    )  
+        # OnlyOwnerCanUpdate,
+    )
 
     def get_queryset(self):
-        return CustomerRequest.objects.filter(owner=self.request.user)
+        return Request.objects.filter(owner=self.request.user)
 
 
 # 신청서 수정
 # 결제완료 후에는 수정 못하게 막기 - permission추가하기
-class CustomerRequestListUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = CustomerRequest.objects.all()
-    serializer_class = CustomerRequestSerializer
+class RequestListUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Request.objects.all()
+    serializer_class = RequestSerializer
     # CustomerRequest의 uuid == orderid
     lookup_field = "orderid"
-    name = "customer-request_update"
+    name = "request_update"
     permission_classes = (
         permissions.IsAuthenticatedOrReadOnly,
         OnlyOwnerCanUpdate,
@@ -77,13 +77,14 @@ class CustomerRequestListUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView)
 # 신청서 수정
 # 결제완료 후에는 수정 못하게 막기 - permission추가하기
 
+
 # 농민 방제 확인 상태
-class CustomerCheckExterminateStateRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
-    queryset = CustomerRequest.objects.all()
-    serializer_class = CustomerCheckExterminateStateSerializer
+class CheckExterminateStateRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
+    queryset = Request.objects.all()
+    serializer_class = CheckExterminateStateSerializer
     # CustomerRequest의 uuid == orderid
     lookup_field = "orderid"
-    name = "customer-request_update"
+    name = "request_state_update"
     permission_classes = (
         permissions.IsAuthenticatedOrReadOnly,
         OnlyOwnerCanUpdate,
