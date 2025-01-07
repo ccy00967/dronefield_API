@@ -1,12 +1,9 @@
 #!/usr/bin/env bash
+# 꼭 chmod +x 해주세요 (실행 권한 필수)
 
-echo "===== Enabling CRB (CodeReady Builder) on Amazon Linux 2023 ====="
-
-# yum 대신 dnf이 사용되지만, 현재 EB 환경에선 yum 명령을 래핑해서 사용 가능합니다.
+echo "===== Enabling CRB on Amazon Linux 2023 ====="
 yum config-manager --set-enabled crb || true
-
-echo "===== Cleaning and updating yum repos ====="
 yum clean all
 yum update -y
 
-echo "===== CRB has been enabled successfully. ====="
+echo "===== CRB enabled successfully ====="
