@@ -24,13 +24,13 @@ class RequestCreateAPIView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         landinfo = ArableLandInfo.objects.get(uuid=self.kwargs.get("landuuid"))
-        # setAveragePrice = self.request.data["setAveragePrice"]
+        setAveragePrice = self.request.data["setAveragePrice"]
         serializer.save(
             owner=self.request.user,
             landInfo=landinfo,
-            # requestAmount=math.ceil(
-            #     float(setAveragePrice) * float(landinfo.lndpclAr) * 0.3025
-            # ),
+            requestAmount=math.ceil(
+                float(setAveragePrice) * float(landinfo.lndpclAr) * 0.3025
+            ),
         )
 
     # def get_queryset(self):

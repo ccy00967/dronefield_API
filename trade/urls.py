@@ -11,7 +11,7 @@ urlpatterns = [
     ),
     # 본인 신청서 목록 가져오기 - 유저 uuid필요
     path(
-        "/",
+        "/list/",
         views.RequestListAPIView.as_view(),
         name=views.RequestListAPIView.name,
     ),
