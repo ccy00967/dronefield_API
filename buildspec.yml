@@ -1,0 +1,21 @@
+version: 0.2
+phases:
+  install:
+    runtime-versions:
+      python: 3.9
+    commands:
+      - pip install -r requirements.txt
+  pre_build:
+    commands:
+      - echo "Preparing for build..."
+  build:
+    commands:
+      - echo "Building Django application..."
+      - python manage.py collectstatic --noinput
+      - zip -r django-app.zip . -x "*.git*"
+  post_build:
+    commands:
+      - echo "Build complete"
+artifacts:
+  files:
+    - django-app.zip
