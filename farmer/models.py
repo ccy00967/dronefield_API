@@ -3,7 +3,7 @@ import uuid
 
 
 # 농지 정보
-class ArableLandInfo(models.Model):
+class FarmInfo(models.Model):
     uuid = models.UUIDField(
         unique=True, default=uuid.uuid4, editable=False, db_index=True
     )

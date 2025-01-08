@@ -7,18 +7,18 @@ urlpatterns = [
     # 농지등록, 목록 가져오기
     path(
         "lands/",
-        views.ArableLandInfoListView.as_view(),
-        name=views.ArableLandInfoListView.name,
+        views.FarmInfoListView.as_view(),
+        name=views.FarmInfoListView.name,
     ),
     # 농지정보 수정, 삭제하기
     path(
         "land/",
-        views.ArableLandInfoCreateView.as_view(),
-        name=views.ArableLandInfoCreateView.name,
+        views.FarmInfoCreateView.as_view(),
+        name=views.FarmInfoCreateView.name,
     ),
     path(
         "land/<uuid:uuid>/",
-        views.ArableLandInfoAPIView.as_view(),
-        name=views.ArableLandInfoListView.name,
+        views.FarmInfoAPIView.as_view(),
+        name=views.FarmInfoListView.name,
     ),
 ]

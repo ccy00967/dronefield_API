@@ -13,7 +13,7 @@ class TossPaymentsSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-# 신청서와 예약금 2개 만들기
+# TODO: 신청서와 예약금 2개 만들기
 class TossPaymentsUpdateSerializer(serializers.ModelSerializer):
     orderid = serializers.ReadOnlyField()
     # tosspayments = TossPayments.objects.get(orderId='orderId')

@@ -6,7 +6,7 @@ from trade.models import Request
 from trade.serializers import RequestSerializer
 from trade.serializers import CheckExterminateStateSerializer
 
-from farmer.models import ArableLandInfo
+from farmer.models import FarmInfo
 
 from trade.permissions import OnlyOwnerCanUpdate
 from trade.permissions import isBeforePay
@@ -23,14 +23,14 @@ class RequestCreateAPIView(generics.CreateAPIView):
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
     def perform_create(self, serializer):
-        landinfo = ArableLandInfo.objects.get(uuid=self.kwargs.get("landuuid"))
-        # setAveragePrice = self.request.data["setAveragePrice"]
+        landinfo = FarmInfo.objects.get(uuid=self.kwargs.get("landuuid"))
+        setAveragePrice = self.request.data["setAveragePrice"]
         serializer.save(
             owner=self.request.user,
             landInfo=landinfo,
-            # requestAmount=math.ceil(
-            #     float(setAveragePrice) * float(landinfo.lndpclAr) * 0.3025
-            # ),
+            requestAmount=math.ceil(
+                float(setAveragePrice) * float(landinfo.lndpclAr) * 0.3025
+            ),
         )
 
     # def get_queryset(self):
