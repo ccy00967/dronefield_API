@@ -11,7 +11,7 @@ from rest_framework.decorators import parser_classes
 from rest_framework.parsers import JSONParser
 from rest_framework.permissions import IsAuthenticated
 
-from drf_yasg.utils import swagger_auto_schema
+#from drf_yasg.utils import swagger_auto_schema
 from . import swagger_doc
 from rest_framework.permissions import AllowAny
 
@@ -55,13 +55,14 @@ isEmailValidate = "isEmailValidate"
 class UserRegistrationAPIView(generics.GenericAPIView):
     serializer_class = UserRegistrationSerializer
     permission_classes = (AllowAny,)
-
+    '''
     @swagger_auto_schema(
         operation_id="회원가입",
         operation_description="유저 회원가입",
         tags=["user"],
         responses=swagger_doc.UserRegistrationResponse,
     )
+    '''
     def post(self, request):
         # 나중에 permission으로 이동하기
         # NicePass 본인인증 여부 확인
@@ -120,13 +121,14 @@ class UserRegistrationAPIView(generics.GenericAPIView):
 class UserLoginAPIView(generics.GenericAPIView):
     serializer_class = UserLoginSerializer
     permission_classes = [AllowAny]
-
+    '''
     @swagger_auto_schema(
         operation_id="로그인",
         operation_description="유저 로그인",
         tags=["user"],
         responses=swagger_doc.UserLoginResponse,
     )
+    '''
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
 
@@ -469,9 +471,6 @@ def niceCallback(request):
 
     except Exception as e:
         return Response({"message": f"오류 발생: {str(e)}"}, status=500)
-
-
-# TODO : SMTP 인증번호 설정 필요
 @swagger_auto_schema(
     method="POST",
     operation_id="인증번호 발송",
@@ -479,7 +478,10 @@ def niceCallback(request):
     request_body=swagger_doc.EmailRequest,
     responses=swagger_doc.EmailResponse,
 )
+
 @api_view(("POST",))
+'''
+@api_view(('POST',)
 def emailValidationSend(request):
     try:
         receive_email = request.data.get("email")
@@ -535,6 +537,7 @@ def emailValidationSend(request):
 
 
 # 계정 활성화 - 클라이언트에서 "validatekey"로 가져옴
+'''
 @swagger_auto_schema(
     method="POST",
     operation_id="인증번호 검증",
@@ -542,11 +545,13 @@ def emailValidationSend(request):
     request_body=swagger_doc.ValidateRequest,
     responses=swagger_doc.ValidateResponse,
 )
-@api_view(("POST",))
-# @parser_classes((JSONParser,))
-def validationCheck(request):
-    if request.method == "POST":
-        if request.session.get(ValidateKey) == request.data[ValidateKey]:
+
+'''
+@api_view(('POST',))
+#@parser_classes((JSONParser,))
+def validationCheck(request) :
+    if request.method == 'POST':
+        if(request.session.get(ValidateKey) == request.data[ValidateKey]):
             request.session[isEmailValidate] = True
             request.session.save()
             return Response({"message": "email validated"}, status=status.HTTP_200_OK)
@@ -556,7 +561,10 @@ def validationCheck(request):
             )
 
 
-# 비밀번호 재설정 - 이메일주소,인증번호,비밀번호 필요
+
+#비밀번호 재설정 - 이메일주소,인증번호,비밀번호 필요
+'''
+
 @swagger_auto_schema(
     method="POST",
     operation_id="비밀번호",
@@ -564,7 +572,9 @@ def validationCheck(request):
     request_body=swagger_doc.PasswordResetRequest,
     responses=swagger_doc.PasswordResetResponse,
 )
-@api_view(["POST"])
+
+'''
+@api_view(['POST'])
 @parser_classes([JSONParser])
 def password_reset(request):
     try:
