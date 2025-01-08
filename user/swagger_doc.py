@@ -1,5 +1,5 @@
-from drf_yasg import openapi
-
+#from drf_yasg import openapi
+'''
 # 이메일
 EmailRequest = openapi.Schema(
     type=openapi.TYPE_OBJECT,
@@ -98,13 +98,12 @@ PasswordResetResponse = {
         schema=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
-                "message": openapi.Schema(
-                    type=openapi.TYPE_STRING, description="validate key error"
-                ),
-            },
-        ),
-    ),
-}
+                'message': openapi.Schema(type=openapi.TYPE_STRING, description="validate key error"),
+            }
+        )),
+    }
+
+#from drf_yasg import openapi
 
 
 # 회원가입
@@ -141,32 +140,24 @@ UserRegistrationResponse = {
 
 # 로그인
 UserLoginResponse = {
-    200: openapi.Response(
-        description="200 OK",
-        schema=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                "access": openapi.Schema(
-                    type=openapi.TYPE_STRING, description="Access Token"
-                ),
-                "refresh": openapi.Schema(
-                    type=openapi.TYPE_STRING, description="Refresh Token"
-                ),
-                "uuid": openapi.Schema(
-                    type=openapi.TYPE_STRING, description="user's UUID"
-                ),
-            },
-        ),
-    ),
-    400: openapi.Response(
-        description="400 BAD_REQUEST",
-        schema=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                "message": openapi.Schema(
-                    type=openapi.TYPE_STRING, description="Login Not Success"
-                ),
-            },
-        ),
-    ),
-}
+            200: openapi.Response(
+            description="200 OK",
+            schema=openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    'access': openapi.Schema(type=openapi.TYPE_STRING, description="Access Token"),
+                    'refresh': openapi.Schema(type=openapi.TYPE_STRING, description="Refresh Token"),
+                    'uuid': openapi.Schema(type=openapi.TYPE_STRING, description="user's UUID"),
+                }
+            )),
+            400: openapi.Response(
+            description="400 BAD_REQUEST",
+            schema=openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    'message': openapi.Schema(type=openapi.TYPE_STRING, description="Login Not Success"),
+                }
+            )),
+        }
+'''
+

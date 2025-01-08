@@ -11,21 +11,18 @@ productID = "2101979031"
 access_token = "ec1dcd1c-02d8-48da-8018-5c0ff193f030"  # 기관토큰(access_token)은 반영구적으로 사용가능하며 한번 발급 후 50년 유효합니다.
 
 
-def encrypt_data(plain_text, key, iv):
-    # from Crypto.Cipher import AES
+def encrypt_data(plain_data, key, iv):
+    block_size = 16
+    pad = lambda s: s + (block_size - len(s) % block_size) * chr(
+        block_size - len(s) % block_size
+    )
+    cipher = AES.new(key.encode("utf8"), AES.MODE_CBC, iv.encode("utf8"))
+    return base64.b64encode(cipher.encrypt(pad(plain_data).encode("utf-8"))).decode(
+        "utf-8"
+    )
 
-    cipher = AES.new(key.encode(), AES.MODE_CBC, iv.encode())
-    pad = 16 - len(plain_text) % 16
-    plain_text += chr(pad) * pad
-    encrypted = cipher.encrypt(plain_text.encode())
-    return base64.b64encode(encrypted).decode("utf-8")
 
-
-def decrypt_data(enc_text, key, iv):
-    # from Crypto.Cipher import AES
-
-    cipher = AES.new(key.encode(), AES.MODE_CBC, iv.encode())
-    enc_text = base64.b64decode(enc_text)
-    decrypted = cipher.decrypt(enc_text).decode("utf-8")
-    pad = ord(decrypted[-1])
-    return decrypted[:-pad]
+def decrypt_data(enc_data, key, iv):
+    encryptor = AES.new(key.encode("utf-8"), AES.MODE_CBC, iv.encode("utf-8"))
+    unpad = lambda s: s[0 : -ord(s[-1:])]
+    return unpad(encryptor.decrypt(base64.b64decode(enc_data))).decode("euc-kr")

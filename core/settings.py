@@ -57,7 +57,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework_simplejwt",
     "corsheaders",
-    "drf_yasg",
+    # "drf_yasg",
     # 커스텀 앱
     # "common.apps.CommonConfig",
     "user",

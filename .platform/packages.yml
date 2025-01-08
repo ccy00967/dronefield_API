@@ -1,0 +1,5 @@
+# .platform/packages.yml
+packages:
+  yum:
+    gcc: []
+    postgresql15-server-devel: []

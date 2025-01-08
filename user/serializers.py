@@ -12,7 +12,11 @@ from user.models import CustomUser
 # from user.views import isNicePassDone
 # from user.views import isEmailValidate
 
-# from drf_yasg.utils import swagger_auto_schema
+#from user.views import isNicePassDone
+#from user.views import isEmailValidate
+
+#from drf_yasg.utils import swagger_auto_schema
+
 from . import swagger_doc
 
 
