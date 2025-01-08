@@ -67,7 +67,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         write_only=True, required=True, style={"input_type": "password"}, min_length=8
     )
     # address = serializers.JSONField(required=True)
-    email = serializers.EmailField(required=True)
+    # email = serializers.EmailField(required=True)
 
     class Meta:
         model = CustomUser
