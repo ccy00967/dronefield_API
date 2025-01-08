@@ -2,4 +2,4 @@
 packages:
   yum:
     gcc: []
-    postgresql15-devel: []
+    postgresql15-server-devel: []
