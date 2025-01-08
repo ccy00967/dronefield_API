@@ -1,10 +1,8 @@
 import base64, requests, time, random, json, hashlib, hmac
 from datetime import datetime
-from Crypto.Cipher import AES
 import uuid
 from rest_framework import status
 from django.core.mail import EmailMessage
-from django.template.loader import render_to_string
 
 from rest_framework.response import Response
 from django.http import HttpResponse
@@ -24,7 +22,8 @@ from common.nice_fuc import secretKey
 from common.nice_fuc import APIUrl
 from common.nice_fuc import productID
 from common.nice_fuc import access_token
-#from .nice_fuc import returnURL
+
+# from .nice_fuc import returnURL
 from user.models import CustomUser
 from .permissions import OnlyOwnerCanUpdate
 from rest_framework import generics
@@ -34,11 +33,11 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import AuthenticationFailed
 from user.serializers import (
     UserRegistrationSerializer,
-    UserLoginSerializer, 
+    UserLoginSerializer,
     ProfileSerializer,
     CustomTokenObtainPairSerializer,
     ManageUserListSerializer,
-    #ExterminatorSerializer,
+    # ExterminatorSerializer,
 )
 
 from core.settings import DEBUG
@@ -46,15 +45,21 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-#회원가입
+Email = "email"
+ValidateKey = "validatekey"
+isNicePassDone = "isNicePassDone"
+isEmailValidate = "isEmailValidate"
+
+
+# 회원가입
 class UserRegistrationAPIView(generics.GenericAPIView):
     serializer_class = UserRegistrationSerializer
     permission_classes = (AllowAny,)
     '''
     @swagger_auto_schema(
-        operation_id='회원가입',
-        operation_description='유저 회원가입',
-        tags=['user'],
+        operation_id="회원가입",
+        operation_description="유저 회원가입",
+        tags=["user"],
         responses=swagger_doc.UserRegistrationResponse,
     )
     '''
@@ -63,34 +68,47 @@ class UserRegistrationAPIView(generics.GenericAPIView):
         # NicePass 본인인증 여부 확인
         is_active = True
         if not DEBUG:
-            if(request.session.get(isNicePassDone) != True):
+            if request.session.get(isNicePassDone) != True:
                 print("나이스 본인인증이 안됨!")
-                return Response({"message": "nicepass validation need first"}, status=status.HTTP_401_UNAUTHORIZED)
+                return Response(
+                    {"message": "nicepass validation need first"},
+                    status=status.HTTP_401_UNAUTHORIZED,
+                )
             # 이메일 인증 여부 확인
-            if(request.session.get(isEmailValidate) != True):
+            if request.session.get(isEmailValidate) != True:
                 print("이메일 인증이 안됨!")
-                return Response({"message": "email validation need first"}, status=status.HTTP_401_UNAUTHORIZED)
+                return Response(
+                    {"message": "email validation need first"},
+                    status=status.HTTP_401_UNAUTHORIZED,
+                )
             # 방제사라면 인증후 직접 바꾸어줌
-            if(request.data["role"] == 3):
+            if request.data["role"] == 3:
                 print("방제사는 나중에 서류 확인 후 activate 시켜줌")
                 is_active = False
-            else : 
+            else:
                 is_active = True
-        
+
         serializer = UserRegistrationSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             # 데이터베이스에 유저정보 저장(serializer create실행)
+            # 로직 수정필요 : request.session.get으로 바꿔야 세션에서 nice pass 데이터를 가져옴
             serializer.save(
-                name = request.data.get("name"),
-                birthdate = request.data.get("birthdate"),
-                gender = request.data.get("gender"),
-                nationalinfo = request.data.get("nationalinfo"),
-                mobileno = request.data.get("mobileno"),
-                email = request.data.get("email"),
+                # name=request.data.get("name"),
+                # birthdate=request.data.get("birthdate"),
+                # gender=request.data.get("gender"),
+                # nationalinfo=request.data.get("nationalinfo"),
+                # mobileno=request.data.get("mobileno"),
+                # email=request.data.get("email"),
+                name=request.session.get("name"),
+                birthdate=request.session.get("birthdate"),
+                gender=request.session.get("gender"),
+                nationalinfo=request.session.get("nationalinfo"),
+                mobileno=request.session.get("mobileno"),
+                email=request.session.get("email"),
                 is_active=is_active,
             )
-            
-            request.session.flush() #세션의 모든 것을 삭제
+
+            request.session.flush()  # 세션의 모든 것을 삭제
 
             response = {
                 "success": True,
@@ -98,15 +116,16 @@ class UserRegistrationAPIView(generics.GenericAPIView):
             }
             return Response(response, status=status.HTTP_201_CREATED)
 
+
 # 이메일과 비밀번호로 로그인
 class UserLoginAPIView(generics.GenericAPIView):
     serializer_class = UserLoginSerializer
     permission_classes = [AllowAny]
     '''
     @swagger_auto_schema(
-        operation_id='로그인',
-        operation_description='유저 로그인',
-        tags=['user'],
+        operation_id="로그인",
+        operation_description="유저 로그인",
+        tags=["user"],
         responses=swagger_doc.UserLoginResponse,
     )
     '''
@@ -118,21 +137,28 @@ class UserLoginAPIView(generics.GenericAPIView):
             response = {
                 "access": serializer.validated_data["access"],
                 "refresh": serializer.validated_data["refresh"],
-                "uuid": serializer.validated_data["uuid"],
+                "user": {
+                    "uuid": serializer.validated_data["uuid"],
+                    "type": serializer.validated_data["type"],
+                    "name": serializer.validated_data["name"],
+                },
             }
             return Response(response, status=status.HTTP_200_OK)
-        
+
         except AuthenticationFailed as e:
             return Response({"error": str(e)}, status=status.HTTP_401_UNAUTHORIZED)
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(
+                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
 
 # 사용자 정보를 수정 - 오직 자기자신의 정보만 수정가능 - access토큰으로 인증
-class ProfileAPIView(generics.RetrieveAPIView):
+class ProfileAPIView(generics.RetrieveUpdateAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = ProfileSerializer
     permission_classes = [IsAuthenticated, OnlyOwnerCanUpdate]
-    
+
     # @swagger_auto_schema(
     #     operation_id='프로필',
     #     operation_description='유저 프로필',
@@ -151,9 +177,6 @@ class ProfileAPIView(generics.RetrieveAPIView):
         print(request.data)
         print(serializer.data)
         return Response(serializer.data, status=status.HTTP_200_OK)
- 
-
-
 
 
 # Email = "email"
@@ -175,7 +198,7 @@ class ProfileAPIView(generics.RetrieveAPIView):
 #     if request.method == 'POST':
 
 #         returnURL = request.data["returnURL"]
-        
+
 #         now = str(int(time.time()))
 #         req_dtim = datetime.now().strftime("%Y%m%d%H%M%S")
 #         req_no = "REQ" + req_dtim + str(random.randint(0, 10000)).zfill(4)
@@ -238,7 +261,7 @@ class ProfileAPIView(generics.RetrieveAPIView):
 #             "enc_data" : enc_data,
 #             "integrity_value" : integrity_value,
 #         }, status = status.HTTP_200_OK)
-        
+
 #     return Response({"message": "표준창 호출 실패!"}, status = status.HTTP_404_NOT_FOUND)
 
 
@@ -314,11 +337,12 @@ class ProfileAPIView(generics.RetrieveAPIView):
 #             #"mobileco"      : dec_data["mobileco"]
 #         }, status = status.HTTP_200_OK)
 
-@api_view(['POST'])
+
+@api_view(["POST"])
 def niceCryptoToken(request):
-    if request.method == 'POST':
+    if request.method == "POST":
         returnURL = request.data.get("returnURL", "")
-        
+
         now = str(int(time.time()))
         req_dtim = datetime.now().strftime("%Y%m%d%H%M%S")
         req_no = "REQ" + req_dtim + str(random.randint(0, 10000)).zfill(4)
@@ -337,30 +361,41 @@ def niceCryptoToken(request):
         }
 
         response = requests.post(url, data=json.dumps(datas), headers=headers)
-        
+
         if response.status_code != 200:
-            return Response({"message": "API 호출 실패"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
+            return Response(
+                {"message": "API 호출 실패"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
         response_data = response.json()["dataBody"]
         sitecode = response_data["site_code"]
         token_version_id = response_data["token_version_id"]
         token_val = response_data["token_val"]
-        
+
         result = req_dtim + req_no + token_val
-        resultVal = base64.b64encode(hashlib.sha256(result.encode()).digest()).decode("utf-8")
+        resultVal = base64.b64encode(hashlib.sha256(result.encode()).digest()).decode(
+            "utf-8"
+        )
 
         key = resultVal[:16]
         iv = resultVal[-16:]
         hmac_key = resultVal[:32]
 
-        plain_data = json.dumps({
-            "requestno": req_no,
-            "returnurl": returnURL,
-            "sitecode": sitecode,
-        })
+        plain_data = json.dumps(
+            {
+                "requestno": req_no,
+                "returnurl": returnURL,
+                "sitecode": sitecode,
+            }
+        )
 
         enc_data = encrypt_data(plain_data, key, iv)
-        h = hmac.new(key=hmac_key.encode(), msg=enc_data.encode("utf-8"), digestmod=hashlib.sha256).digest()
+        h = hmac.new(
+            key=hmac_key.encode(),
+            msg=enc_data.encode("utf-8"),
+            digestmod=hashlib.sha256,
+        ).digest()
         integrity_value = base64.b64encode(h).decode("utf-8")
 
         request.session["token_version_id"] = token_version_id
@@ -370,13 +405,17 @@ def niceCryptoToken(request):
         request.session["hmac_key"] = hmac_key
         request.session.save()
 
-        return Response({
-            "token_version_id": token_version_id,
-            "enc_data": enc_data,
-            "integrity_value": integrity_value,
-        }, status=status.HTTP_200_OK)
+        return Response(
+            {
+                "token_version_id": token_version_id,
+                "enc_data": enc_data,
+                "integrity_value": integrity_value,
+            },
+            status=status.HTTP_200_OK,
+        )
 
-@api_view(['POST', 'GET'])
+
+@api_view(["POST", "GET"])
 def niceCallback(request):
     try:
         # 1. 요청 데이터 추출
@@ -397,7 +436,7 @@ def niceCallback(request):
         h = hmac.new(
             key=hmac_key.encode(),
             msg=enc_data.encode("utf-8"),
-            digestmod=hashlib.sha256
+            digestmod=hashlib.sha256,
         ).digest()
 
         integrity = base64.b64encode(h).decode("utf-8")
@@ -420,34 +459,38 @@ def niceCallback(request):
         request.session.save()
 
         # 7. 사용자 정보 반환
-        return Response({
-            "name": dec_data.get("name"),
-            "birthdate": dec_data.get("birthdate"),
-            "gender": dec_data.get("gender"),
-            "mobileno": dec_data.get("mobileno"),
-        }, status=200)
+        return Response(
+            {
+                "name": dec_data.get("name"),
+                "birthdate": dec_data.get("birthdate"),
+                "gender": dec_data.get("gender"),
+                "mobileno": dec_data.get("mobileno"),
+            },
+            status=200,
+        )
 
     except Exception as e:
         return Response({"message": f"오류 발생: {str(e)}"}, status=500)
-
-#TODO : SMTP 인증번호 설정 필요
-''''
 @swagger_auto_schema(
     method="POST",
-    operation_id='인증번호 발송',
-    operation_description='유저 이메일 인증번호 발송',
+    operation_id="인증번호 발송",
+    operation_description="유저 이메일 인증번호 발송",
     request_body=swagger_doc.EmailRequest,
     responses=swagger_doc.EmailResponse,
 )
+
+@api_view(("POST",))
 '''
-@api_view(('POST',))
+@api_view(('POST',)
 def emailValidationSend(request):
     try:
         receive_email = request.data.get("email")
 
         # 이메일 유효성 검사
         if not receive_email:
-            return Response({"error": "Email is required."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "Email is required."}, status=status.HTTP_400_BAD_REQUEST
+            )
 
         # 6자리 인증번호 생성
         validate_key = str(uuid.uuid4().int)[:6]
@@ -477,15 +520,19 @@ def emailValidationSend(request):
         email.content_subtype = "html"
         email.send()
 
-        logger.info(f"Verification email sent to {receive_email} (Code: {validate_key})")
+        logger.info(
+            f"Verification email sent to {receive_email} (Code: {validate_key})"
+        )
 
-        return Response({"message": "Email sent successfully."}, status=status.HTTP_201_CREATED)
+        return Response(
+            {"message": "Email sent successfully."}, status=status.HTTP_201_CREATED
+        )
 
     except Exception as e:
         logger.error(f"Failed to send email to {receive_email}. Error: {str(e)}")
         return Response(
             {"message": "Failed to send email."},
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
 
@@ -493,11 +540,12 @@ def emailValidationSend(request):
 '''
 @swagger_auto_schema(
     method="POST",
-    operation_id='인증번호 검증',
-    operation_description='유저 이메일 인증번호 검증 등등',
+    operation_id="인증번호 검증",
+    operation_description="유저 이메일 인증번호 검증 등등",
     request_body=swagger_doc.ValidateRequest,
     responses=swagger_doc.ValidateResponse,
 )
+
 '''
 @api_view(('POST',))
 #@parser_classes((JSONParser,))
@@ -506,20 +554,25 @@ def validationCheck(request) :
         if(request.session.get(ValidateKey) == request.data[ValidateKey]):
             request.session[isEmailValidate] = True
             request.session.save()
-            return Response({"message": "email validated"}, status = status.HTTP_200_OK)
-        else: 
-            return Response({"message": "validate key error"}, status = status.HTTP_401_UNAUTHORIZED)
+            return Response({"message": "email validated"}, status=status.HTTP_200_OK)
+        else:
+            return Response(
+                {"message": "validate key error"}, status=status.HTTP_401_UNAUTHORIZED
+            )
+
 
 
 #비밀번호 재설정 - 이메일주소,인증번호,비밀번호 필요
 '''
+
 @swagger_auto_schema(
     method="POST",
-    operation_id='비밀번호',
-    operation_description='비밀번호 재설정',
+    operation_id="비밀번호",
+    operation_description="비밀번호 재설정",
     request_body=swagger_doc.PasswordResetRequest,
     responses=swagger_doc.PasswordResetResponse,
 )
+
 '''
 @api_view(['POST'])
 @parser_classes([JSONParser])
@@ -527,13 +580,18 @@ def password_reset(request):
     try:
         validate_key = request.session.get("validate_key")  # 세션에서 인증키 가져오기
         if validate_key is None:
-            return Response({"message": "Session expired or invalid"}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(
+                {"message": "Session expired or invalid"},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
 
         # 세션의 키와 클라이언트가 보낸 키를 비교
         if validate_key == request.data.get("validate_key"):
             user = CustomUser.objects.filter(email=request.data.get("email")).first()
             if not user:
-                return Response({"message": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+                return Response(
+                    {"message": "User not found"}, status=status.HTTP_404_NOT_FOUND
+                )
 
             # 비밀번호 재설정
             user.set_password(request.data.get("password"))
@@ -541,10 +599,18 @@ def password_reset(request):
 
             # 세션 초기화 (보안 강화)
             request.session.pop("validate_key", None)
-            return Response({"message": "Password updated successfully"}, status=status.HTTP_200_OK)
+            return Response(
+                {"message": "Password updated successfully"}, status=status.HTTP_200_OK
+            )
         else:
-            return Response({"message": "Invalid validation key"}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(
+                {"message": "Invalid validation key"},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
 
     except Exception as e:
         logger.error(f"Password reset error: {str(e)}")
-        return Response({"message": "Internal server error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response(
+            {"message": "Internal server error"},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
