@@ -2,7 +2,7 @@ from rest_framework import serializers
 from trade.models import Request
 from user.serializers import ProfileSerializer
 from payments.serializers import TossPaymentsSerializer
-from farmer.serializers import ArableLandInfoSerializer
+from farmer.serializers import FarmInfoSerializer
 
 
 # 신청서
@@ -14,7 +14,7 @@ class RequestSerializer(serializers.ModelSerializer):
     orderid = serializers.ReadOnlyField()
     owner = ProfileSerializer(read_only=True)
     exterminator = ProfileSerializer(read_only=True)
-    landInfo = ArableLandInfoSerializer(read_only=True)
+    landInfo = FarmInfoSerializer(read_only=True)
     # 유저가 수정하면 안되는 것들
     calculation = serializers.ReadOnlyField()
     requestAmount = serializers.ReadOnlyField()

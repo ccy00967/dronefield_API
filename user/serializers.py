@@ -12,10 +12,10 @@ from user.models import CustomUser
 # from user.views import isNicePassDone
 # from user.views import isEmailValidate
 
-#from user.views import isNicePassDone
-#from user.views import isEmailValidate
+# from user.views import isNicePassDone
+# from user.views import isEmailValidate
 
-#from drf_yasg.utils import swagger_auto_schema
+# from drf_yasg.utils import swagger_auto_schema
 
 from . import swagger_doc
 
@@ -67,17 +67,17 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         write_only=True, required=True, style={"input_type": "password"}, min_length=8
     )
     # address = serializers.JSONField(required=True)
-    email = serializers.EmailField(required=True)
+    # email = serializers.EmailField(required=True)
 
     class Meta:
         model = CustomUser
         fields = [
-            "name",
-            "birthdate",
-            "gender",
-            "nationalinfo",
-            "mobileno",
-            "email",
+            # "name",
+            # "birthdate",
+            # "gender",
+            # "nationalinfo",
+            # "mobileno",
+            # "email",
             "password",
             "type",
             "road",
