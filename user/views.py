@@ -298,7 +298,10 @@ def niceCallback(request):
         request.session["name"] = dec_data.get("name")
         request.session["birthdate"] = dec_data.get("birthdate")
         request.session["gender"] = dec_data.get("gender")
+        request.session["nationalinfo"] = dec_data("nationalinfo")
         request.session["mobileno"] = dec_data.get("mobileno")
+
+        request.session[isNicePassDone] = True
         request.session.save()
 
         # 7. 사용자 정보 반환
