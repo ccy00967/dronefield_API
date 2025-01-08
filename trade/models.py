@@ -49,7 +49,7 @@ class Request(models.Model):
 
     # 농지정보
     landInfo = models.ForeignKey(
-        "farmer.ArableLandInfo",
+        "farmer.FarmInfo",
         related_name="request_landInfo",
         on_delete=models.PROTECT,
     )

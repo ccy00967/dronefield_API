@@ -1,24 +1,24 @@
 from rest_framework import serializers
-from farmer.models import ArableLandInfo
+from farmer.models import FarmInfo
 
 # from common.models import Address
 # from common.serializers import AddressSerializer
 
 
 # 농지 정보 등록
-class ArableLandInfoSerializer(serializers.ModelSerializer):
+class FarmInfoSerializer(serializers.ModelSerializer):
     owner = serializers.ReadOnlyField(source="owner.uuid")
     # address = AddressSerializer()
 
     class Meta:
-        model = ArableLandInfo
+        model = FarmInfo
         fields = "__all__"
 
     # 주소정보 모델 인스턴생 생성및 저장
     # def create(self, validated_data):
     #     address = validated_data.pop("address")
     #     addressinfo = Address.objects.create(**address)
-    #     arableland = ArableLandInfo.objects.create(
+    #     arableland = FarmInfo.objects.create(
     #         address=addressinfo,
     #         **validated_data,
     #     )

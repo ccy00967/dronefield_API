@@ -506,7 +506,6 @@ def emailValidationSend(request):
         <body>
             <h2>드론평야 인증번호</h2>
             <p>안녕하세요!</p>
-            <p>비밀번호 재설정을 위해 아래의 인증번호를 입력해주세요.</p>
             <h3 style="color:blue;">인증번호: <strong>{validate_key}</strong></h3>
             <p>이 인증번호는 5분 동안 유효합니다.</p>
         </body>
