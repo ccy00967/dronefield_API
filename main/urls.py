@@ -17,6 +17,8 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include, re_path
+#from django.conf.urls import url
+from . import views
 
 # from django.views.generic import TemplateView
 
@@ -43,6 +45,7 @@ urlpatterns = [
     #path(r'swagger(?P<format>\.json|\.yaml)', schema_view.without_ui(cache_timeout=0), name='schema-json'),
     #path(r"swagger",schema_view.with_ui("swagger", cache_timeout=0),name="schema-swagger-ui"),
     #path(r"redoc", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc-v1"),
+    path("", views.home, name='home'),
     path("admin/", admin.site.urls),
     path("user/", include("user.urls")),
     path("farmer/", include("farmer.urls")),

@@ -471,6 +471,7 @@ def niceCallback(request):
 
     except Exception as e:
         return Response({"message": f"오류 발생: {str(e)}"}, status=500)
+'''
 @swagger_auto_schema(
     method="POST",
     operation_id="인증번호 발송",
@@ -478,10 +479,8 @@ def niceCallback(request):
     request_body=swagger_doc.EmailRequest,
     responses=swagger_doc.EmailResponse,
 )
-
-@api_view(("POST",))
 '''
-@api_view(('POST',)
+@api_view(('POST',))
 def emailValidationSend(request):
     try:
         receive_email = request.data.get("email")
