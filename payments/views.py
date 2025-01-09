@@ -26,6 +26,9 @@ HEADERS = {
     "Content-Type": "application/json",
 }
 
+# 서비스 이용금액액
+serviceFee = 10000
+
 
 # 신청서와 예약금 2개 만들기
 # 이때 신청서를 여러개 받을 수 있다.
@@ -62,9 +65,10 @@ class RequestTossCreateAPIView(generics.CreateAPIView):
 
             # 사용자 타입에 따른 금액 계산
             if request.user.type == 3:
-                TotalAMOUNT += serializer.data.get("reservateDepositAmount", 0)
+                TotalAMOUNT += serializer.data.get("reservateDepositAmount", 1000)
             elif request.user.type == 4:
                 TotalAMOUNT += serializer.data.get("requestAmount", 0)
+                TotalAMOUNT += 10000
 
         print(TotalAMOUNT)
 
