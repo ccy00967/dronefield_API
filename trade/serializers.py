@@ -37,8 +37,8 @@ class RequestSerializer(serializers.ModelSerializer):
         exclude = (
             "requestCancelTransactionKey",
             "depositCancelTransactionKey",
-            "requestTosspayments",
-            "reservateTosspayments",
+            # "requestTosspayments",
+            # "reservateTosspayments",
         )
 
 

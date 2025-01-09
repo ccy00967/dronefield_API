@@ -12,6 +12,13 @@ from trade.permissions import OnlyOwnerCanUpdate
 from trade.permissions import isBeforePay
 
 
+def servicePriceCal(setAveragePrice, lndpclAr):
+    setAveragePrice = float(setAveragePrice)
+    lndpclAr = float(lndpclAr)
+    servicePrice = setAveragePrice * lndpclAr * 0.3025
+    return servicePrice
+
+
 # 신청서 등록
 # 토스 페이먼츠 적용대상 - 신청서 모델 생성후 토스 정보를 받아서 토스 모델 생성연결
 class RequestCreateAPIView(generics.CreateAPIView):
@@ -25,12 +32,11 @@ class RequestCreateAPIView(generics.CreateAPIView):
     def perform_create(self, serializer):
         landinfo = FarmInfo.objects.get(uuid=self.kwargs.get("landuuid"))
         setAveragePrice = self.request.data["setAveragePrice"]
+        price = servicePriceCal(setAveragePrice, landinfo.lndpclAr)
         serializer.save(
             owner=self.request.user,
             landInfo=landinfo,
-            requestAmount=math.ceil(
-                float(setAveragePrice) * float(landinfo.lndpclAr) * 0.3025
-            ),
+            requestAmount=math.ceil(price),
         )
 
     # def get_queryset(self):

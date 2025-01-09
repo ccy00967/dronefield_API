@@ -5,8 +5,8 @@ urlpatterns = [
     # 결제 완료 요청
     path(
         "success/",
-        views.TossPaymentsUpdateDeleteWithRequestView.as_view(),
-        name=views.TossPaymentsUpdateDeleteWithRequestView.name,
+        views.RequestTossCreateAPIView.as_view(),
+        name=views.RequestTossCreateAPIView.name,
     ),
     # 결제 취소 요청
     path(
