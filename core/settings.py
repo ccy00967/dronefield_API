@@ -68,6 +68,7 @@ INSTALLED_APPS = [
     "common",
     "payments",
     "farmer",
+    "core",
     # "account",
 ]
 

@@ -24,22 +24,16 @@ from .views import (
 """
 
 urlpatterns = [
-    path(
-        "refresh/", jwt_views.TokenRefreshView.as_view(), name="token_refresh"
-    ),  # 리프레시토큰으로 액세스토큰 발급받기
+    path("refresh/", jwt_views.TokenRefreshView.as_view(), name="token_refresh"),  # 리프레시토큰으로 액세스토큰 발급받기
     path("login/", UserLoginAPIView.as_view(), name="login"),  # 로그인하기
-    path(
-        "logout/", jwt_views.TokenBlacklistView.as_view(), name="logout"
-    ),  # 로그아웃하기
-    path(
-        "register/", UserRegistrationAPIView.as_view(), name="register"
-    ),  # 회원가입하기
-    path(
-        "profile/", ProfileAPIView.as_view(), name="userdataupdate"
-    ),  # 자신의 정보 읽기, 수정
+    path("logout/", jwt_views.TokenBlacklistView.as_view(), name="logout"),  # 로그아웃하기
+    path("register/", UserRegistrationAPIView.as_view(), name="register"),  # 회원가입하기
+    path("profile/", ProfileAPIView.as_view(), name="userdataupdate"),  # 자신의 정보 읽기, 수정
     path("validatekey/", emailValidationSend),  # 이메일로 인증번호 전송
     path("validatekeycheck/", validationCheck),  # 인증번호 인증
     path("passwordreset/", password_reset),  # 비밀번호 재설정
+    
+    #나이스
     path("nice-token/", niceCryptoToken),  # 나이스 표준창 호출하기
     path("nice-callback/", niceCallback),  # 나이스 콜백
     # FIX : 미사용

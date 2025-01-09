@@ -15,13 +15,13 @@ from rest_framework.permissions import IsAuthenticated
 from . import swagger_doc
 from rest_framework.permissions import AllowAny
 
-from common.nice_fuc import encrypt_data
-from common.nice_fuc import decrypt_data
-from common.nice_fuc import clientID
-from common.nice_fuc import secretKey
-from common.nice_fuc import APIUrl
-from common.nice_fuc import productID
-from common.nice_fuc import access_token
+from common.Nice.utils import encrypt_data
+from common.Nice.utils import decrypt_data
+from common.Nice.utils import clientID
+from common.Nice.utils import secretKey
+from common.Nice.utils import APIUrl
+from common.Nice.utils import productID
+from common.Nice.utils import access_token
 
 # from .nice_fuc import returnURL
 from user.models import CustomUser
