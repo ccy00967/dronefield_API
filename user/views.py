@@ -193,6 +193,7 @@ class ProfileAPIView(generics.RetrieveUpdateAPIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
         return redirect_request(req, fp, code, msg, hdrs, newurl)
 
+    #TODO: 실명등 nice에서 가져오는 거는 수정이 안되게 해야함
     def patch(self, request):
         serializer = self.get_serializer(request.user, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
