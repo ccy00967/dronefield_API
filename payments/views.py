@@ -2,7 +2,7 @@ from rest_framework import generics
 from rest_framework import permissions
 from rest_framework import status
 
-from payments.serializers import TossPaymentsUpdateSerializer
+from payments.serializers import RequestTossUpdateSerializer
 from payments.serializers import TossPaymentsSerializer
 
 from payments.permissions import CheckUser
@@ -29,11 +29,10 @@ HEADERS = {
 
 # 신청서와 예약금 2개 만들기
 # 이때 신청서를 여러개 받을 수 있다.
-class TossPaymentsUpdateDeleteWithRequestView(generics.CreateAPIView):
+class RequestTossCreateAPIView(generics.CreateAPIView):
     queryset = Request.objects.all()
-    serializer_class = TossPaymentsUpdateSerializer
-    # lookup_field = 'orderid' # 토스페이 orderid를 받음
-    name = "tosspayments-update"
+    serializer_class = RequestTossUpdateSerializer
+    name = "request-tosspayments-update"
     permission_classes = (
         permissions.IsAuthenticatedOrReadOnly,
         CheckStatusMatching,
@@ -41,20 +40,37 @@ class TossPaymentsUpdateDeleteWithRequestView(generics.CreateAPIView):
         # CheckAmount,
     )
 
-    # def perform_update(self, serializer):
-    def create(self, serializer):
+    def post(self, request):
         # 사용자로부터 받음
-        PAYMENT_KEY = self.request.data.get("paymentKey")
-        # AMOUNT = self.request.data.get('amount')
-        ORDERID = self.request.data.get("orderId")
-        orderIdList = self.request.data.get("orderidlist")
-        # orderIdList = self.request.data.getlist('orderIdList')
+        PAYMENT_KEY = request.data.get("paymentKey")
+        ORDERID = request.data.get("orderId")
+        orderIdList = request.data.get("orderidlist")
+        TotalAMOUNT = 0
+
         for orderid in orderIdList:
-            AMOUNT = self.request.data.get("amount")
+            try:
+                # orderid를 'orderId'로 수정하여 필드명 일치시킴
+                request_instance = Request.objects.get(orderId=orderid)
+            except Request.DoesNotExist:
+                return Response(
+                    {"message": f"Request with orderId {orderid} does not exist."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            # RequestSerializer 인스턴스 생성
+            serializer = self.get_serializer(request_instance)
+
+            # 사용자 타입에 따른 금액 계산
+            if request.user.type == 3:
+                TotalAMOUNT += serializer.data.get("reservateDepositAmount", 0)
+            elif request.user.type == 4:
+                TotalAMOUNT += serializer.data.get("requestAmount", 0)
+
+        print(TotalAMOUNT)
 
         # 값 검증하기
         url = "https://api.tosspayments.com/v1/payments/confirm"
-        data = {"paymentKey": PAYMENT_KEY, "orderId": ORDERID, "amount": AMOUNT}
+        data = {"paymentKey": PAYMENT_KEY, "orderId": ORDERID, "amount": TotalAMOUNT}
         payload = json.dumps(data)
         response = requests.post(url, headers=HEADERS, data=payload)
 
@@ -77,17 +93,18 @@ class TossPaymentsUpdateDeleteWithRequestView(generics.CreateAPIView):
             status=tosspayData["status"],
         )
 
-        # 해당하는 신청서 save 실행하기
+        # 해당 신청서들 업데이트
         for orderid in orderIdList:
             print(orderid)
-            if self.request.user.role == 3:
-                Request.objects.filter(orderid=orderid).update(
+            if request.user.type == 3:
+                Request.objects.filter(orderId=orderid).update(
                     reservateTosspayments=tosspaymentsObj, reservateDepositState=1
                 )
-            if self.request.user.role == 4:
-                Request.objects.filter(orderid=orderid).update(
+            elif request.user.type == 4:
+                Request.objects.filter(orderId=orderid).update(
                     requestTosspayments=tosspaymentsObj, requestDepositState=1
                 )
+
         return Response(
             {"message": "결제가 완료되었습니다."}, status=status.HTTP_201_CREATED
         )
