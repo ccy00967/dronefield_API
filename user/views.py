@@ -67,27 +67,48 @@ class UserRegistrationAPIView(generics.GenericAPIView):
     def post(self, request):
         # 나중에 permission으로 이동하기
         # NicePass 본인인증 여부 확인
-        is_active = True
-        if not DEBUG:
-            if request.session.get(isNicePassDone) != True:
-                print("나이스 본인인증이 안됨!")
+        if DEBUG:
+            try:
+                serializer = UserRegistrationSerializer(data=request.data)
+                if serializer.is_valid(raise_exception=True):
+                    serializer.save(
+                    name=request.data.get("name"),
+                    birthdate=request.data.get("birthdate"),
+                    gender=request.data.get("gender"),
+                    nationalinfo=request.data.get("nationalinfo"),
+                    mobileno=request.data.get("mobileno"),
+                    email=request.data.get("email"),
+                    is_active=True,
+                    )
+                    return Response(
+                        {"message": "DEBUG MODE : User successfully registered"},
+                        status=status.HTTP_401_UNAUTHORIZED,
+                    )
+            except Exception as e:
                 return Response(
-                    {"message": "nicepass validation need first"},
+                    {"message": "DEBUG MODE : User registration failed"},
                     status=status.HTTP_401_UNAUTHORIZED,
                 )
-            # 이메일 인증 여부 확인
-            if request.session.get(isEmailValidate) != True:
-                print("이메일 인증이 안됨!")
-                return Response(
-                    {"message": "email validation need first"},
-                    status=status.HTTP_401_UNAUTHORIZED,
-                )
-            # 방제사라면 인증후 직접 바꾸어줌
-            if request.data["role"] == 3:
-                print("방제사는 나중에 서류 확인 후 activate 시켜줌")
-                is_active = False
-            else:
-                is_active = True
+        
+        if request.session.get(isNicePassDone) != True:
+            print("나이스 본인인증이 안됨!")
+            return Response(
+                {"message": "nicepass validation need first"},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+        # 이메일 인증 여부 확인
+        if request.session.get(isEmailValidate) != True:
+            print("이메일 인증이 안됨!")
+            return Response(
+                {"message": "email validation need first"},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+        # 방제사라면 인증후 직접 바꾸어줌
+        if request.data["role"] == 3:
+            print("방제사는 나중에 서류 확인 후 activate 시켜줌")
+            is_active = False
+        else:
+            is_active = True
 
         serializer = UserRegistrationSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
@@ -172,6 +193,7 @@ class ProfileAPIView(generics.RetrieveUpdateAPIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
         return redirect_request(req, fp, code, msg, hdrs, newurl)
 
+    #TODO: 실명등 nice에서 가져오는 거는 수정이 안되게 해야함
     def patch(self, request):
         serializer = self.get_serializer(request.user, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)

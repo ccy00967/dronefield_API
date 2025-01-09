@@ -2,12 +2,13 @@ from rest_framework import generics
 
 from farmer.models import FarmInfo
 from farmer.serializers import FarmInfoSerializer
-
+from rest_framework.exceptions import NotFound
 from rest_framework import permissions
 from farmer.permissions import OnlyOwnerCanUpdate
 from rest_framework.response import Response
 from rest_framework import status
 
+from common.utils.pageanation import CustomPagination
 # from common.models import Address
 
 
@@ -17,7 +18,14 @@ class FarmInfoListView(generics.ListAPIView):
     serializer_class = FarmInfoSerializer
     name = "land_info_list"
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    pagination_class = CustomPagination
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        if self.request.query_params.get("owner"):
+            owner = self.request.query_params.get("owner")
+            queryset = queryset.filter(owner__uuid=owner)
+        return queryset
     # 주소정보 모델 인스턴생 생성및 저장
     # def perform_create(self, serializer):
     #     address = serializer.validated_data.pop('address')
@@ -28,19 +36,11 @@ class FarmInfoListView(generics.ListAPIView):
     #     )
     #     return arableland
 
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        if self.request.query_params.get("owner"):
-            owner = self.request.query_params.get("owner")
-            queryset = queryset.filter(owner__uuid=owner)
-        return queryset
-
-
 class FarmInfoCreateView(generics.CreateAPIView):
     queryset = FarmInfo.objects.all()
     serializer_class = FarmInfoSerializer
     name = "land_info_create"
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     # 신청한 유저 정보를 함께 저장
     def perform_create(self, serializer):
@@ -56,7 +56,8 @@ class FarmInfoAPIView(generics.GenericAPIView):
         permissions.IsAuthenticatedOrReadOnly,
         OnlyOwnerCanUpdate,
     )
-
+    
+    
     def get_object(self, uuid):
         try:
             return FarmInfo.objects.get(uuid=uuid)
