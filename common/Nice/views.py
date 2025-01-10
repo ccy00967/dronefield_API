@@ -106,9 +106,9 @@ def getNicePassUserData(request):
     # 하나의 method로 통일해야 하는 경우 GET으로 설정 가능하며 main페이지에서 plain_data에서 methodtype으로 설정가능합니다. (가이드 확인)
     # 인증 완료 후 전달 드리는 값들이 누락, 유실없이 정상적으로 받고 있는지 확인 바랍니다.
     if request.method == "GET":
-        enc_data = request.data["enc_data"]
-        token_version_id = request.data["token_version_id"]
-        integrity_value = request.data["integrity_value"]
+        enc_data = request.GET.get["enc_data"]
+        token_version_id = request.GET.get["token_version_id"]
+        integrity_value = request.GET.get["integrity_value"]
     if request.method == "POST":
         enc_data = request.data["enc_data"]
         token_version_id = request.data["token_version_id"]

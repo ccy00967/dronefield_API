@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nice CheckPlus</title>
+</head>
+<body>
+    <form name="form_chk" method="post" action="https://nice.checkplus.co.kr/CheckPlusSafeModel/checkplus.cb" target="popupChk">
+        <!-- 필수 파라미터 -->
+        <input type="hidden" name="m" value="service">
+        <input type="hidden" name="token_version_id" value="202501110301301F-NC2CCE405-1D49H-HDD9BD5724">
+        <input type="hidden" name="enc_data" value="RSrgUXd9ch3Lup1R9/Niu0S2g01aQEgtuOx+2Kp3A7QCneA2sBgBho2h8x7I56Tpge6dk9b5yMr4qXY0YSKtky7rwVjHcKiLe3gunzy3sWxKwtJIu81Q1oDn9mn8RmGksI+gxHq1OWLR3xt+GmKPBQ2iStD9ft2UJgbRNV1HDbA=">
+        <input type="hidden" name="integrity_value" value="N7sNYcn6xBLSSTvpKIUgmwfK6lrEo92B2/kr4pgRuYs=">
+        
+        <!-- 제출 버튼 -->
+        <button type="submit" onclick="openPopup()">나이스 본인인증</button>
+    </form>
+
+    <script>
+        function openPopup() {
+            window.open('', 'popupChk', 'width=480, height=812, top=100, fullscreen=no, menubar=no, status=no, toolbar=no, titlebar=yes, location=no, scrollbar=no');
+        }
+    </script>
+</body>
+</html>
