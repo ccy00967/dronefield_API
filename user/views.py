@@ -67,28 +67,28 @@ class UserRegistrationAPIView(generics.GenericAPIView):
     def post(self, request):
         # 나중에 permission으로 이동하기
         # NicePass 본인인증 여부 확인
-        if DEBUG:
-            try:
-                serializer = UserRegistrationSerializer(data=request.data)
-                if serializer.is_valid(raise_exception=True):
-                    serializer.save(
-                    name=request.data.get("name"),
-                    birthdate=request.data.get("birthdate"),
-                    gender=request.data.get("gender"),
-                    nationalinfo=request.data.get("nationalinfo"),
-                    mobileno=request.data.get("mobileno"),
-                    email=request.data.get("email"),
-                    is_active=True,
-                    )
-                    return Response(
-                        {"message": "DEBUG MODE : User successfully registered"},
-                        status=status.HTTP_401_UNAUTHORIZED,
-                    )
-            except Exception as e:
-                return Response(
-                    {"message": "DEBUG MODE : User registration failed"},
-                    status=status.HTTP_401_UNAUTHORIZED,
-                )
+        # if DEBUG:
+        #     try:
+        #         serializer = UserRegistrationSerializer(data=request.data)
+        #         if serializer.is_valid(raise_exception=True):
+        #             serializer.save(
+        #             name=request.data.get("name"),
+        #             birthdate=request.data.get("birthdate"),
+        #             gender=request.data.get("gender"),
+        #             nationalinfo=request.data.get("nationalinfo"),
+        #             mobileno=request.data.get("mobileno"),
+        #             email=request.data.get("email"),
+        #             is_active=True,
+        #             )
+        #             return Response(
+        #                 {"message": "DEBUG MODE : User successfully registered"},
+        #                 status=status.HTTP_401_UNAUTHORIZED,
+        #             )
+        #     except Exception as e:
+        #         return Response(
+        #             {"message": "DEBUG MODE : User registration failed"},
+        #             status=status.HTTP_401_UNAUTHORIZED,
+        #         )
         
         if request.session.get(isNicePassDone) != True:
             print("나이스 본인인증이 안됨!")
@@ -137,6 +137,8 @@ class UserRegistrationAPIView(generics.GenericAPIView):
                 "message": "User successfully registered!",
             }
             return Response(response, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 # 이메일과 비밀번호로 로그인
