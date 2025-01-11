@@ -49,25 +49,35 @@ class RequestExterminateDoneSerializer(serializers.ModelSerializer):
     class Meta:
         model = Request
         fields = (
-            "orderid",
+            "orderId",
             "calculation",
         )
 
 
-# 이렇게 정보 쪼개기가 여러개 필요예정?
 class RequestBriefSerializer(serializers.ModelSerializer):
-    # 이렇게 가능한가?
-    address = serializers.ReadOnlyField(source="common.Address")
+    exterminator = ProfileSerializer(read_only=True)
+    landNickName = serializers.CharField(source="landInfo.landNickName")
+    cropsInfo = serializers.CharField(source="landInfo.cropsInfo")
+    jibun = serializers.CharField(source="landInfo.jibun")
+    cd = serializers.CharField(source="landInfo.cd")
 
     class Meta:
         model = Request
         fields = (
-            "orderid",
-            "landInfo",
+            "orderId",
+            "cd",
+            "exterminator",
+            "landNickName",
+            "cropsInfo",
+            "jibun",
             "startDate",
             "endDate",
+            "pesticide",
+            "exterminateState",
+            "requestDepositState",
+            # "reservateDepositState",
+            "checkState",
         )
-        # fields = '__all__'
 
 
 class CheckExterminateStateSerializer(serializers.ModelSerializer):

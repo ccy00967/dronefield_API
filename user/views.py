@@ -28,7 +28,6 @@ from user.models import CustomUser
 from .permissions import OnlyOwnerCanUpdate
 from rest_framework import generics
 from exterminator.models import Exterminator
-from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import AuthenticationFailed
 from user.serializers import (
@@ -72,13 +71,13 @@ class UserRegistrationAPIView(generics.GenericAPIView):
                 serializer = UserRegistrationSerializer(data=request.data)
                 if serializer.is_valid(raise_exception=True):
                     serializer.save(
-                    name=request.data.get("name"),
-                    birthdate=request.data.get("birthdate"),
-                    gender=request.data.get("gender"),
-                    nationalinfo=request.data.get("nationalinfo"),
-                    mobileno=request.data.get("mobileno"),
-                    email=request.data.get("email"),
-                    is_active=True,
+                        name=request.data.get("name"),
+                        birthdate=request.data.get("birthdate"),
+                        gender=request.data.get("gender"),
+                        nationalinfo=request.data.get("nationalinfo"),
+                        mobileno=request.data.get("mobileno"),
+                        email=request.data.get("email"),
+                        is_active=True,
                     )
                     return Response(
                         {"message": "DEBUG MODE : User successfully registered"},
@@ -89,7 +88,7 @@ class UserRegistrationAPIView(generics.GenericAPIView):
                     {"message": "DEBUG MODE : User registration failed"},
                     status=status.HTTP_401_UNAUTHORIZED,
                 )
-        
+
         if request.session.get(isNicePassDone) != True:
             print("나이스 본인인증이 안됨!")
             return Response(
@@ -193,7 +192,7 @@ class ProfileAPIView(generics.RetrieveUpdateAPIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
         return redirect_request(req, fp, code, msg, hdrs, newurl)
 
-    #TODO: 실명등 nice에서 가져오는 거는 수정이 안되게 해야함
+    # TODO: 실명등 nice에서 가져오는 거는 수정이 안되게 해야함
     def patch(self, request):
         serializer = self.get_serializer(request.user, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
@@ -340,7 +339,9 @@ def niceCallback(request):
 
     except Exception as e:
         return Response({"message": f"오류 발생: {str(e)}"}, status=500)
-'''
+
+
+"""
 @swagger_auto_schema(
     method="POST",
     operation_id="인증번호 발송",
@@ -348,9 +349,10 @@ def niceCallback(request):
     request_body=swagger_doc.EmailRequest,
     responses=swagger_doc.EmailResponse,
 )
-'''
-@api_view(('POST',))
-@api_view(('POST',))
+"""
+
+
+@api_view(("POST",))
 def emailValidationSend(request):
     try:
         receive_email = request.data.get("email")

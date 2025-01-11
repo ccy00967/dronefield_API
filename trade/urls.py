@@ -1,24 +1,17 @@
 from django.urls import path
 from trade import views
 
+
 urlpatterns = [
     # 신청서 등록 - 농지정보 필요
-    path(
-        "<uuid:landuuid>/",
-        # "sendrequest/",
-        views.RequestCreateAPIView.as_view(),
-        name=views.RequestCreateAPIView.name,
-    ),
-    # 본인 신청서 목록 가져오기 - 유저 uuid필요
-    path(
-        "list/",
-        views.RequestListAPIView.as_view(),
-        name=views.RequestListAPIView.name,
-    ),
+    path("<uuid:landuuid>/", views.RequestCreateAPIView.as_view(), name=views.RequestCreateAPIView.name),
+    # 농민용 본인 신청서 목록 가져오기
+    path("list/", views.FarmerRequestListAPIView.as_view(), name=views.FarmerRequestListAPIView.name),
+    path("counts/", views.count_by_exterminateState, name="state_count"),
+    # 방제사용 신청서 목록 가져오기 - cd값 필요
+    path("lists/", views.ExterminatorRequestListAPIView.as_view(), name=views.ExterminatorRequestListAPIView.name),
+    # 방제사용 신청서 본인 담당 목록 가져오기
+    path("work-list/", views.ExterminatorRequestListAPIView.as_view(), name=views.ExterminatorRequestListAPIView.name),
     # 신청서 읽기, 수정, 삭제
-    path(
-        "<uuid:orderid>/",
-        views.RequestListUpdateDeleteView.as_view(),
-        name=views.RequestListUpdateDeleteView.name,
-    ),
+    path("<uuid:orderid>/", views.RequestListUpdateDeleteView.as_view(), name=views.RequestListUpdateDeleteView.name),
 ]
