@@ -27,15 +27,7 @@ class FarmInfoListView(generics.ListAPIView):
             owner = self.request.query_params.get("owner")
             queryset = queryset.filter(owner__uuid=owner)
         return queryset
-    # 주소정보 모델 인스턴생 생성및 저장
-    # def perform_create(self, serializer):
-    #     address = serializer.validated_data.pop('address')
-    #     addressinfo = Address.objects.create(**address)
-    #     arableland = FarmInfo.objects.create(
-    #         address=addressinfo,
-    #         **serializer.validated_data,
-    #     )
-    #     return arableland
+
 
 class FarmInfoCreateView(generics.CreateAPIView):
     queryset = FarmInfo.objects.all()
