@@ -20,14 +20,6 @@ from .views import (
     ProfileAPIView,
 )
 
-
-"""
-1. 이메일, 패스워드로 로그인
--> 리프레시토큰, 액세스토큰 발급
-2. 리프레시토큰으로 로그인
--> 액세스토큰 발급
-"""
-
 urlpatterns = [
     path("refresh/", jwt_views.TokenRefreshView.as_view(), name="token_refresh"),  # 리프레시토큰으로 액세스토큰 발급받기
     path("login/", UserLoginAPIView.as_view(), name="login"),  # 로그인하기

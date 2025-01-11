@@ -182,12 +182,6 @@ class ProfileAPIView(generics.RetrieveUpdateAPIView):
     serializer_class = ProfileSerializer
     permission_classes = [IsAuthenticated, OnlyOwnerCanUpdate]
 
-    # @swagger_auto_schema(
-    #     operation_id='프로필',
-    #     operation_description='유저 프로필',
-    #     tags=['user'],
-    #     responses=swagger_doc.ProfileResponse,
-    # )
     def get(self, request):
         serializer = self.get_serializer(request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -349,7 +343,7 @@ def niceCallback(request):
     responses=swagger_doc.EmailResponse,
 )
 '''
-@api_view(('POST',))
+#@api_view(('POST',))
 @api_view(('POST',))
 def emailValidationSend(request):
     try:
@@ -402,20 +396,6 @@ def emailValidationSend(request):
             {"message": "Failed to send email."},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
-
-
-# 계정 활성화 - 클라이언트에서 "validatekey"로 가져옴
-"""
-@swagger_auto_schema(
-    method="POST",
-    operation_id="인증번호 검증",
-    operation_description="유저 이메일 인증번호 검증 등등",
-    request_body=swagger_doc.ValidateRequest,
-    responses=swagger_doc.ValidateResponse,
-)
-
-"""
-
 
 @api_view(("POST",))
 # @parser_classes((JSONParser,))
