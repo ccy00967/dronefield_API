@@ -81,7 +81,7 @@ def niceCrytoToken(request):
         request.session["hmac_key"] = hmac_key
         request.session.save() # 위 세션 저장
 
-        response_url = "https://nice.checkplus.co.kr/CheckPlusSafeModel/checkplus.cb"
+        base_url = "https://nice.checkplus.co.kr/CheckPlusSafeModel/checkplus.cb"
         params = {
             "m": "service",
             "token_version_id": token_version_id,
@@ -89,14 +89,13 @@ def niceCrytoToken(request):
             "integrity_value": integrity_value
         }
         
-        encoded_params = urllib.parse.urlencode(params)
-        final_url = f"{response_url}?{encoded_params}"
+        response_url = requests.post(base_url, params=params)
         
         return Response({
             "token_version_id": token_version_id,
             "enc_data" : enc_data,
             "integrity_value" : integrity_value,
-            "url" : final_url
+            "url" : response_url
         }, status = status.HTTP_200_OK)
         
     return Response({"message": "표준창 호출 실패!"}, status = status.HTTP_404_NOT_FOUND)
