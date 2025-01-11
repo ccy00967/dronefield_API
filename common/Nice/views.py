@@ -82,14 +82,14 @@ def niceCrytoToken(request):
         request.session.save() # 위 세션 저장
 
         base_url = "https://nice.checkplus.co.kr/CheckPlusSafeModel/checkplus.cb"
-        params = {
+        base_data = {
             "m": "service",
             "token_version_id": token_version_id,
             "enc_data": enc_data,
             "integrity_value": integrity_value
         }
         
-        response_url = requests.post(base_url, params=params)
+        response_url = requests.post(base_url, data=base_data)
         
         return Response({
             "token_version_id": token_version_id,
