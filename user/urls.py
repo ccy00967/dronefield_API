@@ -7,6 +7,7 @@ from .views import (
     validationCheck,
     password_reset,
     #niceCallback,
+    terms_of_service
 )
 
 from common.Nice.views import (
@@ -33,6 +34,9 @@ urlpatterns = [
     #나이스
     path("nice-token/", niceCrytoToken),  # 나이스 표준창 호출하기
     path("nice-callback/", getNicePassUserData),  # 나이스 콜백
+    
+    #이용약관
+    path("term/<int:id>/", terms_of_service, name="terms"),  # 이용약관
     # FIX : 미사용
     # path('manager/users/', ManageUserListView.as_view(), name='manage_get_users'),
     # path('manager/<uuid:uuid>/', ManageUserRetrieveUpdateDestroyView.as_view(), name='manage_update_users'),

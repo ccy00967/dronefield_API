@@ -14,7 +14,7 @@ from rest_framework.permissions import IsAuthenticated
 # from drf_yasg.utils import swagger_auto_schema
 from . import swagger_doc
 from rest_framework.permissions import AllowAny
-
+from django.shortcuts import render
 from common.Nice.utils import encrypt_data
 from common.Nice.utils import decrypt_data
 from common.Nice.utils import clientID
@@ -467,3 +467,15 @@ def password_reset(request):
             {"message": "Internal server error"},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
+
+@api_view(["GET"])
+def terms_of_service(request, id):
+    try:
+        template_name = f"register{id}.html"
+        response = render(request, template_name)
+
+        return response
+    except Exception:
+        raise Response(
+             {"message": "1~4 사이의 숫자를 입력해주세요."},
+             status.HTTP_404_NOT_FOUND)
