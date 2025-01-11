@@ -13,7 +13,7 @@ import json
 import random
 import time
 from datetime import datetime
-import urllib.parse
+from urllib.parse import urlencode
 
 from .utils import (encrypt_data, decrypt_data, clientID, secretKey, APIUrl, productID, access_token, isNicePassDone)
 
@@ -89,7 +89,7 @@ def niceCrytoToken(request):
             "integrity_value": integrity_value
         }
         
-        response_url = requests.post(base_url, data=base_data)
+        response_url = f"{base_url}?{urlencode(base_data)}"
         
         return Response({
             "token_version_id": token_version_id,
