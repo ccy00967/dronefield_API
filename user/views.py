@@ -468,14 +468,18 @@ def password_reset(request):
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
-@api_view(["GET"])
-def terms_of_service(request, id):
-    try:
-        template_name = f"register{id}.html"
-        response = render(request, template_name)
+import os
+from django.http import HttpResponse, Http404
+from django.conf import settings
 
-        return response
-    except Exception:
-        raise Response(
-             {"message": "1~4 사이의 숫자를 입력해주세요."},
-             status.HTTP_404_NOT_FOUND)
+def terms_of_service(request, id):
+    file_path = os.path.join(settings.BASE_DIR, f"templates/register{id}.html")
+    
+    try:
+        # HTML 파일을 읽어와서 응답으로 반환
+        with open(file_path, 'r', encoding='utf-8') as file:
+            html_content = file.read()
+        return HttpResponse(html_content, content_type="text/html")
+    except FileNotFoundError:
+        # 파일이 없을 경우 404 에러 반환
+        raise Http404("이용약관 파일을 찾을 수 없습니다.")
