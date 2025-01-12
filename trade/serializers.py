@@ -11,7 +11,7 @@ class RequestSerializer(serializers.ModelSerializer):
     # tosspaymentorderId = serializers.ReadOnlyField(source='owner.uuid')
     # requestownerName = serializers.ReadOnlyField(source="requestowner.name")
     # requestownerEmail = serializers.ReadOnlyField(source="requestowner.email")
-    orderid = serializers.ReadOnlyField()
+    orderId = serializers.ReadOnlyField()
     owner = ProfileSerializer(read_only=True)
     exterminator = ProfileSerializer(read_only=True)
     landInfo = FarmInfoSerializer(read_only=True)
@@ -55,21 +55,27 @@ class RequestExterminateDoneSerializer(serializers.ModelSerializer):
 
 
 class RequestBriefSerializer(serializers.ModelSerializer):
+    owner_name = serializers.CharField(source="landInfo.owner.name")
+    owner_mobileno = serializers.CharField(source="landInfo.owner.mobileno")
     exterminator = ProfileSerializer(read_only=True)
     landNickName = serializers.CharField(source="landInfo.landNickName")
     cropsInfo = serializers.CharField(source="landInfo.cropsInfo")
     jibun = serializers.CharField(source="landInfo.jibun")
+    lndpclAr = serializers.CharField(source="landInfo.lndpclAr")
     cd = serializers.CharField(source="landInfo.cd")
 
     class Meta:
         model = Request
         fields = (
+            "owner_name",
+            "owner_mobileno",
             "orderId",
             "cd",
             "exterminator",
             "landNickName",
             "cropsInfo",
             "jibun",
+            "lndpclAr",
             "startDate",
             "endDate",
             "pesticide",

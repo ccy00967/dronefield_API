@@ -11,7 +11,9 @@ urlpatterns = [
     # 방제사용 신청서 목록 가져오기 - cd값 필요
     path("lists/", views.ExterminatorRequestListAPIView.as_view(), name=views.ExterminatorRequestListAPIView.name),
     # 방제사용 신청서 본인 담당 목록 가져오기
-    path("work-list/", views.ExterminatorRequestListAPIView.as_view(), name=views.ExterminatorRequestListAPIView.name),
+    path("work-list/", views.ExterminatorWorkRequestListAPIView.as_view(), name=views.ExterminatorWorkRequestListAPIView.name),
     # 신청서 읽기, 수정, 삭제
-    path("<uuid:orderid>/", views.RequestListUpdateDeleteView.as_view(), name=views.RequestListUpdateDeleteView.name),
+    path("detail/<uuid:orderId>/", views.RequestListUpdateDeleteView.as_view(), name=views.RequestListUpdateDeleteView.name),
+    #TODO: 농민의 신청서 상태 업데이트: checkState (방제 완료 최종 확인)
+    #TODO: 방제사의 신청서 상태 업데이트: exterminateState (작업 상태 업데이트)
 ]
