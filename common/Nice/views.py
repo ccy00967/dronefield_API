@@ -142,16 +142,20 @@ def getNicePassUserData(request):
                             + 'window.close();'
                             '</script>')
         else:
+            try:
+                dec_data = json.loads(decrypt_data(enc_data, key, iv))
+            except Exception as e:
+                return Response({"message": f"Decryption failed: {str(e)}", "enc_data": enc_data},
+                                status=status.HTTP_500_INTERNAL_SERVER_ERROR,)
+                
             request.session["name"] = dec_data["name"]
             request.session["birthdate"] = dec_data["birthdate"]
             request.session["gender"] = dec_data["gender"]
             request.session["nationalinfo"] = dec_data["nationalinfo"]
             request.session["mobileno"] = dec_data["mobileno"]
             #request.session["mobileco"] = dec_data["mobileco"]
-
             # 나이스 인증완료 - 회원가입에서 확인할 값
             request.session[isNicePassDone] = True
-
             request.session.save() # 위 세션 저장
 
         return Response({
