@@ -55,41 +55,8 @@ isEmailValidate = "isEmailValidate"
 class UserRegistrationAPIView(generics.GenericAPIView):
     serializer_class = UserRegistrationSerializer
     permission_classes = (AllowAny,)
-    """
-    @swagger_auto_schema(
-        operation_id="회원가입",
-        operation_description="유저 회원가입",
-        tags=["user"],
-        responses=swagger_doc.UserRegistrationResponse,
-    )
-    """
 
     def post(self, request):
-        # 나중에 permission으로 이동하기
-        # NicePass 본인인증 여부 확인
-        # if DEBUG:
-        #     try:
-        #         serializer = UserRegistrationSerializer(data=request.data)
-        #         if serializer.is_valid(raise_exception=True):
-        #             serializer.save(
-        #             name=request.data.get("name"),
-        #             birthdate=request.data.get("birthdate"),
-        #             gender=request.data.get("gender"),
-        #             nationalinfo=request.data.get("nationalinfo"),
-        #             mobileno=request.data.get("mobileno"),
-        #             email=request.data.get("email"),
-        #             is_active=True,
-        #             )
-        #             return Response(
-        #                 {"message": "DEBUG MODE : User successfully registered"},
-        #                 status=status.HTTP_401_UNAUTHORIZED,
-        #             )
-        #     except Exception as e:
-        #         return Response(
-        #             {"message": "DEBUG MODE : User registration failed"},
-        #             status=status.HTTP_401_UNAUTHORIZED,
-        #         )
-        
         if request.session.get(isNicePassDone) != True:
             print("나이스 본인인증이 안됨!")
             return Response(
@@ -112,15 +79,7 @@ class UserRegistrationAPIView(generics.GenericAPIView):
 
         serializer = UserRegistrationSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
-            # 데이터베이스에 유저정보 저장(serializer create실행)
-            # 로직 수정필요 : request.session.get으로 바꿔야 세션에서 nice pass 데이터를 가져옴
             serializer.save(
-                # name=request.data.get("name"),
-                # birthdate=request.data.get("birthdate"),
-                # gender=request.data.get("gender"),
-                # nationalinfo=request.data.get("nationalinfo"),
-                # mobileno=request.data.get("mobileno"),
-                # email=request.data.get("email"),
                 name=request.session.get("name"),
                 birthdate=request.session.get("birthdate"),
                 gender=request.session.get("gender"),
@@ -474,7 +433,7 @@ from django.conf import settings
 from django.http import FileResponse
 
 def terms_of_service(request, id):
-    file_path = os.path.join(settings.BASE_DIR, f"templates/register{id}.html")
+    file_path = os.path.join(settings.BASE_DIR, f"templates/register{id}_structure_modified.html")
     
     try:
         return FileResponse(open(file_path, 'rb'), as_attachment=True, filename=f"register{id}.html")
