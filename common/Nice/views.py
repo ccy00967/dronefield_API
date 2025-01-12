@@ -125,6 +125,8 @@ def getNicePassUserData(request):
         return Response({"error": "Invalid request method"}, status=status.HTTP_404_NOT_FOUND)
 
     enc_data = data.get("enc_data")
+    if not enc_data:
+        return Response({"error": "enc_data is missing in the request."}, status=status.HTTP_400_BAD_REQUEST)
     token_version_id = data.get("token_version_id")
     integrity_value = data.get("integrity_value")
 
