@@ -469,17 +469,14 @@ def password_reset(request):
         )
 
 import os
-from django.http import HttpResponse, Http404
+from django.http import Http404
 from django.conf import settings
+from django.http import FileResponse
 
 def terms_of_service(request, id):
     file_path = os.path.join(settings.BASE_DIR, f"templates/register{id}.html")
     
     try:
-        # HTML 파일을 읽어와서 응답으로 반환
-        with open(file_path, 'r', encoding='utf-8') as file:
-            html_content = file.read()
-        return HttpResponse(html_content, content_type="text/html")
+        return FileResponse(open(file_path, 'rb'), as_attachment=True, filename=f"register{id}.html")
     except FileNotFoundError:
-        # 파일이 없을 경우 404 에러 반환
         raise Http404("이용약관 파일을 찾을 수 없습니다.")
