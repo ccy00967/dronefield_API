@@ -90,37 +90,44 @@ def niceCrytoToken(request):
         "url" : response_url
     }, status = status.HTTP_200_OK)
 
-@api_view(('POST', 'GET'))
+def get_nice_form(request):
+    return render(request, 'nice.html')
+
+@api_view(('GET'))
 def getNicePassUserData(request):
-    s_token_version_id = request.session.get("token_version_id")
+    token_version_id = request.session.get("token_version_id")
     key = request.session.get("key")
     iv = request.session.get("iv")
     hmac_key = request.session.get("hmac_key")
     req_no = request.session.get("req_no")
     
-      
-    
-    print("===================================")
-    print("request: ", request.data)
-    print("session", request.session.session_key)
-    print("Request Cookies:", request.COOKIES)
-    print("GET parameters:", request.GET)
-    print("===================================")
     token_version_id = request.GET.get("token_version_id")
     enc_data = request.GET.get("enc_data")
     integrity_value = request.GET.get("integrity_value")
-    print("token_version_id: ", token_version_id)
-    print("enc_data: ", enc_data)
-    print("integrity_value: ", integrity_value)   
-    print("===================================")
-    dec_data = json.loads(decrypt_data(enc_data, key, iv))
-    print("dec_data: ", dec_data)
-    print("===================================")
-    # if request.method == "GET":
-    #     enc_data = request.GET.get("enc_data", "")
-    #     token_version_id = request.GET.get("token_version_id", "")
-    #     integrity_value = request.GET.get("integrity_value", "")
-    # if request.method == "POST":
+    
+    
+    # session_id = 'uoyjx8533l3jvfditnrjvz8k0hau6yug'
+    # try:
+    #     session = Session.objects.get(session_key=session_id)
+    #     session_data = session.get_decoded()
+    #     key = session_data.get("key")
+    #     iv = session_data.get("iv")
+    #     hmac_key = session_data.get("hmac_key")
+    #     req_no = session_data.get("req_no")
+    #     print("세션 데이터:", session_data)
+    # except Session.DoesNotExist:
+    #     print("해당 세션이 존재하지 않습니다.")
+        
+    # print("===================================")
+    # print("request: ", request.data)
+    # print("session", request.session.session_key)
+    # print("Request Cookies:", request.COOKIES)
+    # print("GET parameters:", request.GET)
+    # print("===================================")
+    # print("token_version_id: ", token_version_id)
+    # print("enc_data: ", enc_data)
+    # print("integrity_value: ", integrity_value)   
+    # print("===================================")
         
     h = hmac.new(
         key=hmac_key.encode(),
