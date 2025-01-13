@@ -90,24 +90,37 @@ def niceCrytoToken(request):
         "url" : response_url
     }, status = status.HTTP_200_OK)
 
-@api_view(('POST',)) #, 'GET'))
+@api_view(('POST', 'GET'))
 def getNicePassUserData(request):
     s_token_version_id = request.session.get("token_version_id")
     key = request.session.get("key")
     iv = request.session.get("iv")
     hmac_key = request.session.get("hmac_key")
     req_no = request.session.get("req_no")
-
-
     
+      
+    
+    print("===================================")
+    print("request: ", request.data)
+    print("session", request.session.session_key)
+    print("Request Cookies:", request.COOKIES)
+    print("GET parameters:", request.GET)
+    print("===================================")
+    token_version_id = request.GET.get("token_version_id")
+    enc_data = request.GET.get("enc_data")
+    integrity_value = request.GET.get("integrity_value")
+    print("token_version_id: ", token_version_id)
+    print("enc_data: ", enc_data)
+    print("integrity_value: ", integrity_value)   
+    print("===================================")
+    dec_data = json.loads(decrypt_data(enc_data, key, iv))
+    print("dec_data: ", dec_data)
+    print("===================================")
     # if request.method == "GET":
     #     enc_data = request.GET.get("enc_data", "")
     #     token_version_id = request.GET.get("token_version_id", "")
     #     integrity_value = request.GET.get("integrity_value", "")
     # if request.method == "POST":
-    enc_data = request.data["enc_data"]
-    token_version_id = request.data["token_version_id"]
-    integrity_value = request.data["integrity_value"]
         
     h = hmac.new(
         key=hmac_key.encode(),
@@ -133,36 +146,14 @@ def getNicePassUserData(request):
             except Exception as e:
                 return Response({"message": f"Decryption failed: {str(e)}", "enc_data": enc_data},
                                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,)
-            
-            
-            #TODO: 여기서 부터 프론트코드 가져와야 함  
-            #===================================
-            session = Session.objects.get(session_key=request.session.session_key)
-            session_data = session.get_decoded()
-            print("===================================")
-            print("key: ", key)
-            print("session_data: ", session_data)
-            print("s_token_version_id: ", s_token_version_id)
-            print("requestno: ", request.data)
-            print("===================================")
-            print("token_version_id: ", request.data["token_version_id"])
-            print("integrity_value: ", request.data["integrity_value"])
-            print("===================================")
-            print("enc_data: ", request.data["enc_data"])
-            print("dec_data: ", dec_data) 
-            print("===================================")
-            #===================================
-            
         
             request.session["name"] = dec_data["name"]
             request.session["birthdate"] = dec_data["birthdate"]
             request.session["gender"] = dec_data["gender"]
             request.session["nationalinfo"] = dec_data["nationalinfo"]
             request.session["mobileno"] = dec_data["mobileno"]
-            #request.session["mobileco"] = dec_data["mobileco"]
-            # 나이스 인증완료 - 회원가입에서 확인할 값
             request.session[isNicePassDone] = True
-            request.session.save() # 위 세션 저장
+            request.session.save() 
 
         return Response({
             #"authtype"      : authtype,
