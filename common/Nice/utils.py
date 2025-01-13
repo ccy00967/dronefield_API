@@ -10,6 +10,10 @@ APIUrl = "https://svc.niceapi.co.kr:22001"
 productID = "2101979031"
 access_token = "ec1dcd1c-02d8-48da-8018-5c0ff193f030"  # 기관토큰(access_token)은 반영구적으로 사용가능하며 한번 발급 후 50년 유효합니다.
 
+Email = "email"
+ValidateKey = "validatekey"
+isNicePassDone = "isNicePassDone"
+isEmailValidate = "isEmailValidate"
 
 def encrypt_data(plain_data, key, iv):
     block_size = 16

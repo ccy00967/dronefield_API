@@ -7,8 +7,9 @@ from rest_framework import permissions
 from farmer.permissions import OnlyOwnerCanUpdate
 from rest_framework.response import Response
 from rest_framework import status
-
+from django.db.models import Sum
 from common.utils.pageanation import CustomPagination
+from rest_framework.permissions import IsAuthenticated
 # from common.models import Address
 
 
@@ -17,7 +18,7 @@ class FarmInfoListView(generics.ListAPIView):
     queryset = FarmInfo.objects.all()
     serializer_class = FarmInfoSerializer
     name = "land_info_list"
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly,]
     pagination_class = CustomPagination
 
     def get_queryset(self):
@@ -26,15 +27,7 @@ class FarmInfoListView(generics.ListAPIView):
             owner = self.request.query_params.get("owner")
             queryset = queryset.filter(owner__uuid=owner)
         return queryset
-    # 주소정보 모델 인스턴생 생성및 저장
-    # def perform_create(self, serializer):
-    #     address = serializer.validated_data.pop('address')
-    #     addressinfo = Address.objects.create(**address)
-    #     arableland = FarmInfo.objects.create(
-    #         address=addressinfo,
-    #         **serializer.validated_data,
-    #     )
-    #     return arableland
+
 
 class FarmInfoCreateView(generics.CreateAPIView):
     queryset = FarmInfo.objects.all()
@@ -81,3 +74,15 @@ class FarmInfoAPIView(generics.GenericAPIView):
         land_info = self.get_object(uuid)
         land_info.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+class TotalLandAreaAPIView(generics.GenericAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        # 현재 사용자의 모든 땅 가져오기
+        user_lands = FarmInfo.objects.filter(owner=request.user)
+        total_area = user_lands.aggregate(total_lndpcAr=Sum('lndpcAr'))['total_lndpcAr'] or 0
+
+        # 응답 데이터 직렬화 및 반환
+        serializer = FarmInfoSerializer({'total_lndpcAr': total_area})
+        return Response(serializer.data)

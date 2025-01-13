@@ -14,7 +14,7 @@ from rest_framework.permissions import IsAuthenticated
 # from drf_yasg.utils import swagger_auto_schema
 from . import swagger_doc
 from rest_framework.permissions import AllowAny
-
+from django.shortcuts import render
 from common.Nice.utils import encrypt_data
 from common.Nice.utils import decrypt_data
 from common.Nice.utils import clientID
@@ -54,41 +54,8 @@ isEmailValidate = "isEmailValidate"
 class UserRegistrationAPIView(generics.GenericAPIView):
     serializer_class = UserRegistrationSerializer
     permission_classes = (AllowAny,)
-    """
-    @swagger_auto_schema(
-        operation_id="회원가입",
-        operation_description="유저 회원가입",
-        tags=["user"],
-        responses=swagger_doc.UserRegistrationResponse,
-    )
-    """
 
     def post(self, request):
-        # 나중에 permission으로 이동하기
-        # NicePass 본인인증 여부 확인
-        if DEBUG:
-            try:
-                serializer = UserRegistrationSerializer(data=request.data)
-                if serializer.is_valid(raise_exception=True):
-                    serializer.save(
-                        name=request.data.get("name"),
-                        birthdate=request.data.get("birthdate"),
-                        gender=request.data.get("gender"),
-                        nationalinfo=request.data.get("nationalinfo"),
-                        mobileno=request.data.get("mobileno"),
-                        email=request.data.get("email"),
-                        is_active=True,
-                    )
-                    return Response(
-                        {"message": "DEBUG MODE : User successfully registered"},
-                        status=status.HTTP_401_UNAUTHORIZED,
-                    )
-            except Exception as e:
-                return Response(
-                    {"message": "DEBUG MODE : User registration failed"},
-                    status=status.HTTP_401_UNAUTHORIZED,
-                )
-
         if request.session.get(isNicePassDone) != True:
             print("나이스 본인인증이 안됨!")
             return Response(
@@ -111,15 +78,7 @@ class UserRegistrationAPIView(generics.GenericAPIView):
 
         serializer = UserRegistrationSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
-            # 데이터베이스에 유저정보 저장(serializer create실행)
-            # 로직 수정필요 : request.session.get으로 바꿔야 세션에서 nice pass 데이터를 가져옴
             serializer.save(
-                # name=request.data.get("name"),
-                # birthdate=request.data.get("birthdate"),
-                # gender=request.data.get("gender"),
-                # nationalinfo=request.data.get("nationalinfo"),
-                # mobileno=request.data.get("mobileno"),
-                # email=request.data.get("email"),
                 name=request.session.get("name"),
                 birthdate=request.session.get("birthdate"),
                 gender=request.session.get("gender"),
@@ -136,6 +95,8 @@ class UserRegistrationAPIView(generics.GenericAPIView):
                 "message": "User successfully registered!",
             }
             return Response(response, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 # 이메일과 비밀번호로 로그인
@@ -181,12 +142,6 @@ class ProfileAPIView(generics.RetrieveUpdateAPIView):
     serializer_class = ProfileSerializer
     permission_classes = [IsAuthenticated, OnlyOwnerCanUpdate]
 
-    # @swagger_auto_schema(
-    #     operation_id='프로필',
-    #     operation_description='유저 프로필',
-    #     tags=['user'],
-    #     responses=swagger_doc.ProfileResponse,
-    # )
     def get(self, request):
         serializer = self.get_serializer(request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -349,10 +304,9 @@ def niceCallback(request):
     request_body=swagger_doc.EmailRequest,
     responses=swagger_doc.EmailResponse,
 )
-"""
-
-
-@api_view(("POST",))
+'''
+@api_view(('POST',))
+@api_view(('POST',))
 def emailValidationSend(request):
     try:
         receive_email = request.data.get("email")
@@ -404,20 +358,6 @@ def emailValidationSend(request):
             {"message": "Failed to send email."},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
-
-
-# 계정 활성화 - 클라이언트에서 "validatekey"로 가져옴
-"""
-@swagger_auto_schema(
-    method="POST",
-    operation_id="인증번호 검증",
-    operation_description="유저 이메일 인증번호 검증 등등",
-    request_body=swagger_doc.ValidateRequest,
-    responses=swagger_doc.ValidateResponse,
-)
-
-"""
-
 
 @api_view(("POST",))
 # @parser_classes((JSONParser,))
@@ -487,3 +427,16 @@ def password_reset(request):
             {"message": "Internal server error"},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
+
+import os
+from django.http import Http404
+from django.conf import settings
+from django.http import FileResponse
+
+def terms_of_service(request, id):
+    file_path = os.path.join(settings.BASE_DIR, f"templates/register{id}_structure_modified.html")
+    
+    try:
+        return FileResponse(open(file_path, 'rb'), as_attachment=True, filename=f"register{id}.html")
+    except FileNotFoundError:
+        raise Http404("이용약관 파일을 찾을 수 없습니다.")

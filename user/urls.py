@@ -2,11 +2,17 @@ from django.urls import path
 from rest_framework_simplejwt import views as jwt_views
 
 from .views import (
-    niceCryptoToken,
+    #niceCryptoToken,
     emailValidationSend,
     validationCheck,
     password_reset,
-    niceCallback,
+    #niceCallback,
+    terms_of_service
+)
+
+from common.Nice.views import (
+    niceCrytoToken,
+    getNicePassUserData,
 )
 
 from .views import (
@@ -14,14 +20,6 @@ from .views import (
     UserLoginAPIView,
     ProfileAPIView,
 )
-
-
-"""
-1. 이메일, 패스워드로 로그인
--> 리프레시토큰, 액세스토큰 발급
-2. 리프레시토큰으로 로그인
--> 액세스토큰 발급
-"""
 
 urlpatterns = [
     path("refresh/", jwt_views.TokenRefreshView.as_view(), name="token_refresh"),  # 리프레시토큰으로 액세스토큰 발급받기
@@ -34,8 +32,11 @@ urlpatterns = [
     path("passwordreset/", password_reset),  # 비밀번호 재설정
     
     #나이스
-    path("nice-token/", niceCryptoToken),  # 나이스 표준창 호출하기
-    path("nice-callback/", niceCallback),  # 나이스 콜백
+    path("nice-token/", niceCrytoToken),  # 나이스 표준창 호출하기
+    path("nice-callback/", getNicePassUserData),  # 나이스 콜백
+    
+    #이용약관
+    path("term/<int:id>/", terms_of_service, name="terms"),  # 이용약관
     # FIX : 미사용
     # path('manager/users/', ManageUserListView.as_view(), name='manage_get_users'),
     # path('manager/<uuid:uuid>/', ManageUserRetrieveUpdateDestroyView.as_view(), name='manage_update_users'),
