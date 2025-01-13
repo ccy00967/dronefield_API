@@ -93,41 +93,32 @@ def niceCrytoToken(request):
 def get_nice_form(request):
     return render(request, 'nice.html')
 
-@api_view(('GET'))
+@api_view(('POST','GET'))
 def getNicePassUserData(request):
-    token_version_id = request.session.get("token_version_id")
-    key = request.session.get("key")
-    iv = request.session.get("iv")
-    hmac_key = request.session.get("hmac_key")
-    req_no = request.session.get("req_no")
-    
     token_version_id = request.GET.get("token_version_id")
     enc_data = request.GET.get("enc_data")
     integrity_value = request.GET.get("integrity_value")
-    
-    
-    # session_id = 'uoyjx8533l3jvfditnrjvz8k0hau6yug'
-    # try:
-    #     session = Session.objects.get(session_key=session_id)
-    #     session_data = session.get_decoded()
-    #     key = session_data.get("key")
-    #     iv = session_data.get("iv")
-    #     hmac_key = session_data.get("hmac_key")
-    #     req_no = session_data.get("req_no")
-    #     print("세션 데이터:", session_data)
-    # except Session.DoesNotExist:
-    #     print("해당 세션이 존재하지 않습니다.")
+    session_id = request.COOKIES.get("sessionid")
+    try:
+        session = Session.objects.get(session_key=session_id)
+        session_data = session.get_decoded()
+        key = session_data.get("key")
+        iv = session_data.get("iv")
+        hmac_key = session_data.get("hmac_key")
+        req_no = session_data.get("req_no")
+        print("세션 데이터:", session_data)
+    except Session.DoesNotExist:
+        print("해당 세션이 존재하지 않습니다.")
         
-    # print("===================================")
-    # print("request: ", request.data)
-    # print("session", request.session.session_key)
-    # print("Request Cookies:", request.COOKIES)
-    # print("GET parameters:", request.GET)
-    # print("===================================")
-    # print("token_version_id: ", token_version_id)
-    # print("enc_data: ", enc_data)
-    # print("integrity_value: ", integrity_value)   
-    # print("===================================")
+    print("===================================")
+    print("token_version_id:", token_version_id)
+    print("enc_data:", enc_data)
+    print("integrity_value:", integrity_value)
+    print("session_id:", session_id)
+    print("hmac_key:",hmac_key)
+    print("key:", key)
+    print("iv:", iv) 
+    print("===================================")
         
     h = hmac.new(
         key=hmac_key.encode(),
@@ -171,3 +162,6 @@ def getNicePassUserData(request):
             "mobileno"      : dec_data["mobileno"],
             #"mobileco"      : dec_data["mobileco"]
         }, status = status.HTTP_200_OK)
+        
+def nice_auth_view(request):
+    return render(request, "nice_auth.html", {})

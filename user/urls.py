@@ -13,7 +13,7 @@ from .views import (
 from common.Nice.views import (
     niceCrytoToken,
     getNicePassUserData,
-    get_nice_form
+    nice_auth_view
 )
 
 from .views import (
@@ -34,9 +34,8 @@ urlpatterns = [
     
     #나이스
     path("nice-token/", niceCrytoToken),  # 나이스 표준창 호출하기
-    path("nice-form/", get_nice_form),  # 나이스 폼 호출하기
     path("nice-callback/", getNicePassUserData),  # 나이스 콜백
-    
+    path("nice-auth/", nice_auth_view, name="nice-auth"),
     #이용약관
     path("term/<int:id>/", terms_of_service, name="terms"),  # 이용약관
     # FIX : 미사용
