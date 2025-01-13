@@ -71,11 +71,14 @@ class FarmInfoAPIView(generics.GenericAPIView):
 
     # 신청서에 등록된 농지는 삭제 요청 불가능 하게 만들기
     def delete(self, request, uuid):
-        land_info = self.get_object(uuid)
-        if land_info.application:
-            raise NotFound("신청서에 등록된 농지는 삭제할 수 없습니다.")
-        land_info.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        try:
+            land_info = self.get_object(uuid)
+            land_info.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT, data={"message": "농지 정보가 삭제되었습니다."})
+        except NotFound:
+            return Response(status=status.HTTP_404_NOT_FOUND, data={"message": "해당 농지 정보가 없습니, 결재중일 수 있습니다."})
+        except Exception as e:
+            return Response(status=status.HTTP_400_BAD_REQUEST, data={"message": f"에러 발생: {e}"})
     
 class TotalLandAreaAPIView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
