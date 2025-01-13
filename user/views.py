@@ -55,7 +55,7 @@ isEmailValidate = "isEmailValidate"
 class UserRegistrationAPIView(generics.GenericAPIView):
     serializer_class = UserRegistrationSerializer
     permission_classes = (AllowAny,)
-
+    
     def post(self, request):
         if request.session.get(isNicePassDone) != True:
             print("나이스 본인인증이 안됨!")
