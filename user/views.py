@@ -28,7 +28,6 @@ from user.models import CustomUser
 from .permissions import OnlyOwnerCanUpdate
 from rest_framework import generics
 from exterminator.models import Exterminator
-from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import AuthenticationFailed
 from user.serializers import (
@@ -148,7 +147,7 @@ class ProfileAPIView(generics.RetrieveUpdateAPIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
         return redirect_request(req, fp, code, msg, hdrs, newurl)
 
-    #TODO: 실명등 nice에서 가져오는 거는 수정이 안되게 해야함
+    # TODO: 실명등 nice에서 가져오는 거는 수정이 안되게 해야함
     def patch(self, request):
         serializer = self.get_serializer(request.user, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
@@ -295,7 +294,9 @@ def niceCallback(request):
 
     except Exception as e:
         return Response({"message": f"오류 발생: {str(e)}"}, status=500)
-'''
+
+
+"""
 @swagger_auto_schema(
     method="POST",
     operation_id="인증번호 발송",
