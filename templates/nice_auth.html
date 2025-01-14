@@ -44,11 +44,13 @@
     <script>
         document.getElementById("nice-auth-btn").addEventListener("click", function() {
             const payload = {
-                returnURL: "http://localhost:8000/user/nice-callback/"
+                //returnURL: "http://localhost:8000/user/nice-callback/"
+                returnURL: "https://api.dronefield.co.kr/user/nice-callback/"
             };
 
             // POST 요청을 통해 인증 URL 호출
-            fetch("http://localhost:8000/user/nice-token/", {
+            //fetch("http://localhost:8000/user/nice-token/", {
+            fetch("https://api.dronefield.co.kr/user/nice-token/", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

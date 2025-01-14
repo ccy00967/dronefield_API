@@ -115,9 +115,6 @@ def getNicePassUserData(request):
     print("enc_data:", enc_data)
     print("integrity_value:", integrity_value)
     print("session_id:", session_id)
-    print("hmac_key:",hmac_key)
-    print("key:", key)
-    print("iv:", iv) 
     print("===================================")
         
     h = hmac.new(
