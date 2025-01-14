@@ -3,24 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nice CheckPlus</title>
+    <title>Get NicePass User Data</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        label {
+            font-weight: bold;
+        }
+        input, textarea, button {
+            padding: 10px;
+            font-size: 14px;
+        }
+        button {
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .response {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+        }
+    </style>
 </head>
 <body>
-    <form name="form_chk" method="post" action="https://nice.checkplus.co.kr/CheckPlusSafeModel/checkplus.cb" target="popupChk">
-        <!-- 필수 파라미터 -->
-        <input type="hidden" name="m" value="service">
-        <input type="hidden" name="token_version_id" value="2025011223220120-NCBCCE405-2FEA9-E69H8H043B">
-        <input type="hidden" name="enc_data" value="BtoRVAKWaVy3rkUt2wlYZwAXqXAI1a6Uxqhl1mBk1chnXV4UluxegpLVHj8EGrMXTjQnItJvdBnB/TgxHGRCYjw+H1+IXLUyQEsScE35vUGDVMi9OVqfPU+FkIL2UCT7xHgJtgVdnoPQVPvkC+dXwZnGvMjPHKh3KIIx83I3KXI=">
-        <input type="hidden" name="integrity_value" value="XSLlXUjXHPXoL6BFd3YjKbOvSxS39CxaDGHBXTWDHQ0=">
-        
-        <!-- 제출 버튼 -->
-        <button type="submit" onclick="openPopup()">나이스 본인인증</button>
-    </form>
+    <div class="container">
+        <h1>Get NicePass User Data</h1>
+        <form id="nicePassForm">
+            <label for="token_version_id">Token Version ID:</label>
+            <input type="text" id="token_version_id" name="token_version_id" required>
+
+            <label for="enc_data">Encrypted Data:</label>
+            <textarea id="enc_data" name="enc_data" rows="4" required></textarea>
+
+            <label for="integrity_value">Integrity Value:</label>
+            <input type="text" id="integrity_value" name="integrity_value" required>
+
+            <button type="submit">Send Request</button>
+        </form>
+
+        <div class="response" id="response">
+            <h3>Response:</h3>
+            <pre id="responseText">No response yet...</pre>
+        </div>
+    </div>
 
     <script>
-        function openPopup() {
-            window.open('', 'popupChk', 'width=480, height=812, top=100, fullscreen=no, menubar=no, status=no, toolbar=no, titlebar=yes, location=no, scrollbar=no');
-        }
+        document.getElementById('nicePassForm').addEventListener('submit', async function (event) {
+            event.preventDefault();
+
+            // Gather form data
+            const formData = new FormData(event.target);
+            const data = Object.fromEntries(formData);
+
+            // Construct the request URL
+            const url = `/getNicePassUserData/?token_version_id=${encodeURIComponent(data.token_version_id)}&enc_data=${encodeURIComponent(data.enc_data)}&integrity_value=${encodeURIComponent(data.integrity_value)}`;
+
+            try {
+                // Make the GET request
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                // Parse and display the response
+                const result = await response.json();
+                document.getElementById('responseText').textContent = JSON.stringify(result, null, 2);
+            } catch (error) {
+                document.getElementById('responseText').textContent = `Error: ${error.message}`;
+            }
+        });
     </script>
 </body>
 </html>
