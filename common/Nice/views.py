@@ -162,3 +162,6 @@ def getNicePassUserData(request):
         
 def nice_auth_view(request):
     return render(request, "nice_auth.html", {})
+
+def flutter_nice_auth_view(request):
+    return render(request, "flutter_nice_auth.html", {})

@@ -13,7 +13,8 @@ from .views import (
 from common.Nice.views import (
     niceCrytoToken,
     getNicePassUserData,
-    nice_auth_view
+    nice_auth_view,
+    flutter_nice_auth_view
 )
 
 from .views import (
@@ -36,6 +37,7 @@ urlpatterns = [
     path("nice-token/", niceCrytoToken),  # 나이스 표준창 호출하기
     path("nice-callback/", getNicePassUserData),  # 나이스 콜백
     path("nice-auth/", nice_auth_view, name="nice-auth"),
+    path("flutter/nice-auth/", flutter_nice_auth_view, name="nice-auth"),
     #이용약관
     path("term/<int:id>/", terms_of_service, name="terms"),  # 이용약관
     # FIX : 미사용
