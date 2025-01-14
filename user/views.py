@@ -296,16 +296,6 @@ def niceCallback(request):
         return Response({"message": f"오류 발생: {str(e)}"}, status=500)
 
 
-"""
-@swagger_auto_schema(
-    method="POST",
-    operation_id="인증번호 발송",
-    operation_description="유저 이메일 인증번호 발송",
-    request_body=swagger_doc.EmailRequest,
-    responses=swagger_doc.EmailResponse,
-)
-'''
-#@api_view(('POST',))
 @api_view(('POST',))
 def emailValidationSend(request):
     try:
@@ -371,21 +361,6 @@ def validationCheck(request):
             return Response(
                 {"message": "validate key error"}, status=status.HTTP_401_UNAUTHORIZED
             )
-
-
-# 비밀번호 재설정 - 이메일주소,인증번호,비밀번호 필요
-"""
-
-@swagger_auto_schema(
-    method="POST",
-    operation_id="비밀번호",
-    operation_description="비밀번호 재설정",
-    request_body=swagger_doc.PasswordResetRequest,
-    responses=swagger_doc.PasswordResetResponse,
-)
-
-"""
-
 
 @api_view(["POST"])
 @parser_classes([JSONParser])
