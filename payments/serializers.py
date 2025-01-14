@@ -15,13 +15,13 @@ class TossPaymentsSerializer(serializers.ModelSerializer):
 
 # TODO: 신청서와 예약금 2개 만들기
 class RequestTossUpdateSerializer(serializers.ModelSerializer):
-    orderid = serializers.ReadOnlyField()
+    orderId = serializers.ReadOnlyField()
     # tosspayments = TossPayments.objects.get(orderId='orderId')
 
     class Meta:
         model = Request
         fields = (
-            "orderid",
+            "orderId",
             "requestTosspayments",
             "requestAmount",
             "reservateDepositAmount",

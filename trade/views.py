@@ -25,15 +25,6 @@ def servicePriceCal(setAveragePrice, lndpclAr):
     return servicePrice
 
 
-    # before_pay_count = Request.objects.filter(requestDepositState=0).count()
-    # matching_count = (
-    #     Request.objects.filter(exterminateState=0).count() - before_pay_count
-    # )
-    # preparing_count = Request.objects.filter(exterminateState=1).count()
-    # exterminating_count = Request.objects.filter(exterminateState=2).count()
-    # done_count = Request.objects.filter(exterminateState=3).count()
-
-
 # 방제 상태별 개수 - 계정주인 것만 보이기
 @api_view(("GET",))
 def count_by_exterminateState(request):
@@ -158,7 +149,7 @@ class ExterminatorRequestListAPIView(generics.ListAPIView):
     )
 
     def get_queryset(self):
-        queryset = Request.objects.filter(requestDepositState=1, exterminateState=0)
+        queryset = Request.objects.filter(requestDepositState=1, exterminateState=0, exterminator=None)
         cd = self.request.query_params.get("cd", None)
 
         if cd is not None:

@@ -83,6 +83,7 @@ class RequestBriefSerializer(serializers.ModelSerializer):
             "requestDepositState",
             # "reservateDepositState",
             "checkState",
+            "calculation",
         )
 
 
