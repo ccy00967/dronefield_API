@@ -28,6 +28,12 @@ class FarmInfoListView(generics.ListAPIView):
             queryset = queryset.filter(owner__uuid=owner)
         return queryset
 
+    def get(self, request, *args, **kwargs):
+        try:
+            return self.list(request, *args, **kwargs)
+        except NotFound:
+            return Response(status=status.HTTP_404_NOT_FOUND, data={"message": "농지 정보가 없습니다."})
+
 
 class FarmInfoCreateView(generics.CreateAPIView):
     queryset = FarmInfo.objects.all()
@@ -76,7 +82,7 @@ class FarmInfoAPIView(generics.GenericAPIView):
             land_info.delete()
             return Response(status=status.HTTP_204_NO_CONTENT, data={"message": "농지 정보가 삭제되었습니다."})
         except NotFound:
-            return Response(status=status.HTTP_404_NOT_FOUND, data={"message": "해당 농지 정보가 없습니, 결재중일 수 있습니다."})
+            return Response(status=status.HTTP_404_NOT_FOUND, data={"message": "해당 농지 정보가 없습니다, 결재중일 수 있습니다."})
         except Exception as e:
             return Response(status=status.HTTP_400_BAD_REQUEST, data={"message": f"에러 발생: {e}"})
     
