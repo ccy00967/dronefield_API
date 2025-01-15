@@ -14,7 +14,7 @@ from rest_framework import status
 from django.db.models import Sum
 from common.utils.pageanation import CustomPagination
 from trade.models import Request
-
+from rest_framework.exceptions import PermissionDenied
 
 # 농지목록 조회
 class FarmInfoListView(generics.ListAPIView):
@@ -25,10 +25,18 @@ class FarmInfoListView(generics.ListAPIView):
     pagination_class = CustomPagination
 
     def get_queryset(self):
-        queryset = super().get_queryset().filter(owner=self.request.user)
-        if self.request.query_params.get("owner"):
-            owner = self.request.query_params.get("owner")
-            queryset = queryset.filter(owner__uuid=owner)
+        queryset = super().get_queryset()
+        try:
+            queryset = queryset.filter(owner=self.request.user)
+        except TypeError:  
+            raise PermissionDenied("로그인이 필요합니다.")
+            
+            queryset = queryset.none()
+
+        if "owner" in self.request.query_params:
+            owner_uuid = self.request.query_params.get("owner")
+            queryset = queryset.filter(owner__uuid=owner_uuid)
+
         return queryset
 
 
