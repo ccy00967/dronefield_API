@@ -54,17 +54,17 @@ class Request(models.Model):
         on_delete=models.PROTECT,
     )
 
-    # 방제진행 상황
+    # 방제진행 상황 - 방제사용
     exterminateState = models.PositiveSmallIntegerField(
         choices=EXTERMINATE_STATE, blank=False, default=0
     )
 
-    # 방제완료 확인
+    # 방제완료 확인 - 농민용
     checkState = models.PositiveSmallIntegerField(
         choices=CHECK_STATE, blank=False, default=0
     )
 
-    # 정산상황
+    # 정산상황 - 드론평야용 - 정산완료 시 여기값을 1로 변경
     calculation = models.PositiveSmallIntegerField(
         choices=CALCULATION, blank=False, default=0
     )

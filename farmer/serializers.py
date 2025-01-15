@@ -5,11 +5,6 @@ from farmer.models import FarmInfo
 # 농지 정보 등록
 class FarmInfoSerializer(serializers.ModelSerializer):
     owner = serializers.ReadOnlyField(source="owner.uuid")
-    lndpclAr = serializers.ReadOnlyField()
-    cd = serializers.ReadOnlyField()
-    road = serializers.ReadOnlyField()
-    jibun = serializers.ReadOnlyField()
-    # address = AddressSerializer()
 
     class Meta:
         model = FarmInfo
@@ -45,7 +40,22 @@ class FarmInfoSerializer(serializers.ModelSerializer):
             )
 
         return data
-    
+
+
+# 농지 정보 수정
+class FarmInfoUpdateSerializer(serializers.ModelSerializer):
+    uuid = serializers.ReadOnlyField()
+    owner = serializers.ReadOnlyField(source="owner.uuid")
+    road = serializers.ReadOnlyField()
+    jibun = serializers.ReadOnlyField()
+    pnu = serializers.ReadOnlyField()
+    lndpclAr = serializers.ReadOnlyField()
+    cd = serializers.ReadOnlyField()
+
+    class Meta:
+        model = FarmInfo
+        fields = "__all__"
+
 
 # TODO: 나중에 최적화용 일부 데이터만 보내기
 class FarmInfoBriefSerializer(serializers.ModelSerializer):

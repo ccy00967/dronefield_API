@@ -7,12 +7,13 @@ from django.db.models.functions import Cast
 from django.db.models import FloatField
 from farmer.models import FarmInfo
 from farmer.serializers import FarmInfoSerializer
+from farmer.serializers import FarmInfoUpdateSerializer
 from farmer.serializers import FarmInfoBriefSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from django.db.models import Sum
 from common.utils.pageanation import CustomPagination
-# from common.models import Address
+from trade.models import Request
 
 
 # 농지목록 조회
@@ -66,22 +67,28 @@ class FarmInfoAPIView(generics.GenericAPIView):
 
     def patch(self, request, uuid):
         land_info = self.get_object(uuid)
-        serializer = FarmInfoSerializer(land_info, data=request.data, partial=True)
+        serializer = FarmInfoUpdateSerializer(land_info, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
 
-    # 신청서에 등록된 농지는 삭제 요청 불가능 하게 만들기
+    # 신청서에 등록된 농지는 삭제 불가능
     def delete(self, request, uuid):
         try:
             land_info = self.get_object(uuid)
+            if Request.objects.filter(farm_info=land_info).exists():
+                return Response(
+                    status=status.HTTP_400_BAD_REQUEST,
+                    data={"message": "이 농지 정보는 다른 요청에 참조 중이어서 삭제할 수 없습니다."}
+                )
             land_info.delete()
             return Response(status=status.HTTP_204_NO_CONTENT, data={"message": "농지 정보가 삭제되었습니다."})
-        except NotFound:
-            return Response(status=status.HTTP_404_NOT_FOUND, data={"message": "해당 농지 정보가 없습니, 결재중일 수 있습니다."})
+        # except NotFound:
+        #     return Response(status=status.HTTP_404_NOT_FOUND, data={"message": "해당 농지 정보가 없습니, 결재중일 수 있습니다."})
         except Exception as e:
             return Response(status=status.HTTP_400_BAD_REQUEST, data={"message": f"에러 발생: {e}"})
     
+
 class TotalLandAreaAPIView(generics.GenericAPIView):
     queryset = FarmInfo.objects.all()
     serializer_class = FarmInfoSerializer
