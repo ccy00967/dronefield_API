@@ -6,7 +6,7 @@ from django.db import models
 
 class TossPayments(models.Model):
 
-    orderId = models.CharField(
+    tossOrderId = models.CharField(
         max_length=65, blank=False, unique=True, null=False
     )  # 임의 생성 orderId
     paymentKey = models.CharField(

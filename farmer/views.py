@@ -1,38 +1,35 @@
 from rest_framework import generics
+from rest_framework import permissions
+from rest_framework.permissions import IsAuthenticated
+from farmer.permissions import OnlyOwnerCanUpdate
 
+from django.db.models.functions import Cast
+from django.db.models import FloatField
 from farmer.models import FarmInfo
 from farmer.serializers import FarmInfoSerializer
-from rest_framework.exceptions import NotFound
-from rest_framework import permissions
-from farmer.permissions import OnlyOwnerCanUpdate
+from farmer.serializers import FarmInfoUpdateSerializer
+from farmer.serializers import FarmInfoBriefSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from django.db.models import Sum
 from common.utils.pageanation import CustomPagination
-from rest_framework.permissions import IsAuthenticated
-# from common.models import Address
+from trade.models import Request
 
 
 # 농지목록 조회
 class FarmInfoListView(generics.ListAPIView):
     queryset = FarmInfo.objects.all()
-    serializer_class = FarmInfoSerializer
+    serializer_class = FarmInfoBriefSerializer
     name = "land_info_list"
     permission_classes = [permissions.IsAuthenticatedOrReadOnly,]
     pagination_class = CustomPagination
 
     def get_queryset(self):
-        queryset = super().get_queryset()
+        queryset = super().get_queryset().filter(owner=self.request.user)
         if self.request.query_params.get("owner"):
             owner = self.request.query_params.get("owner")
             queryset = queryset.filter(owner__uuid=owner)
         return queryset
-
-    def get(self, request, *args, **kwargs):
-        try:
-            return self.list(request, *args, **kwargs)
-        except NotFound:
-            return Response(status=status.HTTP_404_NOT_FOUND, data={"message": "농지 정보가 없습니다."})
 
 
 class FarmInfoCreateView(generics.CreateAPIView):
@@ -70,30 +67,41 @@ class FarmInfoAPIView(generics.GenericAPIView):
 
     def patch(self, request, uuid):
         land_info = self.get_object(uuid)
-        serializer = FarmInfoSerializer(land_info, data=request.data, partial=True)
+        serializer = FarmInfoUpdateSerializer(land_info, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
 
-    # 신청서에 등록된 농지는 삭제 요청 불가능 하게 만들기
+    # 신청서에 등록된 농지는 삭제 불가능
     def delete(self, request, uuid):
         try:
             land_info = self.get_object(uuid)
+            if Request.objects.filter(farm_info=land_info).exists():
+                return Response(
+                    status=status.HTTP_400_BAD_REQUEST,
+                    data={"message": "이 농지 정보는 다른 요청에 참조 중이어서 삭제할 수 없습니다."}
+                )
             land_info.delete()
             return Response(status=status.HTTP_204_NO_CONTENT, data={"message": "농지 정보가 삭제되었습니다."})
-        except NotFound:
-            return Response(status=status.HTTP_404_NOT_FOUND, data={"message": "해당 농지 정보가 없습니다, 결재중일 수 있습니다."})
+        # except NotFound:
+        #     return Response(status=status.HTTP_404_NOT_FOUND, data={"message": "해당 농지 정보가 없습니, 결재중일 수 있습니다."})
         except Exception as e:
             return Response(status=status.HTTP_400_BAD_REQUEST, data={"message": f"에러 발생: {e}"})
     
+
 class TotalLandAreaAPIView(generics.GenericAPIView):
+    queryset = FarmInfo.objects.all()
+    serializer_class = FarmInfoSerializer
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
         # 현재 사용자의 모든 땅 가져오기
         user_lands = FarmInfo.objects.filter(owner=request.user)
-        total_area = user_lands.aggregate(total_lndpcAr=Sum('lndpcAr'))['total_lndpcAr'] or 0
+
+       # lndpclAr를 FloatField로 변환한 후 합산하고 None을 0으로 처리
+        total_area = user_lands.aggregate(
+            total_lndpclAr=Sum(Cast('lndpclAr', FloatField()), output_field=FloatField())
+        )['total_lndpclAr'] or 0
 
         # 응답 데이터 직렬화 및 반환
-        serializer = FarmInfoSerializer({'total_lndpcAr': total_area})
-        return Response(serializer.data)
+        return Response({'total_lndpclAr': total_area})

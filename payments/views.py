@@ -39,16 +39,18 @@ class RequestTossCreateAPIView(generics.CreateAPIView):
     permission_classes = (
         permissions.IsAuthenticatedOrReadOnly,
         CheckStatusMatching,
-        CheckUser,
+        # CheckUser,
         # CheckAmount,
     )
 
     def post(self, request):
         # 사용자로부터 받음
         PAYMENT_KEY = request.data.get("paymentKey")
-        ORDERID = request.data.get("orderId")
+        TOSSORDERID = request.data.get("tossOrderId")
         orderIdList = request.data.get("orderidlist")
         TotalAMOUNT = 0
+
+        print(orderIdList)
 
         for orderid in orderIdList:
             try:
@@ -74,7 +76,7 @@ class RequestTossCreateAPIView(generics.CreateAPIView):
 
         # 값 검증하기
         url = "https://api.tosspayments.com/v1/payments/confirm"
-        data = {"paymentKey": PAYMENT_KEY, "orderId": ORDERID, "amount": TotalAMOUNT}
+        data = {"paymentKey": PAYMENT_KEY, "orderId": TOSSORDERID, "amount": TotalAMOUNT}
         payload = json.dumps(data)
         response = requests.post(url, headers=HEADERS, data=payload)
 
@@ -90,7 +92,7 @@ class RequestTossCreateAPIView(generics.CreateAPIView):
 
         # 토스 결제확인 데이터 저장
         tosspaymentsObj = TossPayments.objects.create(
-            orderId=tosspayData["orderId"],
+            tossOrderId=tosspayData["orderId"],
             paymentKey=tosspayData["paymentKey"],
             method=tosspayData["method"],
             totalAmount=tosspayData["totalAmount"],
@@ -102,11 +104,15 @@ class RequestTossCreateAPIView(generics.CreateAPIView):
             print(orderid)
             if request.user.type == 3:
                 Request.objects.filter(orderId=orderid).update(
-                    reservateTosspayments=tosspaymentsObj, reservateDepositState=1
+                    exterminator=request.user,
+                    exterminateState=1,
+                    reservateTosspayments=tosspaymentsObj,
+                    reservateDepositState=1,
                 )
             elif request.user.type == 4:
                 Request.objects.filter(orderId=orderid).update(
-                    requestTosspayments=tosspaymentsObj, requestDepositState=1
+                    requestTosspayments=tosspaymentsObj,
+                    requestDepositState=1,
                 )
 
         return Response(
