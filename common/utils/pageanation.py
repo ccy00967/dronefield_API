@@ -4,7 +4,7 @@ from django.core.paginator import EmptyPage
 
 
 class CustomPagination(PageNumberPagination):
-    page_size = 10  # 기본 페이지 크기
+    page_size = 1  # 기본 페이지 크기
     page_size_query_param = 'page_size'  # 요청에서 페이지 크기를 변경할 수 있는 파라미터
     max_page_size = 100  # 최대 페이지 크기 제한
 
