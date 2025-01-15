@@ -40,6 +40,14 @@ urlpatterns = [
     path("flutter/nice-auth/", flutter_nice_auth_view, name="nice-auth"),
     #이용약관
     path("term/<int:id>/", terms_of_service, name="terms"),  # 이용약관
+    
+    #Flutter용
+    #path("flutter/refresh/", jwt_views.TokenRefreshView.as_view(), name="flutter-token_refresh"),  # 리프레시토큰으로 액세스토큰 발급받기
+    path("flutter/nice-token/", niceCrytoToken),  # 나이스 표준창 호출하기
+    path("flutter/register/", UserRegistrationAPIView.as_view(), name="flutter-register"),  # 회원가입하기
+    path("flutter/login/", UserLoginAPIView.as_view(), name="flutter-login"),  # 로그인하기
+    path("flutter/profile/", ProfileAPIView.as_view(), name="flutter-userdataupdate"),  # 자신의 정보 읽기, 수정
+    
     # FIX : 미사용
     # path('manager/users/', ManageUserListView.as_view(), name='manage_get_users'),
     # path('manager/<uuid:uuid>/', ManageUserRetrieveUpdateDestroyView.as_view(), name='manage_update_users'),

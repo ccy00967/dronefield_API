@@ -10,6 +10,7 @@ from rest_framework import status
 from django.db.models import Sum
 from common.utils.pageanation import CustomPagination
 from rest_framework.permissions import IsAuthenticated
+from django.db.models.deletion import ProtectedError
 # from common.models import Address
 
 
@@ -76,10 +77,23 @@ class FarmInfoAPIView(generics.GenericAPIView):
             land_info.delete()
             return Response(status=status.HTTP_204_NO_CONTENT, data={"message": "농지 정보가 삭제되었습니다."})
         except NotFound:
-            return Response(status=status.HTTP_404_NOT_FOUND, data={"message": "해당 농지 정보가 없습니, 결재중일 수 있습니다."})
+            return Response(
+                status=status.HTTP_404_NOT_FOUND,
+                data={"message": "해당 농지 정보가 없거나 결제 중일 수 있습니다."}
+            )
+
+        except ProtectedError:
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data={"message": "삭제할 수 없는 농지입니다. 관련 데이터가 존재합니다."}
+            )
+
         except Exception as e:
-            return Response(status=status.HTTP_400_BAD_REQUEST, data={"message": f"에러 발생: {e}"})
-    
+            # 알 수 없는 예외 처리
+            return Response(
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                data={"message": f"알 수 없는 에러 발생: {str(e)}"}
+            )
 class TotalLandAreaAPIView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
 
