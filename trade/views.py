@@ -5,13 +5,17 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 
 from trade.models import Request
-from trade.serializers import RequestBriefSerializer
 from trade.serializers import RequestSerializer
-from trade.serializers import CheckExterminateStateSerializer
+from trade.serializers import RequestDetailSerializer
+from trade.serializers import RequestBriefSerializer
+from trade.serializers import RequestUpdateSerializer
+from trade.serializers import CheckStateSerializer
+from trade.serializers import ExterminateStateSerializer
 
 from farmer.models import FarmInfo
 
 from trade.permissions import OnlyOwnerCanUpdate
+from trade.permissions import OnlyOnChargeExterminator
 from trade.permissions import isBeforePay
 
 from common.utils.pageanation import CustomPagination
@@ -25,34 +29,21 @@ def servicePriceCal(setAveragePrice, lndpclAr):
     return servicePrice
 
 
-    # before_pay_count = Request.objects.filter(requestDepositState=0).count()
-    # matching_count = (
-    #     Request.objects.filter(exterminateState=0).count() - before_pay_count
-    # )
-    # preparing_count = Request.objects.filter(exterminateState=1).count()
-    # exterminating_count = Request.objects.filter(exterminateState=2).count()
-    # done_count = Request.objects.filter(exterminateState=3).count()
-
-
-# 방제 상태별 개수 - 계정주인 것만 보이기
+# 방제 상태별 개수 - 계정 주인 것만 보이기
 @api_view(("GET",))
 def count_by_exterminateState(request):
-    type = request.query_params.get("type", None)
+    type = request.user.type
 
-    print("---------")
-    print(type)
-    # Initialize queryset
     queryset = None
 
-    if type is not None:
-        if type == "3" :
-            queryset = Request.objects.filter(exterminator=request.user)
-        if type == "4" :
-            queryset = Request.objects.filter(owner=request.user)
+    if type == 3:
+        queryset = Request.objects.filter(exterminator=request.user)
+    if type == 4:
+        queryset = Request.objects.filter(owner=request.user)
 
     # Check if queryset is None
     if queryset is None:
-        return Response({"detail": "Invalid type or no type provided."}, status=400)
+        return Response({"detail": "Invalid User provided!"}, status=400)
 
     before_pay_count = queryset.filter(requestDepositState=0).count()
     matching_count = (
@@ -158,7 +149,7 @@ class ExterminatorRequestListAPIView(generics.ListAPIView):
     )
 
     def get_queryset(self):
-        queryset = Request.objects.filter(requestDepositState=1, exterminateState=0)
+        queryset = Request.objects.filter(requestDepositState=1, exterminateState=0, exterminator=None)
         cd = self.request.query_params.get("cd", None)
 
         if cd is not None:
@@ -177,7 +168,6 @@ class ExterminatorWorkRequestListAPIView(generics.ListAPIView):
     name = "exterminator-work-request-lists"
     permission_classes = (
         permissions.IsAuthenticatedOrReadOnly,
-        # OnlyOwnerCanUpdate,
     )
 
     def get_queryset(self):
@@ -193,13 +183,23 @@ class ExterminatorWorkRequestListAPIView(generics.ListAPIView):
                 pass  # exterminateState 값이 유효하지 않으면 필터링하지 않음
 
         return queryset
+    
 
-
-# 신청서 수정 - 결제완료 후에는 수정 못하게 막기
-class RequestListUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
+# 담당중인 신청서 상세 가져오기 - 방제사용
+class ExterminatorWorkRequestRetrieveAPIView(generics.RetrieveAPIView):
     queryset = Request.objects.all()
-    serializer_class = RequestSerializer
-    # CustomerRequest의 uuid == orderid
+    serializer_class = RequestDetailSerializer
+    name = "exterminator-work-request-detail"
+    permission_classes = (
+        permissions.IsAuthenticatedOrReadOnly,
+    )
+
+
+# 신청서 수정 - 결제 전에만 가능
+class RequestUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Request.objects.all()
+    serializer_class = RequestUpdateSerializer
+    # Request의 uuid == orderid
     lookup_field = "orderId"
     name = "request-detail-update"
     permission_classes = (
@@ -209,26 +209,41 @@ class RequestListUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
     )
 
 
-# 농민 방제 확인 상태
-class CheckExterminateStateRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
+# 농민이 방제사가 잘 했나 확인인
+class CheckStateUpdateView(generics.RetrieveUpdateAPIView):
     queryset = Request.objects.all()
-    serializer_class = CheckExterminateStateSerializer
-    # CustomerRequest의 uuid == orderid
-    lookup_field = "orderid"
-    name = "request_state_update"
+    serializer_class = CheckStateSerializer
+    lookup_field = "orderId"
+    name = "farmer-check-exterminate"
     permission_classes = (
         permissions.IsAuthenticatedOrReadOnly,
         OnlyOwnerCanUpdate,
     )
 
 
-# 방제 신청
+# 방제 진행 상태 변경
+class ExterminateStateUpdateView(generics.RetrieveUpdateAPIView):
+    queryset = Request.objects.all()
+    serializer_class = ExterminateStateSerializer
+    lookup_field = "orderId"
+    name = "exterminator-exterminate"
+    permission_classes = (
+        permissions.IsAuthenticatedOrReadOnly,
+        OnlyOnChargeExterminator,
+    )
 
-# 방제 상태 수정 - 농민, 드론방제업자 STATE 두개 만들기
+    def patch(self, request, *args, **kwargs):
+        # PATCH 요청의 데이터에서 exterminateState 값을 가져오기
+        exterminate_state = request.data.get("exterminateState")
 
-# 정산 - 신안은행 대금이체 API 사용 예정?
-# class RequestExterminateDoneView(generics.RetrieveUpdateDestroyAPIView):
-# 금액 정산 시리얼라이저 필요?
-# 신청서 수정
-# 결제완료 후에는 수정 못하게 막기 - permission추가하기
+        # exterminateState가 유효한 값(1, 2, 3, 4)인지 확인
+        if exterminate_state not in [1, 2, 3, 4]:
+            return Response(
+                {"error": "Invalid value for exterminateState. It must be one of [1, 2, 3, 4]."},
+                status=400
+            )
 
+        # 유효하면 기존의 partial_update 호출
+        return self.partial_update(request, *args, **kwargs)
+
+#TODO: 환불 로직 만들기 - 결제된 신청서의 삭제는 환불로직을 따름

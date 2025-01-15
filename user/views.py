@@ -56,6 +56,30 @@ class UserRegistrationAPIView(generics.GenericAPIView):
     permission_classes = (AllowAny,)
     
     def post(self, request):
+        # 나중에 permission으로 이동하기
+        # NicePass 본인인증 여부 확인
+        if DEBUG:
+            try:
+                serializer = UserRegistrationSerializer(data=request.data)
+                if serializer.is_valid(raise_exception=True):
+                    serializer.save(
+                        name=request.data.get("name"),
+                        birthdate=request.data.get("birthdate"),
+                        gender=request.data.get("gender"),
+                        nationalinfo=request.data.get("nationalinfo"),
+                        mobileno=request.data.get("mobileno"),
+                        email=request.data.get("email"),
+                        is_active=True,
+                    )
+                    return Response(
+                        {"message": "DEBUG MODE : User successfully registered"},
+                        status=status.HTTP_401_UNAUTHORIZED,
+                    )
+            except Exception as e:
+                return Response(
+                    {"message": "DEBUG MODE : User registration failed"},
+                    status=status.HTTP_401_UNAUTHORIZED,
+                )
         if request.session.get(isNicePassDone) != True:
             print("나이스 본인인증이 안됨!")
             return Response(
@@ -348,6 +372,7 @@ def emailValidationSend(request):
             {"message": "Failed to send email."},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
+    
 
 @api_view(("POST",))
 # @parser_classes((JSONParser,))
@@ -362,6 +387,8 @@ def validationCheck(request):
                 {"message": "validate key error"}, status=status.HTTP_401_UNAUTHORIZED
             )
 
+
+# 비밀번호 재설정 - 이메일주소,인증번호,비밀번호 필요
 @api_view(["POST"])
 @parser_classes([JSONParser])
 def password_reset(request):
