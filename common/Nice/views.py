@@ -20,7 +20,8 @@ from .utils import (encrypt_data, decrypt_data, clientID, secretKey, APIUrl, pro
 
 @api_view(('POST',))
 def niceCrytoToken(request):
-    returnURL = request.data["returnURL"]
+    base_url = "https://api.dronefield.co.kr"
+    returnURL = base_url + "/user/nice-callback/"
     
     # 나이스 토큰 요청
     now = str(int(time.time()))
