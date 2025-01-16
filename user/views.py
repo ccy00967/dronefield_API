@@ -3,6 +3,7 @@ from datetime import datetime
 import uuid
 from rest_framework import status
 from django.core.mail import EmailMessage
+from django.contrib.sessions.models import Session
 
 from rest_framework.response import Response
 from django.http import HttpResponse
@@ -10,6 +11,13 @@ from rest_framework.decorators import api_view
 from rest_framework.decorators import parser_classes
 from rest_framework.parsers import JSONParser
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.views import APIView
+from rest_framework.decorators import api_view
+from rest_framework.parsers import JSONParser
+from rest_framework.response import Response
+from rest_framework import status
+from django.http import JsonResponse
+
 
 # from drf_yasg.utils import swagger_auto_schema
 from . import swagger_doc
@@ -429,6 +437,46 @@ def password_reset(request):
             {"message": "Internal server error"},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
+
+class DeviceSessionView(APIView):
+    def post(self, request):
+        # 요청에서 기기 UUID 가져오기
+        device_uuid = request.data.get("device_uuid")
+
+        if not device_uuid:
+            return JsonResponse({"status": "error", "message": "Device UUID is required"}, status=400)
+        
+        # UUID 유효성 검사
+        if not self.is_valid_uuid(device_uuid):
+            return JsonResponse({"status": "error", "message": "Invalid Device UUID"}, status=400)
+
+        # 세션 ID 생성 및 저장
+        session_id = self.create_session(request, device_uuid)
+
+        return JsonResponse({
+            "status": "success", 
+            "session_id": session_id,
+            "device_uuid": device_uuid
+            },status=200)
+
+    def is_valid_uuid(self, uuid_string):
+        """UUID 형식 유효성 검증"""
+        try:
+            uuid.UUID(uuid_string)
+            return True
+        except ValueError:
+            return False
+
+    def create_session(self, request, device_uuid):
+        # 동일한 UUID로 기존 세션 확인
+        existing_session = Session.objects.filter(session_key=request.session.session_key).first()
+        if existing_session:
+            return request.session.session_key
+
+        # 새 세션 생성
+        request.session['device_uuid'] = device_uuid
+        request.session.save()
+        return request.session.session_key
 
 import os
 from django.http import Http404

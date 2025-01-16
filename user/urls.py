@@ -21,6 +21,7 @@ from .views import (
     UserRegistrationAPIView,
     UserLoginAPIView,
     ProfileAPIView,
+    DeviceSessionView,
 )
 
 urlpatterns = [
@@ -40,6 +41,9 @@ urlpatterns = [
     path("flutter/nice-auth/", flutter_nice_auth_view, name="nice-auth"),
     #이용약관
     path("term/<int:id>/", terms_of_service, name="terms"),  # 이용약관
+    
+    #세션
+    path("session/", DeviceSessionView.as_view(), name="session"),  # 세션 생성
     # FIX : 미사용
     # path('manager/users/', ManageUserListView.as_view(), name='manage_get_users'),
     # path('manager/<uuid:uuid>/', ManageUserRetrieveUpdateDestroyView.as_view(), name='manage_update_users'),
