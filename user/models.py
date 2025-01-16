@@ -76,13 +76,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     mobileno = models.CharField(max_length=14, unique=True, blank=False)
     email = models.EmailField(max_length=30, unique=True, blank=False)
     type = models.PositiveSmallIntegerField(choices=Type.choices, default=Type.CUSTOMER)
-    # address = models.ForeignKey(
-    #     "common.Address",
-    #     related_name="useraddress",
-    #     on_delete=models.CASCADE,
-    #     blank=True,
-    #     null=True,
-    # )
     road = models.CharField(max_length=50, blank=True, default="")
     jibun = models.CharField(max_length=50, blank=False, default="")
     detail = models.CharField(max_length=50, blank=False, default="")

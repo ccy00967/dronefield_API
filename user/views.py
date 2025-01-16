@@ -135,15 +135,6 @@ class UserRegistrationAPIView(generics.GenericAPIView):
 class UserLoginAPIView(generics.GenericAPIView):
     serializer_class = UserLoginSerializer
     permission_classes = [AllowAny]
-    """
-    @swagger_auto_schema(
-        operation_id="로그인",
-        operation_description="유저 로그인",
-        tags=["user"],
-        responses=swagger_doc.UserLoginResponse,
-    )
-    """
-
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
 
@@ -153,6 +144,8 @@ class UserLoginAPIView(generics.GenericAPIView):
                 "access": serializer.validated_data["access"],
                 "refresh": serializer.validated_data["refresh"],
                 "user": {
+                    "access": serializer.validated_data["access"],
+                    "refresh": serializer.validated_data["refresh"],
                     "uuid": serializer.validated_data["uuid"],
                     "type": serializer.validated_data["type"],
                     "name": serializer.validated_data["name"],
