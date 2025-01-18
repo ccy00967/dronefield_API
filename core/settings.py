@@ -152,6 +152,11 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static")
 STATIC_URL = "/static/"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
+# ===========================
+# 미디어 파일 (Media files)
+# ===========================
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # ===========================
 # 사용자 모델
@@ -236,3 +241,35 @@ CORS_ALLOW_HEADERS = [
 # 기본 필드 설정
 # ===========================
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# ===========================
+# 로깅 설정
+# ===========================
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {"class": "logging.StreamHandler"},
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": "INFO",
+        },
+    },
+}
+
+# ===========================
+# S3 설정
+# ===========================
+# DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+
+# AWS_ACCESS_KEY_ID = config("AWS_ACCESS_KEY_ID")
+# AWS_SECRET_ACCESS_KEY = config("AWS_SECRET_ACCESS_KEY")
+# AWS_STORAGE_BUCKET_NAME = config("AWS_STORAGE_BUCKET_NAME")
+# AWS_S3_REGION_NAME = config("AWS_S3_REGION_NAME")
+
+# AWS_S3_QUERYPARAM_AUTH = False
+# AWS_S3_FILE_OVERWRITE = False
+# AWS_DEFAULT_ACL = None
+

@@ -5,16 +5,17 @@ from farmer.permissions import OnlyOwnerCanUpdate
 
 from django.db.models.functions import Cast
 from django.db.models import FloatField
-from farmer.models import FarmInfo
+from farmer.models import FarmInfo, FarmInfoImage
 from farmer.serializers import FarmInfoSerializer
 from farmer.serializers import FarmInfoUpdateSerializer
-from farmer.serializers import FarmInfoBriefSerializer
+from farmer.serializers import FarmInfoBriefSerializer, FarmInfoImageSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from django.db.models import Sum
 from common.utils.pageanation import CustomPagination
 from trade.models import Request
 from rest_framework.exceptions import PermissionDenied
+from rest_framework import viewsets
 
 # 농지목록 조회
 class FarmInfoListView(generics.ListAPIView):
@@ -113,3 +114,50 @@ class TotalLandAreaAPIView(generics.GenericAPIView):
 
         # 응답 데이터 직렬화 및 반환
         return Response({'total_lndpclAr': total_area})
+
+
+class FarmInfoImageAPIView(generics.GenericAPIView):
+    queryset = FarmInfoImage.objects.all()
+    serializer_class = FarmInfoImageSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_farm(self, uuid):
+        from rest_framework.exceptions import NotFound
+        try:
+            return FarmInfo.objects.get(uuid=uuid)
+        except FarmInfo.DoesNotExist:
+            raise NotFound("해당 농지 정보가 존재하지 않습니다.")
+
+    def get_queryset(self):
+        """해당 농지에 연결된 이미지들만 필터링"""
+        farm_uuid = self.kwargs.get('uuid')
+        return FarmInfoImage.objects.filter(farm_info__uuid=farm_uuid)
+
+    # 예: GET /land/<uuid>/image/ => 이미지 목록
+    def get(self, request, uuid):
+        images = self.get_queryset()
+        serializer = self.get_serializer(images, many=True)
+        return Response(serializer.data)
+
+    # 예: POST /land/<uuid>/image/ => 이미지 새로 업로드
+    def post(self, request, uuid):
+        farm = self.get_farm(uuid)
+        image_file = request.FILES.get('image')  # 단일 업로드 예시
+        if not image_file:
+            return Response({"detail": "이미지 파일이 필요합니다."},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        new_image = FarmInfoImage.objects.create(farm_info=farm, image=image_file)
+        serializer = self.get_serializer(new_image)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    # 예: DELETE /land/<uuid>/image/<pk>/
+    def delete(self, request, uuid, pk=None):
+        try:
+            image_obj = FarmInfoImage.objects.get(pk=pk, farm_info__uuid=uuid)
+        except FarmInfoImage.DoesNotExist:
+            return Response({"detail": "이미지를 찾을 수 없습니다."},
+                            status=status.HTTP_404_NOT_FOUND)
+        
+        image_obj.delete()
+        return Response({"message": "이미지 삭제 완료"}, status=status.HTTP_204_NO_CONTENT)
