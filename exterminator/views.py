@@ -13,15 +13,17 @@ from exterminator.serializers import ExterminatorLicenseSerializer
 
 # 방제사 정보
 class ExterminatorView(generics.ListCreateAPIView):
-    queryset = Exterminator.objects.all()
     serializer_class = ExterminatorSerializer
-    lookup_field = "uuid"
     name = "exterminator-info"
-
+    lookup_field = "uuid"
     permission_classes = [
         permissions.IsAuthenticatedOrReadOnly,
         OnlyOwnerExterminatorCanUpdate,
     ]
+
+    def get_queryset(self):
+        # URL에서 uuid 추출 후, 해당 uuid에 해당하는 Exterminator들을 한 번에 조회
+        return Exterminator.objects.filter(user__uuid=self.kwargs['uuid'])
 
 
 class ExterminatorLicenseView(generics.RetrieveUpdateAPIView):
