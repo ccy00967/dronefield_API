@@ -35,9 +35,9 @@ class FarmInfo(models.Model):
     
 class FarmInfoImage(models.Model):
     uuid = models.UUIDField(unique=True, default=uuid.uuid4, editable=False, db_index=True)
-    farm_info = models.ForeignKey(FarmInfo, related_name="images", on_delete=models.CASCADE)
+    land_info = models.ForeignKey(FarmInfo, related_name="images", on_delete=models.CASCADE)
     image = models.ImageField(upload_to="images/farminfo/", storage=LocalImageStorage(), blank=False, null=False)
     create_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
-        return f"{self.farm_info.landNickName} - {self.image.name}"
+        return f"{self.land_info.landNickName} - {self.image.name}"
