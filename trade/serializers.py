@@ -41,10 +41,11 @@ class RequestDetailSerializer(serializers.ModelSerializer):
 class RequestUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Request
-        fields=(
-            "endDate",
-            "pesticide",
-        )
+        # fields=(
+        #     "endDate",
+        #     "pesticide",
+        # )
+        fields="__all__"
         read_only_fields = (
             "orderId",
             "owner",
@@ -55,15 +56,21 @@ class RequestUpdateSerializer(serializers.ModelSerializer):
             "calculation",
             "dealmothod",
             "startDate",
+            # "endDate",
+            # "pesticide",
             "setAveragePrice",
             "requestAmount",
             "requestDepositState",
             "requestCancelTransactionKey",
+            "reservateDepositAmount",
+            "reservateDepositState",
+            "depositCancelTransactionKey",
             "requestTosspayments",
+            "reservateTosspayments"
         )
 
 
-
+# 읽기(GET) 전용에만 사용
 class RequestBriefSerializer(serializers.ModelSerializer):
     owner_name = serializers.CharField(source="landInfo.owner.name")
     owner_mobileno = serializers.CharField(source="landInfo.owner.mobileno")
@@ -94,6 +101,8 @@ class RequestBriefSerializer(serializers.ModelSerializer):
             # "reservateDepositState",
             "checkState",
             "calculation",
+            "requestTosspayments",
+            "reservateTosspayments",
         )
 
 

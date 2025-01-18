@@ -237,9 +237,9 @@ class ExterminateStateUpdateView(generics.RetrieveUpdateAPIView):
         exterminate_state = request.data.get("exterminateState")
 
         # exterminateState가 유효한 값(1, 2, 3, 4)인지 확인
-        if exterminate_state not in [1, 2, 3, 4]:
+        if exterminate_state not in [1, 2, 3]:
             return Response(
-                {"error": "Invalid value for exterminateState. It must be one of [1, 2, 3, 4]."},
+                {"error": "Invalid value for exterminateState. It must be one of [1, 2, 3]."},
                 status=400
             )
 

@@ -5,10 +5,10 @@ from rest_framework import status
 from payments.serializers import RequestTossUpdateSerializer
 from payments.serializers import TossPaymentsSerializer
 
-from payments.permissions import CheckUser
-from payments.permissions import CheckAmount
-from payments.permissions import CheckPaymentKey
-from payments.permissions import CheckStatusMatching
+# from payments.permissions import CheckUser
+# from payments.permissions import CheckAmount
+# from payments.permissions import CheckPaymentKey
+# from payments.permissions import CheckStatusMatching
 
 from trade.models import Request
 
@@ -26,9 +26,6 @@ HEADERS = {
     "Content-Type": "application/json",
 }
 
-# 서비스 이용금액액
-serviceFee = 10000
-
 
 # 신청서와 예약금 2개 만들기
 # 이때 신청서를 여러개 받을 수 있다.
@@ -38,9 +35,6 @@ class RequestTossCreateAPIView(generics.CreateAPIView):
     name = "request-tosspayments-update"
     permission_classes = (
         permissions.IsAuthenticatedOrReadOnly,
-        CheckStatusMatching,
-        # CheckUser,
-        # CheckAmount,
     )
 
     def post(self, request):
@@ -49,8 +43,6 @@ class RequestTossCreateAPIView(generics.CreateAPIView):
         TOSSORDERID = request.data.get("tossOrderId")
         orderIdList = request.data.get("orderidlist")
         TotalAMOUNT = 0
-
-        print(orderIdList)
 
         for orderid in orderIdList:
             try:
@@ -71,8 +63,6 @@ class RequestTossCreateAPIView(generics.CreateAPIView):
             elif request.user.type == 4:
                 TotalAMOUNT += serializer.data.get("requestAmount", 0)
                 TotalAMOUNT += 10000
-
-        print(TotalAMOUNT)
 
         # 값 검증하기
         url = "https://api.tosspayments.com/v1/payments/confirm"
@@ -101,7 +91,6 @@ class RequestTossCreateAPIView(generics.CreateAPIView):
 
         # 해당 신청서들 업데이트
         for orderid in orderIdList:
-            print(orderid)
             if request.user.type == 3:
                 Request.objects.filter(orderId=orderid).update(
                     exterminator=request.user,
@@ -120,28 +109,59 @@ class RequestTossCreateAPIView(generics.CreateAPIView):
         )
 
 
-# 수정 필요
-# 결제 취소등 정보수정
+# 결제 취소 - 방제사가 예약한 신청서는 결제 취소 불가능
 class TossPaymentsUpdateDeleteView(generics.RetrieveUpdateAPIView):
-    queryset = Request.objects.all()
+    queryset = TossPayments.objects.all()
     serializer_class = TossPaymentsSerializer
-    lookup_field = "orderid"
+    lookup_field = "tossOrderId"
     name = "tosspayments-cancel"
     permission_classes = (
         permissions.IsAuthenticatedOrReadOnly,
-        CheckPaymentKey,
-        CheckStatusMatching,
     )
 
-    def perform_update(self, serializer):
-        # PAYMENT_KEY = self.request.data.get('paymentKey')
-        PAYMENT_KEY = serializer.data["paymentKey"]
-        # cancelAmount = self.request.data.get('cancelAmount')
-        cancelAmount = Request.objects.get(orderid=self.kwargs.get("orderid"))
+    def post(self, request):
+        tossOrderId = self.kwargs.get('tossOrderId')  # URL에서 tossOrderId를 가져옴
+        cancelReason = self.request.data.get("cancelReason")
+        orderIdList = self.request.data.get("orderidlist")
+        cancelAmount = 0
+
+         # tossOrderId에 해당하는 TossPayments 객체를 찾기
+        toss_payment = TossPayments.objects.filter(tossOrderId=tossOrderId).first()
+        if toss_payment:
+            PAYMENT_KEY = toss_payment.paymentKey  # TossPayments 객체에서 paymentKey를 가져옴
+        else:
+            return Response({"error": "TossPayments object not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        for orderid in orderIdList:
+            try:
+                # orderid를 'orderId'로 수정하여 필드명 일치시킴
+                request_instance = Request.objects.get(orderId=orderid)
+            except Request.DoesNotExist:
+                return Response(
+                    {"message": f"Request with orderId {orderid} does not exist."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            # RequestSerializer 인스턴스 생성
+            serializer = self.get_serializer(request_instance)
+
+            # 사용자 타입에 따른 금액 계산
+            if request.user.type == 3:
+                cancelAmount += serializer.data.get("reservateDepositAmount", 1000)
+            elif request.user.type == 4:
+                # 방제사가 예약한 신청서는 에러를 던지기
+                if serializer.data.get("exterminator") != None and serializer.data.get("reservateDepositState") != 0:
+                    return Response(
+                        {"message": "방제가 진행중인 신청서 입니다. 환불이 불가합니다."},
+                        status=status.HTTP_406_NOT_ACCEPTABLE,
+                    )
+                cancelAmount += serializer.data.get("requestAmount", 0)
+                cancelAmount += 10000
 
         # 부분 환불하기
         url = "https://api.tosspayments.com/v1/payments/" + PAYMENT_KEY + "/cancel"
         data = {
+            "cancelReason": cancelReason,
             "cancelAmount": cancelAmount,
         }
         payload = json.dumps(data)
@@ -155,9 +175,21 @@ class TossPaymentsUpdateDeleteView(generics.RetrieveUpdateAPIView):
                 status=response.status_code,
             )
 
-        tosspayData = response.json()
+        # 해당 신청서들 업데이트
+        for orderid in orderIdList:
+            if request.user.type == 3:
+                Request.objects.filter(orderId=orderid).update(
+                    exterminator=None,
+                    exterminateState=0,
+                    reservateTosspayments=None,
+                    reservateDepositState=0,
+                )
+            elif request.user.type == 4:
+                Request.objects.filter(orderId=orderid).update(
+                    #requestTosspayments=tosspaymentsObj,
+                    requestDepositState=2,
+                )
 
-        serializer.save(
-            requestDepositState=0,
-            requestCancelTransactionKey=tosspayData["transactionKey"],
+        return Response(
+            {"message": "결제가 취소되었습니다."}, status=status.HTTP_200_OK
         )

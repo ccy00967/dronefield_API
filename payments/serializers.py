@@ -4,10 +4,6 @@ from trade.models import Request
 
 
 class TossPaymentsSerializer(serializers.ModelSerializer):
-    cancelReason = serializers.CharField(
-        max_length=100,
-    )
-
     class Meta:
         model = TossPayments
         fields = "__all__"

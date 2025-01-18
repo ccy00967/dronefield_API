@@ -85,17 +85,17 @@ class FarmInfoAPIView(generics.GenericAPIView):
     def delete(self, request, uuid):
         try:
             land_info = self.get_object(uuid)
-            if Request.objects.filter(farm_info=land_info).exists():
+            # landInfo 필드로 수정
+            if Request.objects.filter(landInfo=land_info).exists():
                 return Response(
                     status=status.HTTP_400_BAD_REQUEST,
                     data={"message": "이 농지 정보는 다른 요청에 참조 중이어서 삭제할 수 없습니다."}
                 )
             land_info.delete()
             return Response(status=status.HTTP_204_NO_CONTENT, data={"message": "농지 정보가 삭제되었습니다."})
-        # except NotFound:
-        #     return Response(status=status.HTTP_404_NOT_FOUND, data={"message": "해당 농지 정보가 없습니, 결재중일 수 있습니다."})
         except Exception as e:
-            return Response(status=status.HTTP_400_BAD_REQUEST, data={"message": f"에러 발생: {e}"})
+                return Response(status=status.HTTP_400_BAD_REQUEST, data={"message": f"에러 발생: {e}"})
+
     
 
 class TotalLandAreaAPIView(generics.GenericAPIView):
