@@ -30,15 +30,13 @@ CALCULATION = (
 class Request(models.Model):
     # id와 uuid따로 존재
     orderId = models.UUIDField(unique=True, default=uuid.uuid4, editable=False)
-
     # 신청유저정보
     owner = models.ForeignKey(
         "user.CustomUser",
         related_name="request_owner",
         on_delete=models.PROTECT,
     )
-
-    # 방제사 정보 업로드
+    # 담당 방제사 정보
     exterminator = models.ForeignKey(
         "user.CustomUser",
         related_name="request_exterminator",
@@ -46,64 +44,31 @@ class Request(models.Model):
         blank=True,
         null=True,
     )
-
     # 농지정보
     landInfo = models.ForeignKey(
         "farmer.FarmInfo",
         related_name="request_landInfo",
         on_delete=models.PROTECT,
     )
-
-    # 방제진행 상황 - 방제사용
-    exterminateState = models.PositiveSmallIntegerField(
-        choices=EXTERMINATE_STATE, blank=False, default=0
-    )
-
-    # 방제완료 확인 - 농민용
-    checkState = models.PositiveSmallIntegerField(
-        choices=CHECK_STATE, blank=False, default=0
-    )
-
-    # 정산상황 - 드론평야용 - 정산완료 시 여기값을 1로 변경
-    calculation = models.PositiveSmallIntegerField(
-        choices=CALCULATION, blank=False, default=0
-    )
-
     # 거래 방식
     dealmothod = models.PositiveSmallIntegerField(
         choices=DEAL_METHOD_CHOICES,
         blank=False,
         default=0,
     )
-
+    # 날짜
     startDate = models.DateField()
     endDate = models.DateField()
     # 농약종류
     pesticide = models.CharField(max_length=50, blank=True, default="")
-
     # 평단가 - 일반거래 30원 고정
     setAveragePrice = models.IntegerField(blank=False, null=False, default=0)
-
     # 신청서 가격
     requestAmount = models.PositiveIntegerField(blank=False, null=False, default=0)
-    requestDepositState = models.PositiveSmallIntegerField(
-        choices=CALCULATION, blank=False, default=0
-    )
-    requestCancelTransactionKey = models.CharField(
-        max_length=80, blank=True, default=""
-    )
-
-    # 방제사 예약
+    # 방제사 예약 금액
     reservateDepositAmount = models.PositiveIntegerField(
         blank=False, null=False, default=1000
     )
-    reservateDepositState = models.PositiveSmallIntegerField(
-        choices=CALCULATION, blank=False, default=0
-    )
-    depositCancelTransactionKey = models.CharField(
-        max_length=80, blank=True, default=""
-    )
-
     # 신청서 토스 결제정보 - 총 가격을 토스 모델이 가짐ex) 신청서 여러개
     requestTosspayments = models.ForeignKey(
         "payments.TossPayments",
@@ -120,6 +85,40 @@ class Request(models.Model):
         on_delete=models.PROTECT,
         null=True,
         blank=True,
+    )
+
+    # 농민용
+    # 방제완료 확인 - 농민용
+    checkState = models.PositiveSmallIntegerField(
+        choices=CHECK_STATE, blank=False, default=0
+    )
+    # 신청서 결제 상태
+    requestDepositState = models.PositiveSmallIntegerField(
+        choices=CALCULATION, blank=False, default=0
+    )
+    # 신청서 결제 취소 토스 키
+    requestCancelTransactionKey = models.CharField(
+        max_length=80, blank=True, default=""
+    )
+
+    # 방제사용
+    # 방제진행 상황 - 방제사용
+    exterminateState = models.PositiveSmallIntegerField(
+        choices=EXTERMINATE_STATE, blank=False, default=0
+    )
+    # 방제 예약금
+    reservateDepositState = models.PositiveSmallIntegerField(
+        choices=CALCULATION, blank=False, default=0
+    )
+    # 예약금 결제 취소 토스 키
+    depositCancelTransactionKey = models.CharField(
+        max_length=80, blank=True, default=""
+    )
+   
+
+    # 드론평야용 - 정산상황 - 대금 정산완료 시 여기값을 1로 변경
+    calculation = models.PositiveSmallIntegerField(
+        choices=CALCULATION, blank=False, default=0
     )
 
     def __str__(self):

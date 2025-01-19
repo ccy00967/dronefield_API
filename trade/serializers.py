@@ -39,6 +39,9 @@ class RequestDetailSerializer(serializers.ModelSerializer):
 
 # 신청서 업데이트
 class RequestUpdateSerializer(serializers.ModelSerializer):
+    requestTosspayments = serializers.CharField(source="requestTosspayments.tossOrderId",default=None)
+    reservateTosspayments = serializers.CharField(source="reservateTosspayments.tossOrderId", default=None)
+
     class Meta:
         model = Request
         # fields=(
@@ -101,6 +104,7 @@ class RequestBriefSerializer(serializers.ModelSerializer):
             # "reservateDepositState",
             "checkState",
             "calculation",
+            "requestAmount",
             "requestTosspayments",
             "reservateTosspayments",
         )
