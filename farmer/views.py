@@ -84,14 +84,12 @@ class FarmInfoAPIView(generics.GenericAPIView):
     # 신청서에 등록된 농지는 삭제 불가능
     def delete(self, request, uuid):
         try:
-            land_info = self.get_object(uuid)
-            # landInfo 필드로 수정
-            if Request.objects.filter(landInfo=land_info).exists():
-                return Response(
-                    status=status.HTTP_400_BAD_REQUEST,
-                    data={"message": "이 농지 정보는 다른 요청에 참조 중이어서 삭제할 수 없습니다."}
-                )
-            land_info.delete()
+            farm_info  = self.get_object(uuid)
+            
+            if Request.objects.filter(landInfo=farm_info).exists():
+                return Response(status=status.HTTP_400_BAD_REQUEST, data={"message": "신청서에 등록된 농지는 삭제할 수 없습니다."})
+            
+            farm_info.delete()
             return Response(status=status.HTTP_204_NO_CONTENT, data={"message": "농지 정보가 삭제되었습니다."})
         except Exception as e:
                 return Response(status=status.HTTP_400_BAD_REQUEST, data={"message": f"에러 발생: {e}"})
