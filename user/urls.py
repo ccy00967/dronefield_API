@@ -36,7 +36,7 @@ urlpatterns = [
     path("passwordreset/", password_reset, name="passwordreset"),  # 비밀번호 재설정
     
     #아이디 찾기
-    path("findid/", find_id(), name="findid"),  # 아이디 찾기
+    path("findid/", find_id, name="findid"),  # 아이디 찾기
     
     #나이스
     path("nice-token/", niceCrytoToken),  # 나이스 표준창 호출하기
