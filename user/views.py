@@ -473,6 +473,24 @@ class DeviceSessionView(APIView):
         request.session.save()
         return request.session.session_key
 
+#아이디찾기
+@api_view(['POST'])
+def find_id(request):
+    try:
+        name = request.session.get('name')
+        birthdate = request.session.get('birthdate')
+        gender = request.session.get('gender')
+        nationalinfo = request.session.get('nationalinfo')
+        mobileno = request.session.get('mobileno')
+        user = CustomUser.objects.filter(name=name, birthdate=birthdate, gender=gender, nationalinfo=nationalinfo, mobileno=mobileno).first()
+        
+        
+        if not user:
+            return Response({"message": "가입되지 않은 유저입니다."}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"email": user.email}, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 import os
 from django.http import Http404
 from django.conf import settings
