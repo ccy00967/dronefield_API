@@ -482,6 +482,10 @@ def find_id(request):
         gender = request.session.get('gender')
         nationalinfo = request.session.get('nationalinfo')
         mobileno = request.session.get('mobileno')
+        
+        if request.session is None:
+            return Response({"message": "세션이 만료되었습니다."}, status=status.HTTP_401_UNAUTHORIZED)
+        
         user = CustomUser.objects.filter(name=name, birthdate=birthdate, gender=gender, nationalinfo=nationalinfo, mobileno=mobileno).first()
         
         
