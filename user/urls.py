@@ -22,6 +22,7 @@ from .views import (
     UserLoginAPIView,
     ProfileAPIView,
     DeviceSessionView,
+    find_id
 )
 
 urlpatterns = [
@@ -30,9 +31,12 @@ urlpatterns = [
     path("logout/", jwt_views.TokenBlacklistView.as_view(), name="logout"),  # 로그아웃하기
     path("register/", UserRegistrationAPIView.as_view(), name="register"),  # 회원가입하기
     path("profile/", ProfileAPIView.as_view(), name="userdataupdate"),  # 자신의 정보 읽기, 수정
-    path("validatekey/", emailValidationSend),  # 이메일로 인증번호 전송
-    path("validatekeycheck/", validationCheck),  # 인증번호 인증
-    path("passwordreset/", password_reset),  # 비밀번호 재설정
+    path("validatekey/", emailValidationSend, name="validatekey"),  # 이메일로 인증번호 전송
+    path("validatekeycheck/", validationCheck, name= "validatecheck"),  # 인증번호 인증
+    path("passwordreset/", password_reset, name="passwordreset"),  # 비밀번호 재설정
+    
+    #아이디 찾기
+    path("findid/", find_id(), name="findid"),  # 아이디 찾기
     
     #나이스
     path("nice-token/", niceCrytoToken),  # 나이스 표준창 호출하기
