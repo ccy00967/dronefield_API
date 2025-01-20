@@ -4,18 +4,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.models import update_last_login
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-# from common.models import Address
-# from common.serializers import AddressSerializer
-
 from user.models import CustomUser
-
-# from user.views import isNicePassDone
-# from user.views import isEmailValidate
-
-# from user.views import isNicePassDone
-# from user.views import isEmailValidate
-
-# from drf_yasg.utils import swagger_auto_schema
 from . import swagger_doc
 
 
@@ -183,11 +172,11 @@ class UserLoginSerializer(serializers.Serializer):
                 user = CustomUser.objects.get(email=email)
             except CustomUser.DoesNotExist:
                 raise serializers.ValidationError("아이디 또는 비밀번호를 잘못 입력함")
-
+        
             # 비밀번호가 틀렸을 경우에 대한 오류 처리
             if not user.check_password(password):
                 raise serializers.ValidationError("아이디 또는 비밀번호를 잘못 입력함")
-
+        
             # 사용자가 비활성 상태일 때 처리
             if not user.is_active:
                 raise serializers.ValidationError("인증을 확인중입니다.")
