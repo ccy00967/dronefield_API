@@ -129,7 +129,7 @@ class FarmInfoImageAPIView(generics.GenericAPIView):
     def get_queryset(self):
         """해당 농지에 연결된 이미지들만 필터링"""
         farm_uuid = self.kwargs.get('uuid')
-        return FarmInfoImage.objects.filter(farm_info__uuid=farm_uuid)
+        return FarmInfoImage.objects.filter(land_info__uuid=farm_uuid)
 
     # 예: GET /land/<uuid>/image/ => 이미지 목록
     def get(self, request, uuid):
@@ -139,20 +139,24 @@ class FarmInfoImageAPIView(generics.GenericAPIView):
 
     # 예: POST /land/<uuid>/image/ => 이미지 새로 업로드
     def post(self, request, uuid):
-        farm = self.get_farm(uuid)
+        land_info = self.get_farm(uuid)
         image_file = request.FILES.get('image')  # 단일 업로드 예시
+        
         if not image_file:
             return Response({"detail": "이미지 파일이 필요합니다."},
                             status=status.HTTP_400_BAD_REQUEST)
-
-        new_image = FarmInfoImage.objects.create(farm_info=farm, image=image_file)
-        serializer = self.get_serializer(new_image)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        try:
+            new_image = FarmInfoImage.objects.create(land_info=land_info, image=image_file)
+            serializer = FarmInfoImageSerializer(new_image)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            return Response({"detail": f"이미지 업로드 실패: {e}"},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     # 예: DELETE /land/<uuid>/image/<pk>/
     def delete(self, request, uuid, pk=None):
         try:
-            image_obj = FarmInfoImage.objects.get(pk=pk, farm_info__uuid=uuid)
+            image_obj = FarmInfoImage.objects.get(pk=pk, land_info__uuid=uuid)
         except FarmInfoImage.DoesNotExist:
             return Response({"detail": "이미지를 찾을 수 없습니다."},
                             status=status.HTTP_404_NOT_FOUND)

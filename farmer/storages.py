@@ -5,6 +5,7 @@ import os
 
 class LocalImageStorage(FileSystemStorage):
     def __init__(self, *args, **kwargs):
-        kwargs['location'] = os.path.join(settings.BASE_DIR, 'static', 'images', 'farminfo')
-        kwargs['base_url'] = '/static/images/farminfo/'
+        # 기본적으로 MEDIA_ROOT를 기준으로 파일을 저장
+        kwargs['location'] = kwargs.get('location', settings.MEDIA_ROOT)
+        kwargs['base_url'] = kwargs.get('base_url', settings.MEDIA_URL)
         super().__init__(*args, **kwargs)
