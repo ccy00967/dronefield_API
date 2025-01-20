@@ -40,18 +40,15 @@ def count_by_exterminateState(request):
         queryset = Request.objects.filter(exterminator=request.user)
     if type == 4:
         queryset = Request.objects.filter(owner=request.user)
-
     # Check if queryset is None
     if queryset is None:
         return Response({"detail": "Invalid User provided!"}, status=400)
 
-    before_pay_count = queryset.filter(requestDepositState=0).count()
-    matching_count = (
-        queryset.filter(exterminateState=0).count() - before_pay_count
-    )
-    preparing_count = queryset.filter(exterminateState=1).count()
-    exterminating_count = queryset.filter(exterminateState=2).count()
-    done_count = queryset.filter(exterminateState=3).count()
+    before_pay_count = queryset.filter(exterminateState=0, requestDepositState=0).count()
+    matching_count = queryset.filter(exterminateState=0, requestDepositState=1).count()
+    preparing_count = queryset.filter(exterminateState=1, requestDepositState=1).count()
+    exterminating_count = queryset.filter(exterminateState=2, requestDepositState=1).count()
+    done_count = queryset.filter(exterminateState=3, requestDepositState=1).count()
 
     return Response(
         {
@@ -143,6 +140,7 @@ class ExterminatorRequestListAPIView(generics.ListAPIView):
     queryset = Request.objects.all()
     serializer_class = RequestBriefSerializer
     name = "exterminator-request-lists"
+    pagination_class = CustomPagination
     permission_classes = (
         permissions.IsAuthenticatedOrReadOnly,
         # OnlyOwnerCanUpdate,
@@ -205,7 +203,7 @@ class RequestUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = (
         permissions.IsAuthenticatedOrReadOnly,
         OnlyOwnerCanUpdate,
-        isBeforePay,
+        #isBeforePay,
     )
 
 

@@ -119,7 +119,7 @@ class TossPaymentsUpdateDeleteView(generics.RetrieveUpdateAPIView):
         permissions.IsAuthenticatedOrReadOnly,
     )
 
-    def post(self, request):
+    def post(self, request, *args, **kwargs):
         tossOrderId = self.kwargs.get('tossOrderId')  # URL에서 tossOrderId를 가져옴
         cancelReason = self.request.data.get("cancelReason")
         orderIdList = self.request.data.get("orderidlist")
@@ -142,21 +142,19 @@ class TossPaymentsUpdateDeleteView(generics.RetrieveUpdateAPIView):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
-            # RequestSerializer 인스턴스 생성
-            serializer = self.get_serializer(request_instance)
-
             # 사용자 타입에 따른 금액 계산
             if request.user.type == 3:
-                cancelAmount += serializer.data.get("reservateDepositAmount", 1000)
+                cancelAmount += request_instance.reservateDepositAmount if request_instance.reservateDepositAmount else 1000
             elif request.user.type == 4:
                 # 방제사가 예약한 신청서는 에러를 던지기
-                if serializer.data.get("exterminator") != None and serializer.data.get("reservateDepositState") != 0:
+                if request_instance.exterminator is not None and request_instance.reservateDepositState != 0:
                     return Response(
                         {"message": "방제가 진행중인 신청서 입니다. 환불이 불가합니다."},
                         status=status.HTTP_406_NOT_ACCEPTABLE,
                     )
-                cancelAmount += serializer.data.get("requestAmount", 0)
+                cancelAmount += request_instance.requestAmount if request_instance.requestAmount else 0
                 cancelAmount += 10000
+
 
         # 부분 환불하기
         url = "https://api.tosspayments.com/v1/payments/" + PAYMENT_KEY + "/cancel"
@@ -174,6 +172,9 @@ class TossPaymentsUpdateDeleteView(generics.RetrieveUpdateAPIView):
                 {"code": error["code"], "message": error["message"]},
                 status=response.status_code,
             )
+        
+        # 토스 결제확인 데이터
+        tosspayData = response.json()
 
         # 해당 신청서들 업데이트
         for orderid in orderIdList:
@@ -183,11 +184,12 @@ class TossPaymentsUpdateDeleteView(generics.RetrieveUpdateAPIView):
                     exterminateState=0,
                     reservateTosspayments=None,
                     reservateDepositState=0,
+                    depositCancelTransactionKey=tosspayData.transactionKey,
                 )
             elif request.user.type == 4:
                 Request.objects.filter(orderId=orderid).update(
-                    #requestTosspayments=tosspaymentsObj,
                     requestDepositState=2,
+                    requestCancelTransactionKey=tosspayData.transactionKey,
                 )
 
         return Response(
