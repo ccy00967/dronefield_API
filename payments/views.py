@@ -184,12 +184,12 @@ class TossPaymentsUpdateDeleteView(generics.RetrieveUpdateAPIView):
                     exterminateState=0,
                     reservateTosspayments=None,
                     reservateDepositState=0,
-                    depositCancelTransactionKey=tosspayData.transactionKey,
+                    depositCancelTransactionKey=tosspayData.get('cancels')[0].get("transactionKey"),
                 )
             elif request.user.type == 4:
                 Request.objects.filter(orderId=orderid).update(
                     requestDepositState=2,
-                    requestCancelTransactionKey=tosspayData.transactionKey,
+                    requestCancelTransactionKey=tosspayData.get('cancels')[0].get("transactionKey"),
                 )
 
         return Response(
