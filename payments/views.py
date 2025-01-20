@@ -176,6 +176,10 @@ class TossPaymentsUpdateDeleteView(generics.RetrieveUpdateAPIView):
         # 토스 결제확인 데이터
         tosspayData = response.json()
 
+        # toss_payment 인스턴스를 직접 수정하고 저장하기
+        toss_payment.status = tosspayData["status"]
+        toss_payment.save()
+
         # 해당 신청서들 업데이트
         for orderid in orderIdList:
             if request.user.type == 3:
