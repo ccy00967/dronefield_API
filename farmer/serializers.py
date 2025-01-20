@@ -73,7 +73,7 @@ class FarmInfoBriefSerializer(serializers.ModelSerializer):
 class FarmInfoImageSerializer(serializers.ModelSerializer): 
     class Meta:
         model = FarmInfoImage
-        fields = ['uuid', 'image', 'land_info']
+        fields = ['uuid', 'image', 'farm_info']
 
 class FarmInfoImageCreateSerializer(serializers.ModelSerializer):
     images = serializers.ListField(
@@ -94,7 +94,7 @@ class FarmInfoImageCreateSerializer(serializers.ModelSerializer):
         )
         # 여러 이미지 생성
         for image_file in images_data:
-            FarmInfoImage.objects.create(land_info=instance, image=image_file)
+            FarmInfoImage.objects.create(farm_info=instance, image=image_file)
         return instance
 
     def update(self, instance, validated_data):
@@ -105,7 +105,7 @@ class FarmInfoImageCreateSerializer(serializers.ModelSerializer):
         # ★ 여기서 'post=instance' 라고 되어 있는데, 실제 모델은 'farm_info'
         # => 아래처럼 수정
         for image_file in images_data:
-            FarmInfoImage.objects.create(land_info=instance, image=image_file)
+            FarmInfoImage.objects.create(farm_info=instance, image=image_file)
 
         return instance
     

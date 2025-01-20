@@ -70,13 +70,13 @@ class FarmInfoAPIView(generics.GenericAPIView):
             raise status.HTTP_404_NOT_FOUND
 
     def get(self, request, uuid):
-        land_info = self.get_object(uuid)
-        serializer = FarmInfoSerializer(land_info)
+        farm_info = self.get_object(uuid)
+        serializer = FarmInfoSerializer(farm_info)
         return Response(serializer.data)
 
     def patch(self, request, uuid):
-        land_info = self.get_object(uuid)
-        serializer = FarmInfoUpdateSerializer(land_info, data=request.data, partial=True)
+        farm_info = self.get_object(uuid)
+        serializer = FarmInfoUpdateSerializer(farm_info, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
@@ -139,14 +139,14 @@ class FarmInfoImageAPIView(generics.GenericAPIView):
 
     # 예: POST /land/<uuid>/image/ => 이미지 새로 업로드
     def post(self, request, uuid):
-        land_info = self.get_farm(uuid)
+        farm_info = self.get_farm(uuid)
         image_file = request.FILES.get('image')  # 단일 업로드 예시
         
         if not image_file:
             return Response({"detail": "이미지 파일이 필요합니다."},
                             status=status.HTTP_400_BAD_REQUEST)
         try:
-            new_image = FarmInfoImage.objects.create(land_info=land_info, image=image_file)
+            new_image = FarmInfoImage.objects.create(farm_info=farm_info, image=image_file)
             serializer = FarmInfoImageSerializer(new_image)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         except Exception as e:
