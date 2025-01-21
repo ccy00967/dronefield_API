@@ -10,19 +10,25 @@ from .views import (
     terms_of_service
 )
 
-from common.Nice.views import (
+from .service.Nice.views import (
     niceCrytoToken,
     getNicePassUserData,
     nice_auth_view,
     flutter_nice_auth_view
 )
 
+from .service.SMS.views import (
+    find_id_sendcode,
+    find_id_checkcode,
+    reset_password_sendcode,
+    reset_password_checkcode
+)
+
 from .views import (
     UserRegistrationAPIView,
     UserLoginAPIView,
     ProfileAPIView,
-    DeviceSessionView,
-    find_id
+    DeviceSessionView
 )
 
 urlpatterns = [
@@ -30,13 +36,17 @@ urlpatterns = [
     path("login/", UserLoginAPIView.as_view(), name="login"),  # 로그인하기
     path("logout/", jwt_views.TokenBlacklistView.as_view(), name="logout"),  # 로그아웃하기
     path("register/", UserRegistrationAPIView.as_view(), name="register"),  # 회원가입하기
-    path("profile/", ProfileAPIView.as_view(), name="userdataupdate"),  # 자신의 정보 읽기, 수정
+    path("profile/", ProfileAPIView.as_view(), name="userdataupdate"),  # 자신의 정보 읽기, 수정하기
     path("validatekey/", emailValidationSend, name="validatekey"),  # 이메일로 인증번호 전송
     path("validatekeycheck/", validationCheck, name= "validatecheck"),  # 인증번호 인증
-    path("passwordreset/", password_reset, name="passwordreset"),  # 비밀번호 재설정
+    
     
     #아이디 찾기
-    path("findid/", find_id, name="findid"),  # 아이디 찾기
+    #path("passwordreset/", send_sms, name="passwordreset"),  # 비밀번호 재설정
+    path("findid/sendcode/", find_id_sendcode, name="findid_sendcode"),
+    path("findid/checkcode/", find_id_checkcode, name="findid_checkcode"),  # 아이디 찾기
+    path("resetpassword/sendcode/", reset_password_sendcode, name="resetpassword_sendcode"),
+    path("resetpassword/checkcode/", reset_password_checkcode, name="resetpassword_checkcode"),
     
     #나이스
     path("nice-token/", niceCrytoToken),  # 나이스 표준창 호출하기
