@@ -23,13 +23,13 @@ from django.http import JsonResponse
 from . import swagger_doc
 from rest_framework.permissions import AllowAny
 from django.shortcuts import render
-from common.Nice.utils import encrypt_data
-from common.Nice.utils import decrypt_data
-from common.Nice.utils import clientID
-from common.Nice.utils import secretKey
-from common.Nice.utils import APIUrl
-from common.Nice.utils import productID
-from common.Nice.utils import access_token
+from .service.Nice.utils import encrypt_data
+from .service.Nice.utils import decrypt_data
+from .service.Nice.utils import clientID
+from .service.Nice.utils import secretKey
+from .service.Nice.utils import APIUrl
+from .service.Nice.utils import productID
+from .service.Nice.utils import access_token
 
 # from .nice_fuc import returnURL
 from user.models import CustomUser
@@ -381,11 +381,11 @@ def password_reset(request):
         if request.session.get('name') is None:
             return Response({"message": "세션이 만료되었습니다."}, status=status.HTTP_401_UNAUTHORIZED)
         user = CustomUser.objects.filter(
-        name=name,
-        birthdate=birthdate,
-        gender=gender,
-        nationalinfo=nationalinfo,
-        mobileno=mobileno).first()
+                name=name,
+                birthdate=birthdate,
+                gender=gender,
+                nationalinfo=nationalinfo,
+                mobileno=mobileno).first()
         if not user:
             return Response({"message": "가입되지 않은 유저입니다."}, status=status.HTTP_404_NOT_FOUND)
         user.set_password(request.data.get("password"))

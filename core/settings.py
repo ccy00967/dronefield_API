@@ -259,6 +259,12 @@ LOGGING = {
     },
 }
 
+#==============================
+# 로그인 URL 설정
+#==============================
+ALIGO_ACCESS_KEY = config("ALIGO_ACCESS_KEY")
+ALIGO_ACCESS_ID = config("ALIGO_ACCESS_ID")
+ALIGO_SENDER = config("ALIGO_SENDER")
 # ===========================
 # S3 설정
 # ===========================
