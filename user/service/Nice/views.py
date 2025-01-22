@@ -99,7 +99,7 @@ def getNicePassUserData(request):
         token_version_id = request.GET.get("token_version_id")
         enc_data = request.GET.get("enc_data")
         integrity_value = request.GET.get("integrity_value")
-        session_id = request.Cookie.get("sessionid")
+        session_id = request.COOKIES.get("sessionid")
     
         session = Session.objects.get(session_key=session_id)
         session_data = session.get_decoded()
