@@ -91,16 +91,16 @@ def niceCrytoToken(request):
         "url" : response_url
     }, status = status.HTTP_200_OK)
 
-def get_nice_form(request):
-    return render(request, 'nice.html')
+
 
 @api_view(('POST','GET'))
 def getNicePassUserData(request):
-    token_version_id = request.GET.get("token_version_id")
-    enc_data = request.GET.get("enc_data")
-    integrity_value = request.GET.get("integrity_value")
-    session_id = request.COOKIES.get("sessionid")
     try:
+        token_version_id = request.GET.get("token_version_id")
+        enc_data = request.GET.get("enc_data")
+        integrity_value = request.GET.get("integrity_value")
+        session_id = request.Cookie.get("sessionid")
+    
         session = Session.objects.get(session_key=session_id)
         session_data = session.get_decoded()
         key = session_data.get("key")
@@ -117,12 +117,12 @@ def getNicePassUserData(request):
         ).digest()
     integrity = base64.b64encode(h).decode("utf-8")
 
-    if not integrity == integrity_value:
+    if integrity != integrity_value:
         return Response({"message": "무결성 값이 다릅니다. 데이터가 변경된 것이 아닌지 확인 바랍니다."}, status = status.HTTP_400_BAD_REQUEST)
 
     dec_data = json.loads(decrypt_data(enc_data, key, iv))
     
-    if not req_no == dec_data["requestno"]:
+    if req_no != dec_data["requestno"]:
         return HttpResponse('<script type="text/javascript">'+ 'window.close();' + '</script>', status = status.HTTP_400_BAD_REQUEST)
     
     
@@ -141,7 +141,9 @@ def getNicePassUserData(request):
     
     except Exception as e:
         return Response({"message": f"에러 발생: {e}"}, status = status.HTTP_400_BAD_REQUEST)
-        
+    
+def get_nice_form(request):
+    return render(request, 'nice.html')  
 def nice_auth_view(request):
     return render(request, "nice_auth.html", {})
 
