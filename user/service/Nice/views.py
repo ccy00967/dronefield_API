@@ -117,12 +117,12 @@ def getNicePassUserData(request):
         ).digest()
     integrity = base64.b64encode(h).decode("utf-8")
 
-    if not integrity != integrity_value:
+    if not integrity == integrity_value:
         return Response({"message": "무결성 값이 다릅니다. 데이터가 변경된 것이 아닌지 확인 바랍니다."}, status = status.HTTP_400_BAD_REQUEST)
 
     dec_data = json.loads(decrypt_data(enc_data, key, iv))
     
-    if not req_no != dec_data["requestno"]:
+    if not req_no == dec_data["requestno"]:
         return HttpResponse('<script type="text/javascript">'+ 'window.close();' + '</script>', status = status.HTTP_400_BAD_REQUEST)
     
     
