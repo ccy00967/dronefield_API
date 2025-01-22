@@ -4,19 +4,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.models import update_last_login
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-# from common.models import Address
-# from common.serializers import AddressSerializer
-
 from user.models import CustomUser
-
-# from user.views import isNicePassDone
-# from user.views import isEmailValidate
-
-# from user.views import isNicePassDone
-# from user.views import isEmailValidate
-
-# from drf_yasg.utils import swagger_auto_schema
-
 from . import swagger_doc
 
 

@@ -16,6 +16,7 @@ from common.utils.pageanation import CustomPagination
 from trade.models import Request
 from rest_framework.exceptions import PermissionDenied
 from rest_framework import viewsets
+from django.shortcuts import render
 
 # 농지목록 조회
 class FarmInfoListView(generics.ListAPIView):
@@ -163,3 +164,6 @@ class FarmInfoImageAPIView(generics.GenericAPIView):
         
         image_obj.delete()
         return Response({"message": "이미지 삭제 완료"}, status=status.HTTP_204_NO_CONTENT)
+
+def daum_post_view(request):
+    return render(request, 'daum_postcode.html')

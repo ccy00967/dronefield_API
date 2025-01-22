@@ -23,13 +23,13 @@ from django.http import JsonResponse
 from . import swagger_doc
 from rest_framework.permissions import AllowAny
 from django.shortcuts import render
-from common.Nice.utils import encrypt_data
-from common.Nice.utils import decrypt_data
-from common.Nice.utils import clientID
-from common.Nice.utils import secretKey
-from common.Nice.utils import APIUrl
-from common.Nice.utils import productID
-from common.Nice.utils import access_token
+from .service.Nice.utils import encrypt_data
+from .service.Nice.utils import decrypt_data
+from .service.Nice.utils import clientID
+from .service.Nice.utils import secretKey
+from .service.Nice.utils import APIUrl
+from .service.Nice.utils import productID
+from .service.Nice.utils import access_token
 
 # from .nice_fuc import returnURL
 from user.models import CustomUser
@@ -64,30 +64,6 @@ class UserRegistrationAPIView(generics.GenericAPIView):
     permission_classes = (AllowAny,)
     
     def post(self, request):
-        # 나중에 permission으로 이동하기
-        # NicePass 본인인증 여부 확인
-        # if DEBUG:
-        #     try:
-        #         serializer = UserRegistrationSerializer(data=request.data)
-        #         if serializer.is_valid(raise_exception=True):
-        #             serializer.save(
-        #                 name=request.data.get("name"),
-        #                 birthdate=request.data.get("birthdate"),
-        #                 gender=request.data.get("gender"),
-        #                 nationalinfo=request.data.get("nationalinfo"),
-        #                 mobileno=request.data.get("mobileno"),
-        #                 email=request.data.get("email"),
-        #                 is_active=True,
-        #             )
-        #             return Response(
-        #                 {"message": "DEBUG MODE : User successfully registered"},
-        #                 status=status.HTTP_401_UNAUTHORIZED,
-        #             )
-        #     except Exception as e:
-        #         return Response(
-        #             {"message": "DEBUG MODE : User registration failed"},
-        #             status=status.HTTP_401_UNAUTHORIZED,
-        #         )
         if request.session.get(isNicePassDone) != True:
             print("나이스 본인인증이 안됨!")
             return Response(
@@ -182,7 +158,6 @@ class ProfileAPIView(generics.RetrieveUpdateAPIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
 
 @api_view(["POST"])
 def niceCryptoToken(request):
@@ -396,43 +371,29 @@ def validationCheck(request):
 @parser_classes([JSONParser])
 def password_reset(request):
     try:
-        validate_key = request.session.get("validate_key")  # 세션에서 인증키 가져오기
-        if validate_key is None:
-            return Response(
-                {"message": "Session expired or invalid"},
-                status=status.HTTP_401_UNAUTHORIZED,
-            )
-
-        # 세션의 키와 클라이언트가 보낸 키를 비교
-        if validate_key == request.data.get("validate_key"):
-            user = CustomUser.objects.filter(email=request.data.get("email")).first()
-            if not user:
-                return Response(
-                    {"message": "User not found"}, status=status.HTTP_404_NOT_FOUND
-                )
-
-            # 비밀번호 재설정
-            user.set_password(request.data.get("password"))
-            user.save()
-
-            # 세션 초기화 (보안 강화)
-            request.session.pop("validate_key", None)
-            return Response(
-                {"message": "Password updated successfully"}, status=status.HTTP_200_OK
-            )
-        else:
-            return Response(
-                {"message": "Invalid validation key"},
-                status=status.HTTP_401_UNAUTHORIZED,
-            )
-
+        name = request.session.get('name')
+        birthdate = request.session.get('birthdate')
+        gender = request.session.get('gender')
+        nationalinfo = request.session.get('nationalinfo')
+        mobileno = request.session.get('mobileno')
+        print(request.headers)
+        print(request.session.get('name'))
+        if request.session.get('name') is None:
+            return Response({"message": "세션이 만료되었습니다."}, status=status.HTTP_401_UNAUTHORIZED)
+        user = CustomUser.objects.filter(
+                name=name,
+                birthdate=birthdate,
+                gender=gender,
+                nationalinfo=nationalinfo,
+                mobileno=mobileno).first()
+        if not user:
+            return Response({"message": "가입되지 않은 유저입니다."}, status=status.HTTP_404_NOT_FOUND)
+        user.set_password(request.data.get("password"))
+        user.save()
+        return Response({"message": "비밀번호가 변경되었습니다."}, status=status.HTTP_200_OK)
     except Exception as e:
-        logger.error(f"Password reset error: {str(e)}")
-        return Response(
-            {"message": "Internal server error"},
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        )
-
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
 class DeviceSessionView(APIView):
     def post(self, request):
         # 요청에서 기기 UUID 가져오기
@@ -457,7 +418,7 @@ class DeviceSessionView(APIView):
     def is_valid_uuid(self, uuid_string):
         """UUID 형식 유효성 검증"""
         try:
-            uuid.UUID(uuid_string)
+            uuid.UUID(uuid_string)#TODO: 안드로이드에서 UUID 생성시 '-'문자가 포함되어 있어서 오류가 발생함. 이를 제거해주는 로직이 필요함
             return True
         except ValueError:
             return False
@@ -482,11 +443,19 @@ def find_id(request):
         gender = request.session.get('gender')
         nationalinfo = request.session.get('nationalinfo')
         mobileno = request.session.get('mobileno')
-        
-        if request.session is None:
+        print(request.headers)
+        print(request.session.get('name'))
+        if request.session.get('name') is None:
             return Response({"message": "세션이 만료되었습니다."}, status=status.HTTP_401_UNAUTHORIZED)
         
-        user = CustomUser.objects.filter(name=name, birthdate=birthdate, gender=gender, nationalinfo=nationalinfo, mobileno=mobileno).first()
+        print( name, birthdate)
+        print(request.session)
+        user = CustomUser.objects.filter(
+            name=name,
+            birthdate=birthdate, 
+            gender=gender,
+            nationalinfo=nationalinfo, 
+            mobileno=mobileno).first()
         
         
         if not user:

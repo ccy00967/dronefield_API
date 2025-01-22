@@ -95,33 +95,25 @@ def niceCrytoToken(request):
         "url" : response_url
     }, status = status.HTTP_200_OK)
 
-def get_nice_form(request):
-    return render(request, 'nice.html')
+
 
 @api_view(('POST','GET'))
 def getNicePassUserData(request):
-    token_version_id = request.GET.get("token_version_id")
-    enc_data = request.GET.get("enc_data")
-    integrity_value = request.GET.get("integrity_value")
-    session_id = request.COOKIES.get("sessionid")
     try:
+        token_version_id = request.GET.get("token_version_id")
+        enc_data = request.GET.get("enc_data")
+        integrity_value = request.GET.get("integrity_value")
+        session_id = request.COOKIES.get("sessionid")
+    
         session = Session.objects.get(session_key=session_id)
         session_data = session.get_decoded()
         key = session_data.get("key")
         iv = session_data.get("iv")
         hmac_key = session_data.get("hmac_key")
         req_no = session_data.get("req_no")
-        print("세션 데이터:", session_data)
     except Session.DoesNotExist:
-        print("해당 세션이 존재하지 않습니다.")
-        
-    print("===================================")
-    print("token_version_id:", token_version_id)
-    print("enc_data:", enc_data)
-    print("integrity_value:", integrity_value)
-    print("session_id:", session_id)
-    print("===================================")
-        
+        return Response({"message": "세션값이 존재하지 않습니다."}, status = status.HTTP_400_BAD_REQUEST)
+     
     h = hmac.new(
         key=hmac_key.encode(),
         msg=enc_data.encode("utf-8"),
@@ -130,41 +122,32 @@ def getNicePassUserData(request):
     integrity = base64.b64encode(h).decode("utf-8")
 
     if integrity != integrity_value:
-        return Response({"message": "무결성 값이 다릅니다. 데이터가 변경된 것이 아닌지 확인 바랍니다."}, status = status.HTTP_404_NOT_FOUND)
+        return Response({"message": "무결성 값이 다릅니다. 데이터가 변경된 것이 아닌지 확인 바랍니다."}, status = status.HTTP_400_BAD_REQUEST)
+
+    dec_data = json.loads(decrypt_data(enc_data, key, iv))
     
-    else:
+    if req_no != dec_data["requestno"]:
+        return HttpResponse('<script type="text/javascript">'+ 'window.close();' + '</script>', status = status.HTTP_400_BAD_REQUEST)
+    
+    
+    try:
         dec_data = json.loads(decrypt_data(enc_data, key, iv))
 
-        if req_no != dec_data["requestno"]:
-            print("세션값이 다릅니다. 올바른 경로로 접근하시기 바랍니다.")
-            return HttpResponse('<script type="text/javascript">'
-                            + 'window.close();'
-                            '</script>')
-        else:
-            try:
-                dec_data = json.loads(decrypt_data(enc_data, key, iv))
-            except Exception as e:
-                return Response({"message": f"Decryption failed: {str(e)}", "enc_data": enc_data},
-                                status=status.HTTP_500_INTERNAL_SERVER_ERROR,)
-        
-            request.session["name"] = dec_data["name"]
-            request.session["birthdate"] = dec_data["birthdate"]
-            request.session["gender"] = dec_data["gender"]
-            request.session["nationalinfo"] = dec_data["nationalinfo"]
-            request.session["mobileno"] = dec_data["mobileno"]
-            request.session[isNicePassDone] = True
-            request.session.save() 
+        request.session["name"] = dec_data["name"]
+        request.session["birthdate"] = dec_data["birthdate"]
+        request.session["gender"] = dec_data["gender"]
+        request.session["nationalinfo"] = dec_data["nationalinfo"]
+        request.session["mobileno"] = dec_data["mobileno"]
+        request.session[isNicePassDone] = True
+        request.session.save() 
 
-        return Response({
-            #"authtype"      : authtype,
-            "name"          : dec_data["name"],
-            "birthdate"     : dec_data["birthdate"],
-            "gender"        : dec_data["gender"],
-            "nationalinfo"  : dec_data["nationalinfo"],
-            "mobileno"      : dec_data["mobileno"],
-            #"mobileco"      : dec_data["mobileco"]
-        }, status = status.HTTP_200_OK)
-        
+        return HttpResponse('<script type="text/javascript">'+ 'window.close();' + '</script>', status = status.HTTP_200_OK)
+    
+    except Exception as e:
+        return Response({"message": f"에러 발생: {e}"}, status = status.HTTP_400_BAD_REQUEST)
+    
+def get_nice_form(request):
+    return render(request, 'nice.html')  
 def nice_auth_view(request):
     return render(request, "nice_auth.html", {})
 
