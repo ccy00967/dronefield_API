@@ -434,10 +434,16 @@ class DeviceSessionView(APIView):
     def is_valid_uuid(self, uuid_string):
         """UUID 형식 유효성 검증"""
         try:
-            uuid_string = uuid_string.replace("-", "")
-            uuid.UUID(uuid_string)
+            if len(uuid_string) == 16:
+                # 16자리 UUID를 표준 32자리 형식으로 변환
+                formatted_uuid = f"{uuid_string[:8]}-{uuid_string[8:12]}-{uuid_string[12:16]}-0000-000000000000"
+                print(formatted_uuid)
+                uuid.UUID(formatted_uuid, version=4)
+            else:
+                uuid.UUID(uuid_string, version=4)
             return True
-        except ValueError:
+        except Exception as e:
+            print(e)
             return False
 
     def create_session(self, request, device_uuid):
