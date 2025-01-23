@@ -17,6 +17,7 @@ from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
 from rest_framework import status
 from django.http import JsonResponse
+from rest_framework_simplejwt.views import TokenBlacklistView
 
 
 # from drf_yasg.utils import swagger_auto_schema
@@ -134,6 +135,21 @@ class UserLoginAPIView(generics.GenericAPIView):
         except Exception as e:
             return Response(
                 {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+# 로그아웃
+class UserLogoutAPIView(TokenBlacklistView):
+    permission_classes = [IsAuthenticated]
+    def post(self, request):
+        response = super().post(request)
+        
+        if response.status_code == 205:
+            response.data = {"message": "Successfully logged out."}
+            return Response(response.data, status=status.HTTP_205_RESET_CONTENT)
+        else:
+            return Response(
+                {"error": "Failed to log out."},
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
 
@@ -418,7 +434,6 @@ class DeviceSessionView(APIView):
     def is_valid_uuid(self, uuid_string):
         """UUID 형식 유효성 검증"""
         try:
-            #TODO: 안드로이드에서 UUID 생성시 '-'문자가 포함되어 있어서 오류가 발생함. 이를 제거해주는 로직이 필요함
             uuid_string = uuid_string.replace("-", "")
             uuid.UUID(uuid_string)
             return True
