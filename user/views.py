@@ -418,7 +418,9 @@ class DeviceSessionView(APIView):
     def is_valid_uuid(self, uuid_string):
         """UUID 형식 유효성 검증"""
         try:
-            uuid.UUID(uuid_string)#TODO: 안드로이드에서 UUID 생성시 '-'문자가 포함되어 있어서 오류가 발생함. 이를 제거해주는 로직이 필요함
+            #TODO: 안드로이드에서 UUID 생성시 '-'문자가 포함되어 있어서 오류가 발생함. 이를 제거해주는 로직이 필요함
+            uuid_string = uuid_string.replace("-", "")
+            uuid.UUID(uuid_string)
             return True
         except ValueError:
             return False

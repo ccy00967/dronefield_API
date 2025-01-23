@@ -69,10 +69,10 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     uuid = models.UUIDField(
         db_index=True, unique=True, default=uuid.uuid4, editable=False
     )
-    name = models.CharField(max_length=16, blank=False)
-    birthdate = models.CharField(max_length=8, blank=False)
-    gender = models.CharField(max_length=1, choices=Gender.choices, blank=False)
-    nationalinfo = models.CharField(max_length=1, choices=Nation.choices, blank=False)
+    name = models.CharField(max_length=16, blank=False, editable=False)
+    birthdate = models.CharField(max_length=8, blank=False, editable=False)
+    gender = models.CharField(max_length=1, choices=Gender.choices, blank=False, editable=False)
+    nationalinfo = models.CharField(max_length=1, choices=Nation.choices, blank=False, editable=False)
     mobileno = models.CharField(max_length=14, unique=True, blank=False)
     email = models.EmailField(max_length=30, unique=True, blank=False)
     type = models.PositiveSmallIntegerField(choices=Type.choices, default=Type.CUSTOMER)
