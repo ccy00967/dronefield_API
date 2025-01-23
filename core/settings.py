@@ -265,6 +265,13 @@ LOGGING = {
 ALIGO_ACCESS_KEY = config("ALIGO_ACCESS_KEY")
 ALIGO_ACCESS_ID = config("ALIGO_ACCESS_ID")
 ALIGO_SENDER = config("ALIGO_SENDER")
+
+# ===========================
+# vwolrd API 설정
+# ===========================
+CONSUMER_KEY = config("CONSUMER_KEY")
+CONSUMER_SECRET = config("CONSUMER_SECRET")
+
 # ===========================
 # S3 설정
 # ===========================

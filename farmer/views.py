@@ -2,7 +2,7 @@ from rest_framework import generics
 from rest_framework import permissions
 from rest_framework.permissions import IsAuthenticated
 from farmer.permissions import OnlyOwnerCanUpdate
-
+import requests
 from django.db.models.functions import Cast
 from django.db.models import FloatField
 from farmer.models import FarmInfo, FarmInfoImage
@@ -17,6 +17,7 @@ from trade.models import Request
 from rest_framework.exceptions import PermissionDenied
 from rest_framework import viewsets
 from django.shortcuts import render
+from core.settings import CONSUMER_KEY, CONSUMER_SECRET
 
 # 농지목록 조회
 class FarmInfoListView(generics.ListAPIView):
@@ -51,6 +52,68 @@ class FarmInfoCreateView(generics.CreateAPIView):
     # 신청한 유저 정보를 함께 저장
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
+    
+    def post(self, request, *args, **kwargs):
+        vworld_key = "6C934ED4-5978-324D-B7DE-AC3A0DDC3B38"
+        jibun = request.data.get("jibun")
+        road = request.data.get("road")
+        pnu = request.data.get("pnu")
+        cd = request.data.get("cd")
+        lndpclAr = request.data.get("lndpclAr")
+        baseurl = "https://api.vworld.kr/req/search"
+        response_pnu = requests.get(f"{baseurl}"
+                                   +f"?page=1&size=1"
+                                   +f"&request=search"
+                                   +f"&query={jibun}"
+                                   +f"&type=address"
+                                   +f"&category=parcel"
+                                   +f"&format=json"
+                                   +f"&key={vworld_key}")
+        
+        response_pnu_result=response_pnu.json()["response"].get("result").get("items")[0].get("id")
+        
+        
+        if response_pnu_result != pnu:
+            return Response(status=status.HTTP_400_BAD_REQUEST, data={"message": "cd값이 일치하지 않습니다."})
+        
+        baseurl = "https://api.vworld.kr/ned/data/ladfrlList"
+        response_lndpclAr = requests.get(f"{baseurl}"
+                                    +f"?domain=https://dronefield.co.kr"
+                                    +f"&pnu={response_pnu_result}"
+                                    +f"&format=json"
+                                    +f"&key={vworld_key}")
+        
+        response_lndpclAr_result = response_lndpclAr.json()["ladfrlVOList"].get("ladfrlVOList")[0].get("lndpclAr")
+        
+        print(f"{pnu} : {response_pnu_result}")
+        print(f"{lndpclAr} : {response_lndpclAr_result}")
+        print(f"{cd} :  ")
+        
+        baseurl_sgisapi = "https://sgisapi.kostat.go.kr/OpenAPI3/auth/authentication.json"
+        response_cd_access = requests.get(f"{baseurl_sgisapi}"
+                                    +f"?consumer_key={CONSUMER_KEY}"
+                                    +f"&consumer_secret={CONSUMER_SECRET}"
+                                    ).json()["result"].get("accessToken")
+        
+        baseurl_sgisapi = "https://sgisapi.kostat.go.kr/OpenAPI3/addr/geocode.json"
+        response_cd_result = requests.get(f"{baseurl_sgisapi}"
+                                    +f"?accessToken={response_cd_access}"
+                                    +f"&address={jibun}")
+        response_cd_result = response_cd_result.json()["result"].get("resultdata")[0].get("ri_cd")
+        print(response_cd_result)
+        
+        if  response_lndpclAr_result != lndpclAr:
+            return Response(status=status.HTTP_400_BAD_REQUEST, data={"message": "lndpclAr값이 일치하지 않습니다."})
+        
+        
+        
+       
+        
+        return super().post(request, *args, **kwargs)
+        
+        
+    
+        
 
 
 # 농지 정보 조회, 수정, 삭제

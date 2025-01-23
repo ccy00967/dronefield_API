@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from farmer.models import FarmInfo, FarmInfoImage
+from rest_framework import permissions
 
 
 # 농지 정보 등록
@@ -30,15 +31,11 @@ class FarmInfoSerializer(serializers.ModelSerializer):
 
         for field in required_fields:
             if not data.get(field) or str(data.get(field)).strip() == "":
-                raise serializers.ValidationError(
-                    {field: f"{field} 값은 비어 있을 수 없습니다."}
-                )
+                raise serializers.ValidationError({field: f"{field} 값은 비어 있을 수 없습니다."})
 
         if "lndpclAr" in data and not data["lndpclAr"].isdigit():
-            raise serializers.ValidationError(
-                {"lndpclAr": "lndpclAr는 숫자여야 합니다."}
-            )
-
+            raise serializers.ValidationError({"lndpclAr": "lndpclAr는 숫자여야 합니다."})
+        
         return data
 
 
