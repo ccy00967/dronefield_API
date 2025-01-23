@@ -24,8 +24,8 @@ def niceCrytoToken(request):
 
     #TODO: 리턴 주소 하드 코딩으로 고정시 웹에서 자식창이 닫히질 않음
     #TODO: hmac_key 에러 발생: 세션 정보가 제대로 전달 되지 않아서 생기는 에러
-    #returnURL = base_url + "/user/nice-callback/"
-    returnURL = request.data["returnURL"]
+    returnURL = base_url + "/user/nice-callback/"
+    #returnURL = request.data["returnURL"]
     
     # 나이스 토큰 요청
     now = str(int(time.time()))

@@ -136,11 +136,20 @@ class TossPaymentsUpdateDeleteView(generics.RetrieveUpdateAPIView):
             try:
                 # orderid를 'orderId'로 수정하여 필드명 일치시킴
                 request_instance = Request.objects.get(orderId=orderid)
+                
+                # requestTosspayments의 tossOrderId가 요청된 tossOrderId와 일치하는지 확인
+                if request_instance.requestTosspayments and request_instance.requestTosspayments.tossOrderId != tossOrderId:
+                    return Response(
+                        {"message": f"orderId {orderid}에 대한 TossOrderId가 일치하지 않습니다."},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+                
             except Request.DoesNotExist:
                 return Response(
                     {"message": f"Request with orderId {orderid} does not exist."},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
+
 
             # 사용자 타입에 따른 금액 계산
             if request.user.type == 3:
