@@ -25,7 +25,7 @@ class FarmInfo(models.Model):
         max_length=50, blank=False, null=False, default=""
     )  # 농지 고유번호
     # 면적 m^2
-    cd = models.CharField(max_length=8, blank=False, null=False, default="")  # 행정구역
+    cd = models.CharField(max_length=10, blank=False, null=False, default="")  # 행정구역
 
     # 농지 추가 정보
     landNickName = models.CharField(max_length=50, blank=False, default="")  # 농지 별칭
