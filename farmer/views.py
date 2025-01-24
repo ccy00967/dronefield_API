@@ -2,6 +2,7 @@ from rest_framework import generics
 from rest_framework import permissions
 from rest_framework.permissions import IsAuthenticated
 from farmer.permissions import OnlyOwnerCanUpdate
+from rest_framework.exceptions import NotFound
 
 from django.db.models.functions import Cast
 from django.db.models import FloatField
@@ -63,12 +64,11 @@ class FarmInfoAPIView(generics.GenericAPIView):
         OnlyOwnerCanUpdate,
     )
     
-    
     def get_object(self, uuid):
         try:
             return FarmInfo.objects.get(uuid=uuid)
         except FarmInfo.DoesNotExist:
-            raise status.HTTP_404_NOT_FOUND
+            raise NotFound("FarmInfo not found.")
 
     def get(self, request, uuid):
         farm_info = self.get_object(uuid)
