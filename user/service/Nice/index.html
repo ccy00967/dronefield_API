@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Get NicePass User Data</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        label {
+            font-weight: bold;
+        }
+        input, textarea, button {
+            padding: 10px;
+            font-size: 14px;
+        }
+        button {
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .response {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Get NicePass User Data</h1>
+        <form id="nicePassForm">
+            <label for="token_version_id">Token Version ID:</label>
+            <input type="text" id="token_version_id" name="token_version_id" required>
+
+            <label for="enc_data">Encrypted Data:</label>
+            <textarea id="enc_data" name="enc_data" rows="4" required></textarea>
+
+            <label for="integrity_value">Integrity Value:</label>
+            <input type="text" id="integrity_value" name="integrity_value" required>
+
+            <button type="submit">Send Request</button>
+        </form>
+
+        <div class="response" id="response">
+            <h3>Response:</h3>
+            <pre id="responseText">No response yet...</pre>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('nicePassForm').addEventListener('submit', async function (event) {
+            event.preventDefault();
+
+            // Gather form data
+            const formData = new FormData(event.target);
+            const data = Object.fromEntries(formData);
+
+            // Construct the request URL
+            const url = `/getNicePassUserData/?token_version_id=${encodeURIComponent(data.token_version_id)}&enc_data=${encodeURIComponent(data.enc_data)}&integrity_value=${encodeURIComponent(data.integrity_value)}`;
+
+            try {
+                // Make the GET request
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                // Parse and display the response
+                const result = await response.json();
+                document.getElementById('responseText').textContent = JSON.stringify(result, null, 2);
+            } catch (error) {
+                document.getElementById('responseText').textContent = `Error: ${error.message}`;
+            }
+        });
+    </script>
+</body>
+</html>

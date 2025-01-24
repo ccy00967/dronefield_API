@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NICE 인증</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        .info-box {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #007BFF;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>NICE 본인인증</h1>
+
+    <p>세션이 발급되었습니다. 아래 버튼을 클릭하여 인증을 진행하세요.</p>
+
+    <!-- 인증 시작 버튼 -->
+    <button id="nice-auth-btn">인증 시작</button>
+
+    <script>
+        // CSRF 토큰을 쿠키에서 가져오는 함수
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== "") {
+                const cookies = document.cookie.split(";");
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.startsWith(name + "=")) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        const csrfToken = getCookie("csrftoken");
+
+        document.getElementById("nice-auth-btn").addEventListener("click", function() {
+            const payload = {
+                returnURL: "https://api.dronefield.co.kr/user/nice-callback/"
+            };
+
+            // POST 요청을 통해 인증 URL 호출
+            fetch("https://api.dronefield.co.kr/user/nice-token/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": csrfToken // CSRF 토큰 추가
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Network response was not ok");
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("Received data:", data);
+
+                // NICE 인증 URL로 팝업 창 대신 Flutter 메시지 전송
+                if (data.url) {
+                    if (window.flutter_inappwebview) {
+                        window.flutter_inappwebview.callHandler("openPopup", data.url);
+                    } else {
+                        alert("Flutter WebView 환경에서만 사용할 수 있습니다.");
+                    }
+                } else {
+                    alert("Failed to retrieve NICE authentication URL.");
+                }
+            })
+            .catch(error => {
+                console.error("Error during NICE token request:", error);
+                alert("An error occurred while initiating the authentication process.");
+            });
+        });
+    </script>
+</body>
+</html>

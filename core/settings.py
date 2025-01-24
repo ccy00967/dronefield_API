@@ -21,19 +21,19 @@ ROOT_DIR = os.path.dirname(BASE_DIR)
 # ===========================
 # 환경 설정 (.env)
 # ===========================
-SECRET_KEY = config('SECRET_KEY')
-DATABASES_HOST = config('DATABASES_HOST', default='localhost')
-DATABASES_PORT = config('PORT', default='5432')
+SECRET_KEY = config("SECRET_KEY")
+DATABASES_HOST = config("DATABASES_HOST", default="localhost")
+DATABASES_PORT = config("PORT", default="5432")
 
 # ===========================
 # 이메일 설정
 # ===========================
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.naver.com'
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.naver.com"
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
-EMAIL_HOST_USER = config('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+EMAIL_HOST_USER = config("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 
@@ -41,7 +41,7 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 # 기본 설정
 # ===========================
 DEBUG = True
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "*").split(",")
 
 # ===========================
 # 애플리케이션 정의
@@ -53,24 +53,23 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.admin",
-    
     # 서드파티 앱
     "rest_framework",
     "rest_framework_simplejwt",
     "corsheaders",
-    "drf_yasg",
-    
+    # "drf_yasg",
     # 커스텀 앱
-    #"common.apps.CommonConfig",
+    # "common.apps.CommonConfig",
     "user",
-    #"validation",
-    #"customer",
+    # "validation",
+    # "customer",
     "exterminator",
     "trade",
     "common",
     "payments",
     "farmer",
-    #"account",
+    "core",
+    # "account",
 ]
 
 MIDDLEWARE = [
@@ -94,11 +93,11 @@ WSGI_APPLICATION = "core.wsgi.application"
 # ===========================
 # 템플릿 설정
 # ===========================
-TEMPLATES_DIR = os.path.join(BASE_DIR, 'static')
+TEMPLATES_DIR = os.path.join(BASE_DIR, "static")
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [TEMPLATES_DIR, os.path.join(BASE_DIR, 'templates')],
+        "DIRS": [TEMPLATES_DIR, os.path.join(BASE_DIR, "templates")],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -128,7 +127,9 @@ DATABASES = {
 # 비밀번호 검증
 # ===========================
 AUTH_PASSWORD_VALIDATORS = [
-    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
+    },
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
@@ -139,7 +140,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # 국제화 및 지역화
 # ===========================
 LANGUAGE_CODE = "en-us"
-TIME_ZONE = 'Asia/Seoul'
+TIME_ZONE = "Asia/Seoul"
 USE_I18N = True
 USE_TZ = False
 
@@ -147,10 +148,15 @@ USE_TZ = False
 # ===========================
 # 정적 파일 (Static files)
 # ===========================
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
 STATIC_URL = "/static/"
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
+# ===========================
+# 미디어 파일 (Media files)
+# ===========================
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # ===========================
 # 사용자 모델
@@ -162,6 +168,7 @@ AUTH_USER_MODEL = "user.CustomUser"
 # DRF 및 JWT 설정
 # ===========================
 REST_FRAMEWORK = {
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ],
@@ -181,18 +188,20 @@ SIMPLE_JWT = {
 }
 
 
-
-
-
 # ===========================
 # 세션 및 CSRF 설정
 # ===========================
 SESSION_COOKIE_AGE = 900
 SESSION_COOKIE_HTTPONLY = True
-SESSION_COOKIE_SAMESITE = 'None'
-SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_SAMESITE = "None"
+SESSION_COOKIE_SECURE = True #TODO: 개발환경 세팅
+
+#SESSION_COOKIE_NAME = 'sessionid'
+#SESSION_COOKIE_HTTPONLY = False  # JavaScript에서 접근 가능
+#SESSION_COOKIE_SAMESITE = 'Lax'
+
 CSRF_COOKIE_SECURE = True
-CSRF_COOKIE_SAMESITE = 'None'
+CSRF_COOKIE_SAMESITE = "None"
 
 
 # ===========================
@@ -208,21 +217,72 @@ CORS_ORIGIN_WHITELIST = [
     "https://dronefield.co.kr:8080",
     "https://api.dronefield.co.kr",
     "https://api.dronefield.co.kr:8080",
-    
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True
-#CORS_ALLOWED_ORIGINS = CORS_ORIGIN_WHITELIST
+# CORS_ALLOWED_ORIGINS = CORS_ORIGIN_WHITELIST
 CSRF_TRUSTED_ORIGINS = CORS_ORIGIN_WHITELIST
 
 CORS_ALLOW_METHODS = ["DELETE", "GET", "OPTIONS", "PATCH", "POST", "PUT"]
 CORS_ALLOW_HEADERS = [
-    "accept", "accept-encoding", "authorization", "content-type",
-    "content-disposition", "dnt", "origin", "user-agent",
-    "x-csrftoken", "x-requested-with"
+    "accept",
+    "accept-encoding",
+    "authorization",
+    "content-type",
+    "content-disposition",
+    "dnt",
+    "origin",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
 ]
 
 # ===========================
 # 기본 필드 설정
 # ===========================
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# ===========================
+# 로깅 설정
+# ===========================
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {"class": "logging.StreamHandler"},
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": "INFO",
+        },
+    },
+}
+
+#==============================
+# 로그인 URL 설정
+#==============================
+ALIGO_ACCESS_KEY = config("ALIGO_ACCESS_KEY")
+ALIGO_ACCESS_ID = config("ALIGO_ACCESS_ID")
+ALIGO_SENDER = config("ALIGO_SENDER")
+
+# ===========================
+# vwolrd API 설정
+# ===========================
+CONSUMER_KEY = config("CONSUMER_KEY")
+CONSUMER_SECRET = config("CONSUMER_SECRET")
+
+# ===========================
+# S3 설정
+# ===========================
+# DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+
+# AWS_ACCESS_KEY_ID = config("AWS_ACCESS_KEY_ID")
+# AWS_SECRET_ACCESS_KEY = config("AWS_SECRET_ACCESS_KEY")
+# AWS_STORAGE_BUCKET_NAME = config("AWS_STORAGE_BUCKET_NAME")
+# AWS_S3_REGION_NAME = config("AWS_S3_REGION_NAME")
+
+# AWS_S3_QUERYPARAM_AUTH = False
+# AWS_S3_FILE_OVERWRITE = False
+# AWS_DEFAULT_ACL = None
+

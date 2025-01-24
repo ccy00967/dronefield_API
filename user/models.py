@@ -8,7 +8,8 @@ from django.contrib.auth.models import (
 import re
 from django.utils.translation import gettext_lazy as _
 
-class Role(models.IntegerChoices):
+
+class Type(models.IntegerChoices):
     ADMIN = 1, _("Admin")
     MANAGER = 2, _("Manager")
     DRONE_EXTERMINATOR = 3, _("Drone Exterminator")
@@ -35,7 +36,9 @@ class CustomUserManager(BaseUserManager):
         if not re.search(r"\d", password):
             raise ValueError(_("Password must contain at least one number."))
         if not re.search(r"[!@#$%^&*()]", password):
-            raise ValueError(_("Password must contain at least one special character (!@#$%^&*())."))
+            raise ValueError(
+                _("Password must contain at least one special character (!@#$%^&*()).")
+            )
 
     def create_user(self, email, password=None, **extra_fields):
         if not email:
@@ -49,28 +52,33 @@ class CustomUserManager(BaseUserManager):
         return user
 
     def create_manager(self, email=None, password=None, **extra_fields):
-        extra_fields.setdefault("role", Role.MANAGER)
+        extra_fields.setdefault("type", Type.MANAGER)
         return self.create_user(email, password, **extra_fields)
 
     def create_superuser(self, email=None, password=None, **extra_fields):
         extra_fields.setdefault("is_active", True)
-        extra_fields.setdefault("role", Role.ADMIN)
+        extra_fields.setdefault("type", Type.ADMIN)
 
-        if extra_fields.get("role") != Role.ADMIN:
-            raise ValueError(_("Superuser must have role of Admin"))
+        if extra_fields.get("type") != Type.ADMIN:
+            raise ValueError(_("Superuser must have type of Admin"))
 
         return self.create_user(email, password, **extra_fields)
 
+
 class CustomUser(AbstractBaseUser, PermissionsMixin):
-    uuid = models.UUIDField(db_index=True, unique=True, default=uuid.uuid4, editable=False)
-    name = models.CharField(max_length=16, blank=False)
-    birthdate = models.CharField(max_length=8, blank=False)
-    gender = models.CharField(max_length=1, choices=Gender.choices, blank=False)
-    nationalinfo = models.CharField(max_length=1, choices=Nation.choices, blank=False)
+    uuid = models.UUIDField(
+        db_index=True, unique=True, default=uuid.uuid4, editable=False
+    )
+    name = models.CharField(max_length=16, blank=False, editable=False)
+    birthdate = models.CharField(max_length=8, blank=False, editable=False)
+    gender = models.CharField(max_length=1, choices=Gender.choices, blank=False, editable=False)
+    nationalinfo = models.CharField(max_length=1, choices=Nation.choices, blank=False, editable=False)
     mobileno = models.CharField(max_length=14, unique=True, blank=False)
     email = models.EmailField(max_length=30, unique=True, blank=False)
-    role = models.PositiveSmallIntegerField(choices=Role.choices, default=Role.CUSTOMER)
-    address = models.ForeignKey("common.Address",related_name="useraddress",on_delete=models.CASCADE,blank=True,null=True,)
+    type = models.PositiveSmallIntegerField(choices=Type.choices, default=Type.CUSTOMER)
+    road = models.CharField(max_length=50, blank=True, default="")
+    jibun = models.CharField(max_length=50, blank=False, default="")
+    detail = models.CharField(max_length=50, blank=False, default="")
     is_active = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -85,5 +93,3 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     class Meta:
         verbose_name = _("User")
         verbose_name_plural = _("Users")
-
-

@@ -1,41 +1,59 @@
 from django.urls import path
 from rest_framework_simplejwt import views as jwt_views
 
-from .views import (niceCryptoToken,emailValidationSend,
-                    validationCheck,password_reset,
-                    niceCallback)
+from .views import (
+    #niceCryptoToken,
+    emailValidationSend,
+    validationCheck,
+    password_reset,
+    #niceCallback,
+    terms_of_service
+)
 
-from .views import (UserRegistrationAPIView,UserLoginAPIView,
-                    ProfileAPIView,)
+from .service.Nice.views import (
+    niceCrytoToken,
+    getNicePassUserData,
+    nice_auth_view,
+    flutter_nice_auth_view
+)
 
-
-'''
-1. 이메일, 패스워드로 로그인
--> 리프레시토큰, 액세스토큰 발급
-2. 리프레시토큰으로 로그인
--> 액세스토큰 발급
-'''
+from .views import (
+    UserRegistrationAPIView,
+    UserLoginAPIView,
+    UserLogoutAPIView,
+    ProfileAPIView,
+    DeviceSessionView,
+    find_id
+)
 
 urlpatterns = [
-    path('refreshtoken/', jwt_views.TokenRefreshView.as_view(), name='token_refresh'),# 리프레시토큰으로 액세스토큰 발급받기
-    path('login/', UserLoginAPIView.as_view(), name='login'),# 로그인하기
-    path('logout/', jwt_views.TokenBlacklistView .as_view(), name='logout'),# 로그아웃하기
-    path('register/', UserRegistrationAPIView.as_view(), name='register'),# 회원가입하기
-    path('profile/', ProfileAPIView.as_view(), name='userdataupdate'),# 자신의 정보 읽기, 수정
+    path("refresh/", jwt_views.TokenRefreshView.as_view(), name="token_refresh"),  # 리프레시토큰으로 액세스토큰 발급받기
+    path("login/", UserLoginAPIView.as_view(), name="login"),  # 로그인하기
+    path("logout/", UserLogoutAPIView.as_view(), name="logout"),  # 로그아웃하기
+    path("register/", UserRegistrationAPIView.as_view(), name="register"),  # 회원가입하기
+    path("profile/", ProfileAPIView.as_view(), name="userdataupdate"),  # 자신의 정보 읽기, 수정
+    path("validatekey/", emailValidationSend, name="validatekey"),  # 이메일로 인증번호 전송
+    path("validatekeycheck/", validationCheck, name= "validatecheck"),  # 인증번호 인증
+    path("passwordreset/", password_reset, name="passwordreset"),  # 비밀번호 재설정
     
-    path('emailsend/', emailValidationSend), # 이메일 전송
-    path('validatekeycheck/', validationCheck), # 인증번호 인증
-    path('passwordreset/', password_reset), # 비밀번호 재설정
+    #아이디 찾기
+    path("findid/", find_id, name="findid"),  # 아이디 찾기
     
-    path('nice-token/', niceCryptoToken), # 나이스 표준창 호출하기
-    path('nice-callback/', niceCallback), # 나이스 콜백
+    #나이스
+    path("nice-token/", niceCrytoToken),  # 나이스 표준창 호출하기
+    path("nice-callback/", getNicePassUserData),  # 나이스 콜백
+    path("nice-auth/", nice_auth_view, name="nice-auth"),
+    path("flutter/nice-auth/", flutter_nice_auth_view, name="nice-auth"),
+    #이용약관
+    path("term/<int:id>/", terms_of_service, name="terms"),  # 이용약관
     
+    #세션
+    path("session/", DeviceSessionView.as_view(), name="session"),  # 세션 생성
     # FIX : 미사용
-    #path('manager/users/', ManageUserListView.as_view(), name='manage_get_users'),
-    #path('manager/<uuid:uuid>/', ManageUserRetrieveUpdateDestroyView.as_view(), name='manage_update_users'),
-    #path('manager/exterminator/<uuid:uuid>/', ManageExterminatorRetrieveUpdateDestroyView.as_view(), name='manage_update_exterminator'),
-    #path('userinfo/exterminator/<uuid:uuid>/', ExterminatorView.as_view(), name='get_exterminator_info'),
-    #path('accesstokenlogin/', jwt_views.TokenRefreshView.as_view(), name='token_refresh'),# 리프레시토큰으로 액세스토큰 발급받기
-    #path('token/obtain/', CustomTokenObtainPairView.as_view(), name='token_create'),# 토큰을 아예 발급받는다? 이것은 일단 막아두기
-
+    # path('manager/users/', ManageUserListView.as_view(), name='manage_get_users'),
+    # path('manager/<uuid:uuid>/', ManageUserRetrieveUpdateDestroyView.as_view(), name='manage_update_users'),
+    # path('manager/exterminator/<uuid:uuid>/', ManageExterminatorRetrieveUpdateDestroyView.as_view(), name='manage_update_exterminator'),
+    # path('userinfo/exterminator/<uuid:uuid>/', ExterminatorView.as_view(), name='get_exterminator_info'),
+    # path('accesstokenlogin/', jwt_views.TokenRefreshView.as_view(), name='token_refresh'),# 리프레시토큰으로 액세스토큰 발급받기
+    # path('token/obtain/', CustomTokenObtainPairView.as_view(), name='token_create'),# 토큰을 아예 발급받는다? 이것은 일단 막아두기
 ]

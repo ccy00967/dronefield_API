@@ -1,25 +1,55 @@
 from django.db import models
 import uuid
+from .storages import LocalImageStorage
 
 # 농지 정보
-class ArableLandInfo(models.Model):
-    uuid = models.UUIDField(unique=True, default=uuid.uuid4, editable=False, db_index=True)
-    owner = models.ForeignKey('user.CustomUser',related_name = 'land_owner',on_delete=models.CASCADE)
 
-    # 디지털트윈 토지임야정보 API
-    pnu = models.CharField(max_length=30, blank=False, null=False, default='')
-    lndpclAr = models.CharField(max_length=50, blank=False, null=False, default='')
 
-    # 네이버 MAPS API
-    address = models.ForeignKey('common.Address',related_name = 'land_address',on_delete=models.CASCADE)
+class FarmInfo(models.Model):
+    uuid = models.UUIDField(
+        unique=True, default=uuid.uuid4, editable=False, db_index=True
+    )
+    owner = models.ForeignKey(
+        "user.CustomUser", related_name="land_owner", on_delete=models.CASCADE
+    )
 
-    # 행정구역
-    cd = models.CharField(max_length=8, blank=False, null=False, default='')
+    # 네이버 MAPS API, 주소정보
+    road = models.CharField(max_length=50, blank=True, default="")
+    jibun = models.CharField(max_length=50, blank=False, default="")
+    detail = models.CharField(max_length=50, blank=False, default="")
 
-    #농지 추가 정보
-    landNickName = models.CharField(max_length=50, blank=False, default='')
-    cropsInfo = models.CharField(max_length=50, blank=False, default='')
-    additionalPhoneNum = models.CharField(max_length=50, blank=True, null=True)
+    pnu = models.CharField(
+        max_length=30, blank=False, null=False, default=""
+    )  # 디지털트윈 토지임야정보 API
+    lndpclAr = models.CharField(
+        max_length=50, blank=False, null=False, default=""
+    )  # 농지 고유번호
+    # 면적 m^2
+    cd = models.CharField(max_length=8, blank=False, null=False, default="")  # 행정구역
+
+    # 농지 추가 정보
+    landNickName = models.CharField(max_length=50, blank=False, default="")  # 농지 별칭
+    cropsInfo = models.CharField(max_length=50, blank=False, default="")  # 농작물 정보
+    additionalPhoneNum = models.CharField(max_length=50, blank=True, default="") # 추가 연락처
 
     def __str__(self):
         return self.landNickName
+
+
+class FarmInfoImage(models.Model):
+    uuid = models.UUIDField(
+        unique=True, default=uuid.uuid4, editable=False, db_index=True
+    )
+    farm_info = models.ForeignKey(
+        FarmInfo, related_name="images", on_delete=models.CASCADE
+    )
+    image = models.ImageField(
+        upload_to="images/farminfo/",
+        storage=LocalImageStorage(),
+        blank=False,
+        null=False,
+    )
+    create_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.farm_info.landNickName} - {self.image.name}"

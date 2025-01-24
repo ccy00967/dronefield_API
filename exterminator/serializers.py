@@ -30,12 +30,12 @@ class ExterminatorSerializer(serializers.ModelSerializer):
         )
 
     def validate_user(self, value):
-        if Exterminator.objects.filter(user=value).exists():
-            raise serializers.ValidationError("Extermintor Info Create Needed")
+        if CustomUser.objects.filter(uuid=value).exists():
+            raise serializers.ValidationError("CustomUser Info Create Needed")
         return value
 
     def validate_license(self, value):
-        if Exterminator.objects.filter(license=value).exists():
+        if ExterminatorLicense.objects.filter(license_number=value).exists():
             raise serializers.ValidationError("Extermintor License Info Create Needed")
         return value
 
