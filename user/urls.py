@@ -17,6 +17,13 @@ from .service.Nice.views import (
     flutter_nice_auth_view
 )
 
+from .service.SMS.views import (
+    find_id_sendcode,
+    find_id_checkcode,
+    reset_password_sendcode,
+    reset_password_checkcode
+)
+
 from .views import (
     UserRegistrationAPIView,
     UserLoginAPIView,
@@ -36,8 +43,13 @@ urlpatterns = [
     path("validatekeycheck/", validationCheck, name= "validatecheck"),  # 인증번호 인증
     path("passwordreset/", password_reset, name="passwordreset"),  # 비밀번호 재설정
     
-    #아이디 찾기
-    path("findid/", find_id, name="findid"),  # 아이디 찾기
+     #아이디 찾기
+    #path("passwordreset/", send_sms, name="passwordreset"),  # 비밀번호 재설정
+    path("findid/sendcode/", find_id_sendcode, name="findid_sendcode"),
+    path("findid/checkcode/", find_id_checkcode, name="findid_checkcode"),  # 아이디 찾기
+    path("resetpassword/sendcode/", reset_password_sendcode, name="resetpassword_sendcode"),
+    path("resetpassword/checkcode/", reset_password_checkcode, name="resetpassword_checkcode"),
+    
     
     #나이스
     path("nice-token/", niceCrytoToken),  # 나이스 표준창 호출하기
