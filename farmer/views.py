@@ -7,8 +7,8 @@ from django.db.models.functions import Cast
 from django.db.models import FloatField
 from farmer.models import FarmInfo, FarmInfoImage
 from farmer.serializers import FarmInfoSerializer
-from farmer.serializers import FarmInfoUpdateSerializer
-from farmer.serializers import FarmInfoBriefSerializer, FarmInfoImageSerializer
+from farmer.serializers import FarmInfoSerializer, FarmInfoImageSerializer
+#from farmer.serializers import FarmInfoBriefSerializer, FarmInfoImageSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from django.db.models import Sum
@@ -22,7 +22,7 @@ from core.settings import CONSUMER_KEY, CONSUMER_SECRET
 # 농지목록 조회
 class FarmInfoListView(generics.ListAPIView):
     queryset = FarmInfo.objects.all()
-    serializer_class = FarmInfoBriefSerializer
+    serializer_class = FarmInfoSerializer
     name = "land_info_list"
     permission_classes = [permissions.IsAuthenticatedOrReadOnly,]
     pagination_class = CustomPagination
@@ -54,61 +54,6 @@ class FarmInfoCreateView(generics.CreateAPIView):
         serializer.save(owner=self.request.user)
     
     def post(self, request, *args, **kwargs):
-        vworld_key = "6C934ED4-5978-324D-B7DE-AC3A0DDC3B38"
-        jibun = request.data.get("jibun")
-        road = request.data.get("road")
-        pnu = request.data.get("pnu")
-        cd = request.data.get("cd")
-        lndpclAr = request.data.get("lndpclAr")
-        baseurl = "https://api.vworld.kr/req/search"
-        response_pnu = requests.get(f"{baseurl}"
-                                   +f"?page=1&size=1"
-                                   +f"&request=search"
-                                   +f"&query={jibun}"
-                                   +f"&type=address"
-                                   +f"&category=parcel"
-                                   +f"&format=json"
-                                   +f"&key={vworld_key}")
-        
-        response_pnu_result=response_pnu.json()["response"].get("result").get("items")[0].get("id")
-        
-        
-        if response_pnu_result != pnu:
-            return Response(status=status.HTTP_400_BAD_REQUEST, data={"message": "cd값이 일치하지 않습니다."})
-        
-        baseurl = "https://api.vworld.kr/ned/data/ladfrlList"
-        response_lndpclAr = requests.get(f"{baseurl}"
-                                    +f"?domain=https://dronefield.co.kr"
-                                    +f"&pnu={response_pnu_result}"
-                                    +f"&format=json"
-                                    +f"&key={vworld_key}")
-        
-        response_lndpclAr_result = response_lndpclAr.json()["ladfrlVOList"].get("ladfrlVOList")[0].get("lndpclAr")
-        
-        print(f"{pnu} : {response_pnu_result}")
-        print(f"{lndpclAr} : {response_lndpclAr_result}")
-        print(f"{cd} :  ")
-        
-        baseurl_sgisapi = "https://sgisapi.kostat.go.kr/OpenAPI3/auth/authentication.json"
-        response_cd_access = requests.get(f"{baseurl_sgisapi}"
-                                    +f"?consumer_key={CONSUMER_KEY}"
-                                    +f"&consumer_secret={CONSUMER_SECRET}"
-                                    ).json()["result"].get("accessToken")
-        
-        baseurl_sgisapi = "https://sgisapi.kostat.go.kr/OpenAPI3/addr/geocode.json"
-        response_cd_result = requests.get(f"{baseurl_sgisapi}"
-                                    +f"?accessToken={response_cd_access}"
-                                    +f"&address={jibun}")
-        response_cd_result = response_cd_result.json()["result"].get("resultdata")[0].get("ri_cd")
-        print(response_cd_result)
-        
-        if  response_lndpclAr_result != lndpclAr:
-            return Response(status=status.HTTP_400_BAD_REQUEST, data={"message": "lndpclAr값이 일치하지 않습니다."})
-        
-        
-        
-       
-        
         return super().post(request, *args, **kwargs)
         
         
@@ -140,7 +85,7 @@ class FarmInfoAPIView(generics.GenericAPIView):
 
     def patch(self, request, uuid):
         farm_info = self.get_object(uuid)
-        serializer = FarmInfoUpdateSerializer(farm_info, data=request.data, partial=True)
+        serializer = FarmInfoSerializer(farm_info, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
