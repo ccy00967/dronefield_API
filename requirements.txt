@@ -10,7 +10,7 @@ idna==3.10
 inflection==0.5.1
 Naked==0.1.32
 packaging==24.2
-#psycopg-binary==3.2.3
+pillow==11.1.0
 psycopg2==2.9.10
 pycryptodome==3.21.0
 PyJWT==2.10.1
