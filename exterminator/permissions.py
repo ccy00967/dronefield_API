@@ -1,5 +1,12 @@
 from rest_framework import permissions
 
+class IsOwner(permissions.BasePermission):
+    """
+    객체의 소유자만 접근을 허용하는 커스텀 권한 클래스
+    """
+
+    def has_object_permission(self, request, view, obj):
+        return obj.owner == request.user
 """
 ADMIN = 1
 MANAGER = 2
