@@ -36,7 +36,7 @@ from .service.Nice.utils import access_token
 from user.models import CustomUser
 from .permissions import OnlyOwnerCanUpdate
 from rest_framework import generics
-from exterminator.models import Exterminator
+from exterminator.models import ExterminatorLicense
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import AuthenticationFailed
 from user.serializers import (
