@@ -40,7 +40,7 @@ class Drone(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     nickname = models.CharField(max_length=30, blank=True, null=True)
     model_number = models.CharField(max_length=30, blank=True, null=True)
-    fuel_capacity = models.FloatField(blank=True, null=True)
+    capacity = models.FloatField(blank=True, null=True)
     owner = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='drones')
     image = models.ImageField(
         upload_to='drones/images/',
