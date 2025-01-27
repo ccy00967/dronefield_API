@@ -32,9 +32,8 @@ class FarmInfoListView(generics.ListAPIView):
         try:
             queryset = queryset.filter(owner=self.request.user)
         except TypeError:  
-            raise PermissionDenied("로그인이 필요합니다.")
-            
             queryset = queryset.none()
+            return queryset
 
         if "owner" in self.request.query_params:
             owner_uuid = self.request.query_params.get("owner")

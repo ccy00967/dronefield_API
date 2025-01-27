@@ -8,7 +8,7 @@ from user.models import CustomUser
 from rest_framework.views import APIView
 from django.http import Http404
 from django.http import FileResponse
-
+from common.utils.pageanation import CustomPagination
 
 class ExterminatorLicenseImageView(APIView):
     """
@@ -58,7 +58,8 @@ class ExterminatorLicenseListView(generics.ListAPIView):
     permission_classes = [
         permissions.IsAuthenticatedOrReadOnly,
     ]
-
+    pagination_class = CustomPagination
+    
     def get_queryset(self):
         queryset = super().get_queryset()
         try:
@@ -113,6 +114,7 @@ class DroneListAPIView(generics.ListAPIView):
     permission_classes = [
         permissions.IsAuthenticatedOrReadOnly,
     ]
+    pagination_class = CustomPagination
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -135,6 +137,7 @@ class DroneDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
         permissions.IsAuthenticatedOrReadOnly,
     ]
     lookup_field = "uuid"
+    pagination_class = CustomPagination
     
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
