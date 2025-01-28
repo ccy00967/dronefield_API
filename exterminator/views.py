@@ -16,7 +16,7 @@ class ExterminatorLicenseImageView(APIView):
     """
     permission_classes = [permissions.IsAuthenticated, IsOwner]
 
-    def get(self, request, uuid, image_type, format=None):
+    def get(self, request, uuid, image_type):
         # 요청한 사용자가 소유자인지 확인
         license = get_object_or_404(ExterminatorLicense, uuid=uuid, owner=request.user)
 
@@ -32,7 +32,7 @@ class ExterminatorLicenseImageView(APIView):
             raise Http404("이미지를 찾을 수 없습니다.")
 
         # 파일 제공
-        return FileResponse(file.open(), content_type='image/jpeg')  # 필요에 따라 content_type 조정
+        return FileResponse(file.open('rb'), content_type='image/jpeg')  # 필요에 따라 content_type 조정
 class ExterminatorLicenseCreateView(generics.CreateAPIView):
     """
     POST /exterminator-license/  -> 라이선스 생성
@@ -154,11 +154,11 @@ class DroneImageView(APIView):
     permission_classes = [permissions.IsAuthenticated, IsOwner]
     name = "drone-image"
 
-    def get(self, request, uuid, format=None):
+    def get(self, request, uuid):
         # 요청한 사용자가 소유자인지 확인
         drone = get_object_or_404(Drone, uuid=uuid, owner=request.user)
         if not drone.image:
             raise Http404("이미지를 찾을 수 없습니다.")
 
         # 파일 제공
-        return FileResponse(drone.image.open(), content_type='image/jpeg')  # 필요에 따라 content_type 조정
+        return FileResponse(drone.image.open('rb'), content_type='image/jpeg')

@@ -4,13 +4,19 @@ from user.models import CustomUser
 from django.utils import timezone
 import uuid
 
+class Registration(models.IntegerChoices):
+    INDIVIDUAL = 1, _("개인")
+    CORPORATE = 2, _("법인")
+    SIMPLE = 3, _("간이")
 
 # Drone Exterminator License
 class ExterminatorLicense(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    license_title = models.CharField(max_length=30, blank=True, null=True)
     license_number = models.CharField(max_length=30, blank=True, null=True)
     lincense_nickname = models.CharField(max_length=30, blank=True, null=True)
     #model_number = models.CharField(max_length=30, blank=True, null=True)
+    business_registration_type = models.CharField(max_length=30, blank=True, null=True)
     worker_registration_number = models.CharField(max_length=30, blank=True, null=True)
     owner = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='exterminator_license')
     
