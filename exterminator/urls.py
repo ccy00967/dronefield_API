@@ -16,8 +16,8 @@ urlpatterns = [
     ),
     
     # 드론
-    path("drones/", views.DroneListAPIView.as_view(), name=views.DroneListAPIView.name),
-    path("drone/", views.DroneCreateAPIView.as_view(), name=views.DroneCreateAPIView.name),
-    path("drone/<uuid:uuid>/", views.DroneDetailAPIView.as_view(), name=views.DroneDetailAPIView.name),
-    path("drone/<uuid:uuid>/image/", views.DroneImageView.as_view(), name=views.DroneImageView.name),
+    path("drones/", views.DroneListAPIView.as_view(), name="drone-list"),
+    path("drone/", views.DroneCreateAPIView.as_view(), name="drone-create"),
+    path("drone/<uuid:uuid>/", views.DroneDetailAPIView.as_view(), name="drone-detail"),
+    #path("drone/<uuid:uuid>/image/", views.DroneImageView.as_view(), name='drone-image'),
 ]

@@ -9,7 +9,12 @@ from rest_framework.views import APIView
 from django.http import Http404
 from django.http import FileResponse
 from common.utils.pageanation import CustomPagination
-
+from django.http import JsonResponse
+from django.http import HttpResponseForbidden
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.viewsets import ModelViewSet
+from django.core.files.storage import default_storage
+import uuid
 class ExterminatorLicenseImageView(APIView):
     """
     GET /exterminator-license/<uuid>/image/<image_type>/ -> 보호된 이미지 조회
@@ -91,74 +96,68 @@ class ExterminatorLicenseDetailView(generics.RetrieveUpdateDestroyAPIView):
         
 class DroneCreateAPIView(generics.CreateAPIView):
     """
-    POST /drone/  -> 드론 생성
+    POST /drone/ -> 드론 생성
     """
     name = "drone-create"
     queryset = Drone.objects.all()
     serializer_class = DroneSerializer
-    permission_classes = [
-        permissions.IsAuthenticated,
-    ]
+    permission_classes = [permissions.IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
 
     def perform_create(self, serializer):
-        serializer.save(owner=self.request.user)
-        return super().perform_create(serializer)
-
+        return serializer.save(owner=self.request.user)
 class DroneListAPIView(generics.ListAPIView):
     """
-    GET /drone/  -> 드론 목록 조회
+    GET /drone/ -> 드론 목록 조회
     """
     name = "drone-list"
-    queryset = Drone.objects.all()
     serializer_class = DroneSerializer
-    permission_classes = [
-        permissions.IsAuthenticatedOrReadOnly,
-    ]
+    permission_classes = [permissions.IsAuthenticated]
     pagination_class = CustomPagination
+    parser_classes = [MultiPartParser, FormParser]
 
     def get_queryset(self):
-        queryset = super().get_queryset()
-        try:
-            queryset = queryset.filter(owner=self.request.user)
-        except TypeError:
-            queryset = queryset.none()
-        return queryset
+        """
+        현재 로그인된 사용자의 드론만 반환
+        """
+        return Drone.objects.filter(owner=self.request.user)
+
 
 class DroneDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     """
     GET /drone/<uuid>/   -> 드론 조회
     PATCH /drone/<uuid>/ -> 드론 부분 수정
     PUT /drone/<uuid>/   -> 드론 전체 수정
+    DELETE /drone/<uuid>/ -> 드론 삭제
     """
     name = "drone-detail"
-    queryset = Drone.objects.all()
     serializer_class = DroneSerializer
-    permission_classes = [
-        permissions.IsAuthenticatedOrReadOnly,
-    ]
+    permission_classes = [permissions.IsAuthenticated, IsOwner]  # 소유자만 접근 가능
     lookup_field = "uuid"
-    pagination_class = CustomPagination
-    
+    parser_classes = [MultiPartParser, FormParser]
+
+    def get_queryset(self):
+        """
+        소유자의 드론만 조회 가능
+        """
+        return Drone.objects.filter(owner=self.request.user)
+
+    def perform_update(self, serializer):
+        return super().perform_update(serializer)
+
+
     def destroy(self, request, *args, **kwargs):
+        """
+        드론 삭제 후 S3 이미지도 삭제
+        """
         instance = self.get_object()
+        # S3에서 이미지 삭제
+        if instance.image:
+            default_storage.delete(instance.image)
+
+        # 드론 삭제
         self.perform_destroy(instance)
         return Response(
             {"message": "드론이 성공적으로 삭제되었습니다."},
             status=status.HTTP_200_OK
         )
-        
-class DroneImageView(APIView):
-    """
-    GET /drone/<uuid>/image/ -> 보호된 이미지 조회
-    """
-    permission_classes = [permissions.IsAuthenticated, IsOwner]
-    name = "drone-image"
-
-    def get(self, request, uuid):
-        # 요청한 사용자가 소유자인지 확인
-        drone = get_object_or_404(Drone, uuid=uuid, owner=request.user)
-        if not drone.image:
-            raise Http404("이미지를 찾을 수 없습니다.")
-
-        # 파일 제공
-        return FileResponse(drone.image.open('rb'), content_type='image/jpeg')

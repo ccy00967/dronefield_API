@@ -10,12 +10,16 @@ from datetime import timedelta
 from decouple import config
 import json
 from django.core.exceptions import ImproperlyConfigured
+import boto3
+from django.core.files.storage import default_storage
+from storages.backends.s3boto3 import S3Boto3Storage
+from django.core.files.base import ContentFile
 
 # ===========================
 # 경로 설정
 # ===========================
-BASE_DIR = Path(__file__).resolve().parent.parent
-ROOT_DIR = os.path.dirname(BASE_DIR)
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ROOT_DIR = Path(__file__).resolve(strict=True).parent.parent.parent
 
 
 # ===========================
@@ -57,20 +61,17 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework_simplejwt",
     "corsheaders",
-    # "drf_yasg",
-    # 커스텀 앱
-    # "common.apps.CommonConfig",
+    "storages",
+    # 내부 앱
     "user",
-    # "validation",
-    # "customer",
     "exterminator",
     "trade",
     "common",
     "payments",
     "farmer",
     "core",
-    # "account",
 ]
+
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
@@ -144,19 +145,6 @@ TIME_ZONE = "Asia/Seoul"
 USE_I18N = True
 USE_TZ = False
 
-
-# ===========================
-# 정적 파일 (Static files)
-# ===========================
-STATIC_ROOT = os.path.join(BASE_DIR, "static")
-STATIC_URL = "/static/"
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
-
-# ===========================
-# 미디어 파일 (Media files)
-# ===========================
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # ===========================
 # 사용자 모델
@@ -242,23 +230,6 @@ CORS_ALLOW_HEADERS = [
 # ===========================
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# ===========================
-# 로깅 설정
-# ===========================
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "handlers": {
-        "console": {"class": "logging.StreamHandler"},
-    },
-    "loggers": {
-        "django": {
-            "handlers": ["console"],
-            "level": "INFO",
-        },
-    },
-}
-
 #==============================
 # 로그인 URL 설정
 #==============================
@@ -275,14 +246,38 @@ CONSUMER_SECRET = config("CONSUMER_SECRET")
 # ===========================
 # S3 설정
 # ===========================
-# DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
 
-# AWS_ACCESS_KEY_ID = config("AWS_ACCESS_KEY_ID")
-# AWS_SECRET_ACCESS_KEY = config("AWS_SECRET_ACCESS_KEY")
-# AWS_STORAGE_BUCKET_NAME = config("AWS_STORAGE_BUCKET_NAME")
-# AWS_S3_REGION_NAME = config("AWS_S3_REGION_NAME")
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
-# AWS_S3_QUERYPARAM_AUTH = False
-# AWS_S3_FILE_OVERWRITE = False
-# AWS_DEFAULT_ACL = None
+AWS_ACCESS_KEY_ID = config("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = config("AWS_SECRET_ACCESS_KEY")
+AWS_STORAGE_BUCKET_NAME = config("AWS_STORAGE_BUCKET_NAME")
+AWS_S3_REGION_NAME = config('AWS_S3_REGION_NAME', 'ap-northeast-2')
+AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com'
 
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_URL  = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
+
+
+#from django.conf import settings
+#from django.utils.module_loading import import_string
+
+# Import S3 Storage Class
+#storage_class = import_string(settings.DEFAULT_FILE_STORAGE)
+#default_storage = storage_class()
+
+# print("==============s3================")
+# print(f"DEFAULT_FILE_STORAGE: {settings.DEFAULT_FILE_STORAGE}")
+# print(f"Default storage: {default_storage}")
+# print("==============s3================")
+# from django.core.files.storage import default_storage
+
+# # 테스트 파일 업로드
+# with default_storage.open('test.txt', 'w') as file:
+#     file.write('Hello, S3!')
+
+# print("File uploaded to S3")
