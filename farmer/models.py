@@ -21,9 +21,7 @@ class FarmInfo(models.Model):
     pnu = models.CharField(
         max_length=30, blank=False, null=False, default=""
     )  # 디지털트윈 토지임야정보 API
-    lndpclAr = models.CharField(
-        max_length=50, blank=False, null=False, default=""
-    )  # 농지 고유번호
+    lndpclAr = models.FloatField(blank=False, null=False)  # 농지 고유번호
     # 면적 m^2
     cd = models.CharField(max_length=10, blank=False, null=False, default="")  # 행정구역
 

@@ -10,19 +10,19 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('farmer', '0001_initial'),
+        ('exterminator', '0001_initial'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='farminfo',
+            model_name='drone',
             name='owner',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='land_owner', to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='drones', to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
-            model_name='farminfoimage',
-            name='farm_info',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='images', to='farmer.farminfo'),
+            model_name='exterminatorlicense',
+            name='owner',
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='exterminator_license', to=settings.AUTH_USER_MODEL),
         ),
     ]
