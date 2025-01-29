@@ -130,9 +130,11 @@ class ProfileSerializer(BaseUserSerializer):
         ]
 
     def update(self, instance, validated_data):
-        instance.name = validated_data.get("name", instance.name)
-        instance.email = validated_data.get("email", instance.email)
-        instance.mobileno = validated_data.get("mobileno", instance.mobileno)
+        #FIX: 이메일 변경시 중복 확인 필요
+        #instance.mobileno = validated_data.get("mobileno", instance.mobileno)
+        instance.road = validated_data.get("road", instance.road)
+        instance.jibun = validated_data.get("jibun", instance.jibun)
+        instance.detail = validated_data.get("detail", instance.detail)
         instance.save()
         return instance
 

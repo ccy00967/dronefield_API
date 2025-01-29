@@ -18,7 +18,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.http import JsonResponse
 from rest_framework_simplejwt.views import TokenBlacklistView
-
+from rest_framework_simplejwt.tokens import RefreshToken
 
 # from drf_yasg.utils import swagger_auto_schema
 from . import swagger_doc
@@ -166,12 +166,30 @@ class ProfileAPIView(generics.RetrieveUpdateAPIView):
     # TODO: 실명등 nice에서 가져오는 거는 수정이 안되게 해야함
     def patch(self, request):
         try:
-            serializer = self.get_serializer(request.user, data=request.data, partial=True)
+            serializer = self.get_serializer(
+                request.user, data=request.data, partial=True
+            )
             serializer.is_valid(raise_exception=True)
             serializer.save()
-            print(request.data)
-            print(serializer.data)
             return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(
+                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+class UserDeleteView(APIView):
+    permission_classes = [IsAuthenticated]
+    def delete(self, request):
+        user = request.user
+        
+        try:
+            user.is_active = False
+            user.save()
+            refresh_token = request.data.get("refresh_token")
+            if refresh_token:
+                token = RefreshToken(refresh_token)
+                token.blacklist()
+
+            return Response({"message": "회원 탈퇴가 완료되었습니다."}, status=status.HTTP_204_NO_CONTENT)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

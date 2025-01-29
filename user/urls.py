@@ -30,6 +30,7 @@ from .views import (
     UserLogoutAPIView,
     ProfileAPIView,
     DeviceSessionView,
+    UserDeleteView,
     find_id
 )
 
@@ -42,6 +43,7 @@ urlpatterns = [
     path("validatekey/", emailValidationSend, name="validatekey"),  # 이메일로 인증번호 전송
     path("validatekeycheck/", validationCheck, name= "validatecheck"),  # 인증번호 인증
     path("passwordreset/", password_reset, name="passwordreset"),  # 비밀번호 재설정
+    path("delete/", UserDeleteView.as_view(), name="delete"),  # 회원탈퇴
     
      #아이디 찾기
     #path("passwordreset/", send_sms, name="passwordreset"),  # 비밀번호 재설정
