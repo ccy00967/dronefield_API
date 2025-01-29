@@ -50,7 +50,7 @@ def create_test():
             jibun=f"TestJibun{i}",
             detail=f"TestDetail{i}",
             pnu=f"pnu{i}",
-            lndpclAr=20.00,
+            lndpclAr="20.00",
             cd=f"cd{i}",
             landNickName=f"landNickName{i}",
             cropsInfo=f"cropsInfo{i}",
@@ -90,7 +90,7 @@ def create_test():
             uuid=uuid.uuid4(),
             nickname=f"nickname{i}",
             model_number=f"model_number{i}",
-            capacity=20.00,
+            capacity="20.00",
             owner=exter,
             image=drone_image_url,  # S3 URL 저장
         )
@@ -121,7 +121,7 @@ def create_test():
                 jibun=f"TestJibun{j}",
                 detail=f"TestDetail{j}",
                 pnu=f"pnu{j}",
-                lndpclAr=20.00,
+                lndpclAr="20.00",
                 cd=f"cd{j}",
                 landNickName=f"landNickName{j}",
                 cropsInfo=f"cropsInfo{j}",
@@ -141,11 +141,30 @@ def create_test():
                 uuid=uuid.uuid4(),
                 nickname=f"nickname{j}",
                 model_number=f"model_number{j}",
-                capacity=20.00,
+                capacity="20.00",
                 owner=user,  # 기존 `CustomUser.objects.get(name=f"test{i}")` 제거
                 image=drone_image_url,  # S3 URL 저장
             )
+            
+    user = CustomUser.objects.create(
+            uuid=uuid.uuid4(),
+            name=f"test50",
+            birthdate="19900101",
+            gender=random.choice(gender_choices),
+            nationalinfo=random.choice(nation_choices),
+            mobileno=f"999999999999",
+            email=f"test50@test.com",
+            type=random.choice(type_choices),
+            road=f"TestRoad50",
+            jibun=f"TestJibun50",
+            detail=f"TestDetail50",
+            is_active=True,
+    )
+    user = CustomUser.objects.get(name=f"test50")
+    user.set_password("test1234@")
+    user.save()
         
+    
 
 
 create_test()

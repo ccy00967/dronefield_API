@@ -13,9 +13,6 @@ class FarmInfoSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
     def validate(self, data):
-        if "lndpclAr" in data and not data["lndpclAr"].isdigit():
-            raise serializers.ValidationError({"lndpclAr": "lndpclAr는 숫자여야 합니다."})
-        
         return data
     
     def create(self, validated_data):

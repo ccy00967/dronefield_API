@@ -114,9 +114,7 @@ class TotalLandAreaAPIView(generics.GenericAPIView):
         user_lands = FarmInfo.objects.filter(owner=request.user)
 
        # lndpclAr를 FloatField로 변환한 후 합산하고 None을 0으로 처리
-        total_area = user_lands.aggregate(
-            total_lndpclAr=Sum(Cast('lndpclAr', FloatField()), output_field=FloatField())
-        )['total_lndpclAr'] or 0
+        total_area = user_lands.aggregate(total_lndpclAr=Sum(Cast('lndpclAr', FloatField())))['total_lndpclAr'] or 0
 
         # 응답 데이터 직렬화 및 반환
         return Response({'total_lndpclAr': total_area})

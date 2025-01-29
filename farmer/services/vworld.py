@@ -101,6 +101,6 @@ def serch_pnu(road: str, jibun: str) -> Dict[str, Any]:
     # lndpclAr 값 추출 및 기본값 설정
     lndpclAr = lndpclAr_list[0].get("lndpclAr", 11)
     response_result["lndpclAr"] = lndpclAr
-    logger.debug(f"Land Area (lndpclAr): {lndpclAr}")
+    #logger.debug(f"Land Area (lndpclAr): {lndpclAr}")
     
     return response_result
