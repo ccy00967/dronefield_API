@@ -3,6 +3,8 @@ from botocore.exceptions import NoCredentialsError, PartialCredentialsError
 from core import settings
 from django.core.files.storage import default_storage
 import uuid
+from django.core.files.uploadedfile import InMemoryUploadedFile
+import io
 
 def s3_upload_file(file_obj, file_name):
     """
@@ -17,15 +19,31 @@ def s3_upload_file(file_obj, file_name):
             aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
             region_name=settings.AWS_S3_REGION_NAME
         )
+        #추가인 부분
+        if isinstance(file_obj, InMemoryUploadedFile):
+            file_obj.seek(0)  # 파일 읽기 위치를 처음으로 이동
+            file_data = io.BytesIO(file_obj.read())  # 파일을 BytesIO 객체로 변환
+            content_type = file_obj.content_type  # 파일의 Content-Type 유지
+        else:
+            file_data = file_obj
+            content_type = "application/octet-stream"
+        
         
         # S3에 파일 객체 업로드
         s3_client.upload_fileobj(
-            file_obj,  # 파일 객체
+            file_data,
             settings.AWS_STORAGE_BUCKET_NAME,
             file_name,
-            ExtraArgs={'ACL': 'public-read'}  # 퍼블릭 읽기 권한 (옵션)
+            ExtraArgs={'ACL': 'public-read'}#, 'ContentType': content_type}  # ContentType 추가
         )
+        
         return f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.{settings.AWS_S3_REGION_NAME}.amazonaws.com/{file_name}"
+    except NoCredentialsError:
+        print("AWS 자격 증명이 설정되지 않았습니다.")
+        return None
+    except PartialCredentialsError:
+        print("AWS 자격 증명이 일부만 설정되었습니다.")
+        return None
     except Exception as e:
         print(f"파일 업로드 실패: {str(e)}")
         return None
