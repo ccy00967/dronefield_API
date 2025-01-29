@@ -47,3 +47,26 @@ def s3_upload_file(file_obj, file_name):
     except Exception as e:
         print(f"파일 업로드 실패: {str(e)}")
         return None
+
+def s3_delete_file(file_url):
+    """
+    S3에서 파일 삭제
+    :param file_url: 삭제할 파일의 S3 URL
+    """
+    try:
+        s3_client = boto3.client(
+            's3',
+            aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+            region_name=settings.AWS_S3_REGION_NAME
+        )
+        
+        # S3 URL에서 파일 경로 추출
+        file_key = file_url.split(f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.{settings.AWS_S3_REGION_NAME}.amazonaws.com/")[-1]
+        
+        # 파일 삭제
+        s3_client.delete_object(Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=file_key)
+        print(f"Deleted old S3 file: {file_key}")
+        
+    except Exception as e:
+        print(f"S3 파일 삭제 실패: {str(e)}")

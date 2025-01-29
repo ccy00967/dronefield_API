@@ -4,7 +4,7 @@ from exterminator.models import ExterminatorLicense, Drone
 from django.urls import reverse
 import uuid
 from django.core.files.storage import default_storage
-from common.utils.s3 import s3_upload_file
+from common.utils.s3 import s3_upload_file, s3_delete_file
 
 class ExterminatorLicenseSerializer(serializers.ModelSerializer):
     license_image = serializers.ImageField(write_only=True, required=False)  # POST 요청에서 이미지를 파일로 받음
@@ -54,19 +54,25 @@ class ExterminatorLicenseSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         license_image_file = validated_data.pop('license_image', None)
         business_registration_image_file = validated_data.pop('business_registration_image', None)
-        uuid_key= uuid.uuid4()
-        
+        uuid_key = uuid.uuid4()
+
+        # 기존 이미지 삭제 후 새 이미지 업로드
         if license_image_file:
+            if instance.license_image:  # 기존 이미지가 있다면 삭제
+                s3_delete_file(instance.license_image)
+
             license_image_name = f'exterminator/images/license/{uuid_key}.jpg'
             license_s3_url = s3_upload_file(license_image_file, license_image_name)
             validated_data['license_image'] = license_s3_url
-            
+
         if business_registration_image_file:
+            if instance.business_registration_image:  # 기존 이미지가 있다면 삭제
+                s3_delete_file(instance.business_registration_image)
+
             business_registration_image_name = f'exterminator/images/business/{uuid_key}.jpg'
             business_registration_url = s3_upload_file(business_registration_image_file, business_registration_image_name)
             validated_data['business_registration_image'] = business_registration_url
-              
-              
+
         return super().update(instance, validated_data)
 
     
