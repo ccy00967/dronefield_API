@@ -452,7 +452,8 @@ class DeviceSessionView(APIView):
         if not self.is_valid_uuid(device_uuid):
             return JsonResponse({"status": "error", "message": "Invalid Device UUID"}, status=400)
 
-        # 세션 ID 생성 및 저장
+        
+        # 세션 생성
         session_id = self.create_session(request, device_uuid)
 
         return JsonResponse({
@@ -479,6 +480,7 @@ class DeviceSessionView(APIView):
     def create_session(self, request, device_uuid):
         # 동일한 UUID로 기존 세션 확인
         existing_session = Session.objects.filter(session_key=request.session.session_key).first()
+        print(existing_session)
         if existing_session:
             return request.session.session_key
 

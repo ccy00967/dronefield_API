@@ -4,13 +4,14 @@ from user.models import CustomUser
 from django.utils import timezone
 import uuid
 import os
+from user.models import CustomUser
 
 # Drone Exterminator License
 class ExterminatorLicense(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     license_title = models.CharField(max_length=30, blank=True, null=True)
-    license_number = models.CharField(max_length=30, blank=True, null=True)
-    #lincense_nickname = models.CharField(max_length=30, blank=True, null=True)
+    license_number = models.CharField(max_length=30, blank=True, null=True, default="0000000000")
+    lincense_holder_name = models.CharField(max_length=30, blank=True, null=True, default=CustomUser.objects.get)
     #model_number = models.CharField(max_length=30, blank=True, null=True)
     business_registration_type = models.CharField(max_length=30, blank=True, null=True)
     worker_registration_number = models.CharField(max_length=30, blank=True, null=True)

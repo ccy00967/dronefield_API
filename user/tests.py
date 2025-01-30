@@ -80,6 +80,7 @@ def create_test():
             uuid=uuid.uuid4(),
             license_title=f"license_title{i}",
             license_number=f"license_number{i}",
+            lincense_holder_name=f"lincense_holder_name{i}",
             business_registration_type=f"business_registration_type{i}",
             worker_registration_number=f"worker_registration_number{i}",
             owner=exter,
@@ -131,6 +132,7 @@ def create_test():
                 uuid=uuid.uuid4(),
                 license_title=f"license_title{j}",
                 license_number=f"license_number{j}",
+                lincense_holder_name=f"lincense_holder_name{j}",
                 business_registration_type=f"business_registration_type{j}",
                 worker_registration_number=f"worker_registration_number{j}",
                 owner=user,  # 기존 `CustomUser.objects.get(name=f"test{i}")` 제거

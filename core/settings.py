@@ -189,7 +189,7 @@ SESSION_COOKIE_SECURE = True #TODO: 개발환경 세팅
 #SESSION_COOKIE_SAMESITE = 'Lax'
 
 CSRF_COOKIE_SECURE = True
-CSRF_COOKIE_SAMESITE = "None"
+CSRF_COOKIE_SAMESITE = None
 
 
 # ===========================
