@@ -1,11 +1,13 @@
 from user.models import CustomUser
 from farmer.models import FarmInfo
 from exterminator.models import ExterminatorLicense, Drone
+from trade.models import Request, BankAccount
 import uuid
 import random
 from common.utils.s3 import s3_upload_file, s3_delete_file
 from farmer.models import FarmInfo
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.utils.timezone import now
 
 gender_choices = ['0', '1'] # 예: 여성, 남성
 nation_choices = ['0', '1'] # 예: 내국인, 외국인인
@@ -39,6 +41,8 @@ def create_test():
         jibun=f"TestJibun_farmer",
         detail=f"TestDetail_farmer",
         is_active=True,
+        sent_agreement=True,
+        sent_agreement_date=now()
     )
     famrmer.set_password("test1234@")
     famrmer.save() 
@@ -54,7 +58,8 @@ def create_test():
             cd=f"cd{i}",
             landNickName=f"landNickName{i}",
             cropsInfo=f"cropsInfo{i}",
-            additionalPhoneNum=f"0100000{1000+i:04}"
+            additionalPhoneNum=f"0100000{1000+i:04}",
+            min_price=25
         )
         
         
@@ -72,6 +77,8 @@ def create_test():
         jibun=f"TestJibun_exterminator",
         detail=f"TestDetail_exterminator",
         is_active=True,
+        sent_agreement=True,
+        sent_agreement_date=now()
     )
     exter.set_password("test1234@")
     exter.save() 
@@ -110,6 +117,8 @@ def create_test():
             jibun=f"TestJibun{i}",
             detail=f"TestDetail{i}",
             is_active=True,
+            sent_agreement=True,
+            sent_agreement_date=now()
         )
         user.set_password("test1234@")
         user.save()
@@ -126,7 +135,8 @@ def create_test():
                 cd=f"cd{j}",
                 landNickName=f"landNickName{j}",
                 cropsInfo=f"cropsInfo{j}",
-                additionalPhoneNum=f"0100000{1000+j:04}"
+                additionalPhoneNum=f"0100000{1000+j:04}",
+                min_price=25
             )
             ExterminatorLicense.objects.create(
                 uuid=uuid.uuid4(),
@@ -147,7 +157,9 @@ def create_test():
                 owner=user,  # 기존 `CustomUser.objects.get(name=f"test{i}")` 제거
                 image=drone_image_url,  # S3 URL 저장
             )
-            
+        
+        
+#=========비어있는 계정================    
     user = CustomUser.objects.create(
             uuid=uuid.uuid4(),
             name=f"test50",
@@ -161,6 +173,8 @@ def create_test():
             jibun=f"TestJibun50",
             detail=f"TestDetail50",
             is_active=True,
+            sent_agreement=True,
+            sent_agreement_date=now()
     )
     user = CustomUser.objects.get(name=f"test50")
     user.set_password("test1234@")

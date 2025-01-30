@@ -29,7 +29,7 @@ class FarmInfo(models.Model):
     landNickName = models.CharField(max_length=50, blank=False, default="")  # 농지 별칭
     cropsInfo = models.CharField(max_length=50, blank=False, default="")  # 농작물 정보
     additionalPhoneNum = models.CharField(max_length=50, blank=True, default="") # 추가 연락처
-
+    min_price = models.PositiveIntegerField(blank=False, null=False, default=0)# 최소 가격
     def __str__(self):
         return self.landNickName
 
