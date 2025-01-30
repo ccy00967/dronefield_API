@@ -14,7 +14,8 @@ from .service.Nice.views import (
     niceCrytoToken,
     getNicePassUserData,
     nice_auth_view,
-    flutter_nice_auth_view
+    flutter_nice_auth_view,
+    view_session_data
 )
 
 from .service.SMS.views import (
@@ -63,6 +64,7 @@ urlpatterns = [
     
     #세션
     path("session/", DeviceSessionView.as_view(), name="session"),  # 세션 생성
+    #path("sessioncheck/", view_session_data, name="sessioncheck"),  # 세션 체크
     # FIX : 미사용
     # path('manager/users/', ManageUserListView.as_view(), name='manage_get_users'),
     # path('manager/<uuid:uuid>/', ManageUserRetrieveUpdateDestroyView.as_view(), name='manage_update_users'),

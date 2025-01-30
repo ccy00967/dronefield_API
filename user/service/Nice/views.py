@@ -41,10 +41,10 @@ def niceCrytoToken(request):
     }
     response = requests.post(url, data=json.dumps(datas), headers=headers)
 
-    print("=====================================")
-    print(response.json())
-    print(response.json()["dataBody"])
-    print("=====================================")
+    # print("=====================================")
+    # print(response.json())
+    # print(response.json()["dataBody"])
+    # print("=====================================")
     
     #응답 받은 데이터 암호화
     sitecode = response.json()["dataBody"]["site_code"]
@@ -154,3 +154,16 @@ def nice_auth_view(request):
 
 def flutter_nice_auth_view(request):
     return render(request, "flutter_nice_auth.html", {})
+
+
+from django.contrib.sessions.models import Session
+from django.utils import timezone
+
+def view_session_data(request, session_key):
+    # 세션 키를 사용하여 해당 세션 객체 조회
+    try:
+        session = Session.objects.get(session_key=session_key, expire_date__gt=timezone.now())
+        session_data = session.get_decoded()  # 세션 데이터 디코드
+        return HttpResponse(f"All session data: {session_data}")
+    except Session.DoesNotExist:
+        return HttpResponse("Session not found or expired")

@@ -429,6 +429,18 @@ def password_reset(request):
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 class DeviceSessionView(APIView):
+    def get(self, request):
+        session_key = request.session.session_key
+        
+        if not session_key:
+            return Response({"status": "error", "message": "Session not found"}, status=404)
+        
+        session_data = Session.objects.filter(session_key=session_key).first()
+        if not session_data:
+            return Response({"status": "error", "message": "Session not found"}, status=404)
+        
+        return Response({"session_key": session_key, "session_data": session_data.get_decoded()}, status=200)
+    
     def post(self, request):
         # 요청에서 기기 UUID 가져오기
         device_uuid = request.data.get("device_uuid")
