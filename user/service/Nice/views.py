@@ -41,6 +41,11 @@ def niceCrytoToken(request):
     }
     response = requests.post(url, data=json.dumps(datas), headers=headers)
 
+    print("=====================================")
+    print(response.json())
+    print(response.json()["dataBody"])
+    print("=====================================")
+    
     #응답 받은 데이터 암호화
     sitecode = response.json()["dataBody"]["site_code"]
     token_version_id = response.json()["dataBody"]["token_version_id"]
