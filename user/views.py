@@ -410,8 +410,6 @@ def password_reset(request):
         gender = request.session.get('gender')
         nationalinfo = request.session.get('nationalinfo')
         mobileno = request.session.get('mobileno')
-        print(request.headers)
-        print(request.session.get('name'))
         if request.session.get('name') is None:
             return Response({"message": "세션이 만료되었습니다."}, status=status.HTTP_401_UNAUTHORIZED)
         user = CustomUser.objects.filter(

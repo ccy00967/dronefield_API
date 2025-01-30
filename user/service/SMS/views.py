@@ -7,6 +7,7 @@ from user.models import CustomUser
 from rest_framework.response import Response
 from rest_framework import status
 import uuid
+from django.contrib.sessions.backends.db import SessionStore
 
 
 send_url = "https://apis.aligo.in/send/"  # 요청을 던지는 URL, 현재는 문자보내기
@@ -22,7 +23,7 @@ def find_id_sendcode(request):
     name = request.data.get("name")
     birthdate = request.data.get("birthdate")
     mobileno = request.data.get("mobileno")
-
+    
     user = CustomUser.objects.filter(
         name=name, birthdate=birthdate, mobileno=mobileno
     ).first()
@@ -59,23 +60,56 @@ def find_id_sendcode(request):
         "testmode_yn": "N",  # 테스트모드 적용 여부 Y/N
     }
     response = requests.post(send_url, data=sms_data)
-    return Response(data=response.json(), status=status.HTTP_200_OK)
+    response_json = response.json()
+    response_json["sessionid"] = request.session.session_key
+    return Response(data=response_json, status=status.HTTP_200_OK)
 
 @api_view(("POST",))
 def find_id_checkcode(request):
-    validate_key = request.data.get("validate_key")
-    if validate_key == request.session["validate_key"]:
+    if not request.session.session_key:
+        sessionid = request.session.session_key
+    if request.data.get("sessionid"):
+        sessionid = request.data.get("sessionid")
+    else:
+        return Response({"message": "sessionid가 없습니다."}, status=status.HTTP_400_BAD_REQUEST)
+    
+    
+    session_store = SessionStore(session_key=sessionid)
+    validate_key = session_store.get("validate_key")  # 세션에 저장된 validate_key
+
+    if not validate_key:
+        return Response({"message": "validate_key가 필요합니다."}, status=status.HTTP_400_BAD_REQUEST)
+
+    if validate_key == request.data.get("validate_key"):
+        name = session_store.get("name")
+        birthdate = session_store.get("birthdate")
+        mobileno = session_store.get("mobileno")
+
+        if not (name and birthdate and mobileno):
+            return Response({"message": "세션에 필요한 정보가 없습니다."}, status=status.HTTP_400_BAD_REQUEST)
+
         user = CustomUser.objects.filter(
-            name=request.session["name"],
-            birthdate=request.session["birthdate"],
-            mobileno=request.session["mobileno"],
+            name=name,
+            birthdate=birthdate,
+            mobileno=mobileno,
         ).first()
+
+        if not user:
+            return Response(
+                {"message": "해당 정보로 가입된 사용자를 찾을 수 없습니다."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        
+        session_store.delete()
+        
         return Response(
-            {"message": "인증번호가 일치합니다.", "id": user.email}, status=status.HTTP_200_OK
+            {"message": "아이디 찾기를 성공했습니다.", "id": user.email},
+            status=status.HTTP_200_OK
         )
     else:
         return Response(
-            {"message": "인증번호가 일치하지 않습니다."}, status=status.HTTP_400_BAD_REQUEST
+            {"message": "인증번호가 일치하지 않습니다."},
+            status=status.HTTP_400_BAD_REQUEST
         )
 
 @api_view(("POST",))
@@ -121,28 +155,56 @@ def reset_password_sendcode(request):
         "testmode_yn": "N",  # 테스트모드 적용 여부 Y/N
     }
     response = requests.post(send_url, data=sms_data)
-    return Response(data=response.json(), status=status.HTTP_200_OK)
+    response_json = response.json()
+    response_json["sessionid"] = request.session.session_key
+    return Response(data=response_json, status=status.HTTP_200_OK)
 
 @api_view(("POST",))
 def reset_password_checkcode(request):
-    validate_key = request.data.get("validate_key")
-    if validate_key == request.session["validate_key"]:
-        email = request.session["email"]
-        password = request.data.get("password")
-        try:
-            user = CustomUser.objects.filter(email=email).first()
-            user.set_password(password)
-            return Response(
-                {"message": "비밀번호가 변경되었습니다."}, status=status.HTTP_200_OK
-            )
-        except Exception as e:
-            return Response(
-                {"message": "비밀번호 변경에 실패했습니다."}, status=status.HTTP_400_BAD_REQUEST
-            )
+    if not request.session.session_key:
+        sessionid = request.session.session_key
+    if request.data.get("sessionid"):
+        sessionid = request.data.get("sessionid")
     else:
-        return Response(
-            {"message": "인증번호가 일치하지 않습니다."}, status=status.HTTP_400_BAD_REQUEST
-        )
+        return Response({"message": "sessionid가 없습니다."}, status=status.HTTP_400_BAD_REQUEST)
     
+    
+    session_store = SessionStore(session_key=sessionid)
+    validate_key = session_store.get("validate_key")
+    
+    if not validate_key:
+        return Response({"message": "validate_key가 필요합니다."}, status=status.HTTP_400_BAD_REQUEST)
+    
+    if validate_key == request.data.get("validate_key"):
+        email = session_store.get("email")
+        name = session_store.get("name")
+        birthdate = session_store.get("birthdate")
+        mobileno = session_store.get("mobileno")
+        password = request.data.get("password")
+        
+        if not (email and name and birthdate and mobileno):
+            return Response({"message": "세션에 필요한 정보가 없습니다."}, status=status.HTTP_400_BAD_REQUEST)
+
+        user = CustomUser.objects.filter(
+            email=email,
+            name=name,
+            birthdate=birthdate,
+            mobileno=mobileno,
+        ).first()
+
+        if not user:
+            return Response(
+                {"message": "해당 정보로 가입된 사용자를 찾을 수 없습니다."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        
+        user.set_password(password)
+        user.save()
+        session_store.delete()
+        
+        return Response(
+            {"message": "비밀번호 변경이 되었습니다."},
+            status=status.HTTP_200_OK
+        )
     
     
