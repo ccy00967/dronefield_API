@@ -66,7 +66,7 @@ class UserRegistrationAPIView(generics.GenericAPIView):
     permission_classes = (AllowAny,)
     
     def post(self, request):
-        token_version_id = request.session.get("token_version_id")
+        token_version_id = request.data.get("token_version_id")
         if token_version_id:
             cache_data = cache.get(token_version_id)
             isNicePassDone = cache_data.get("isNicePassDone")
@@ -288,6 +288,8 @@ def validationCheck(request):
     try:
         if token_version_id:
             cache_data = cache.get(token_version_id)
+            if cache_data is None:
+                return Response({"message": "token_version_id error"}, status=status.HTTP_400_BAD_REQUEST)
             validate_key = cache_data.get("validate_key")
         elif request.session.get("ValidateKey"):
             validate_key = request.session.get("ValidateKey")

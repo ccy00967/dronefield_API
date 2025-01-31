@@ -78,7 +78,9 @@ def niceCrytoToken(request):
         "hmac_key": hmac_key,
     }
     cache.set(token_version_id, chach_data, timeout=1200)  # 5분동안 캐시에 저장
-
+    #인메모리 DB = 캐시 => RAM= 읽기더빠른데 용량이 적지지 Redis
+    #DB => HDD, SSD => 읽기는 느리지만 용량이 큼
+    
     # 세션에 저장
     request.session["token_version_id"] = token_version_id
     request.session["req_no"] = req_no
@@ -93,9 +95,7 @@ def niceCrytoToken(request):
         "m": "service",
         "token_version_id": token_version_id,
         "enc_data": enc_data,
-        "integrity_value": integrity_value,
-        "session_id": request.session.session_key,
-        
+        "integrity_value": integrity_value, 
     }
     response_url = f"{base_url}?{urlencode(base_data)}"
     
