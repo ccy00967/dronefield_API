@@ -136,11 +136,20 @@ class TossPaymentsUpdateDeleteView(generics.RetrieveUpdateAPIView):
             try:
                 # orderid를 'orderId'로 수정하여 필드명 일치시킴
                 request_instance = Request.objects.get(orderId=orderid)
+                
+                # requestTosspayments의 tossOrderId가 요청된 tossOrderId와 일치하는지 확인
+                if request_instance.requestTosspayments and request_instance.requestTosspayments.tossOrderId != tossOrderId:
+                    return Response(
+                        {"message": f"orderId {orderid}에 대한 TossOrderId가 일치하지 않습니다."},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+                
             except Request.DoesNotExist:
                 return Response(
                     {"message": f"Request with orderId {orderid} does not exist."},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
+
 
             # 사용자 타입에 따른 금액 계산
             if request.user.type == 3:
@@ -176,6 +185,10 @@ class TossPaymentsUpdateDeleteView(generics.RetrieveUpdateAPIView):
         # 토스 결제확인 데이터
         tosspayData = response.json()
 
+        # toss_payment 인스턴스를 직접 수정하고 저장하기
+        toss_payment.status = tosspayData["status"]
+        toss_payment.save()
+
         # 해당 신청서들 업데이트
         for orderid in orderIdList:
             if request.user.type == 3:
@@ -184,12 +197,12 @@ class TossPaymentsUpdateDeleteView(generics.RetrieveUpdateAPIView):
                     exterminateState=0,
                     reservateTosspayments=None,
                     reservateDepositState=0,
-                    depositCancelTransactionKey=tosspayData.transactionKey,
+                    depositCancelTransactionKey=tosspayData.get('cancels')[0].get("transactionKey"),
                 )
             elif request.user.type == 4:
                 Request.objects.filter(orderId=orderid).update(
                     requestDepositState=2,
-                    requestCancelTransactionKey=tosspayData.transactionKey,
+                    requestCancelTransactionKey=tosspayData.get('cancels')[0].get("transactionKey"),
                 )
 
         return Response(

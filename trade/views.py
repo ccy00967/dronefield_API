@@ -1,6 +1,7 @@
 import math
 from rest_framework import generics
 from rest_framework import permissions
+from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 
@@ -44,11 +45,15 @@ def count_by_exterminateState(request):
     if queryset is None:
         return Response({"detail": "Invalid User provided!"}, status=400)
 
-    before_pay_count = queryset.filter(exterminateState=0, requestDepositState=0).count()
-    matching_count = queryset.filter(exterminateState=0, requestDepositState=1).count()
-    preparing_count = queryset.filter(exterminateState=1, requestDepositState=1).count()
-    exterminating_count = queryset.filter(exterminateState=2, requestDepositState=1).count()
-    done_count = queryset.filter(exterminateState=3, requestDepositState=1).count()
+    try:
+        before_pay_count = queryset.filter(exterminateState=0, requestDepositState=0).count()
+        matching_count = queryset.filter(exterminateState=0, requestDepositState=1).count()
+        preparing_count = queryset.filter(exterminateState=1, requestDepositState=1).count()
+        exterminating_count = queryset.filter(exterminateState=2, requestDepositState=1).count()
+        done_count = queryset.filter(exterminateState=3, requestDepositState=1).count()
+    except Exception as e:
+        return Response({"message": f"Error occurred while counting: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
     return Response(
         {
@@ -72,6 +77,7 @@ class RequestCreateAPIView(generics.CreateAPIView):
     name = "request-list"
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
+    # TODO: REFACTOR: 시리얼라이저로 옮기기
     def perform_create(self, serializer):
         landinfo = FarmInfo.objects.get(uuid=self.kwargs.get("landuuid"))
         setAveragePrice = self.request.data["setAveragePrice"]
@@ -188,6 +194,7 @@ class ExterminatorWorkRequestListAPIView(generics.ListAPIView):
 class ExterminatorWorkRequestRetrieveAPIView(generics.RetrieveAPIView):
     queryset = Request.objects.all()
     serializer_class = RequestDetailSerializer
+    lookup_field = "orderId"
     name = "exterminator-work-request-detail"
     permission_classes = (
         permissions.IsAuthenticatedOrReadOnly,
@@ -234,15 +241,29 @@ class ExterminateStateUpdateView(generics.RetrieveUpdateAPIView):
     def patch(self, request, *args, **kwargs):
         # PATCH 요청의 데이터에서 exterminateState 값을 가져오기
         exterminate_state = request.data.get("exterminateState")
-
-        # exterminateState가 유효한 값(1, 2, 3, 4)인지 확인
+    
+        # exterminateState가 None이거나 빈 문자열인 경우 처리
+        if exterminate_state is None or exterminate_state == "":
+            return Response(
+                {"error": "exterminateState is required."},
+                status=400
+            )
+    
+        # exterminateState를 정수로 변환 시도
+        try:
+            exterminate_state = int(exterminate_state)  # 문자열을 정수로 변환
+        except ValueError:
+            return Response(
+                {"error": "Invalid value for exterminateState. It must be an integer."},
+                status=400
+            )
+    
+        # exterminateState가 유효한 값(1, 2, 3)인지 확인
         if exterminate_state not in [1, 2, 3]:
             return Response(
                 {"error": "Invalid value for exterminateState. It must be one of [1, 2, 3]."},
                 status=400
             )
-
+    
         # 유효하면 기존의 partial_update 호출
         return self.partial_update(request, *args, **kwargs)
-
-#TODO: 환불 로직 만들기 - 결제된 신청서의 삭제는 환불로직을 따름

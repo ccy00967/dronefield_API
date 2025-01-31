@@ -30,6 +30,10 @@ class RequestSerializer(serializers.ModelSerializer):
         
 # 신청서 세부정보 - 오직 GET인 View에서만 사용하기
 class RequestDetailSerializer(serializers.ModelSerializer):
+    landInfo = FarmInfoSerializer(read_only=True)
+    requestTosspayments = serializers.CharField(source="requestTosspayments",default=None)
+    reservateTosspayments = serializers.CharField(source="reservateTosspayments.tossOrderId", default=None)
+    
     class Meta:
         model = Request
         fields='__all__'
@@ -39,7 +43,8 @@ class RequestDetailSerializer(serializers.ModelSerializer):
 
 # 신청서 업데이트
 class RequestUpdateSerializer(serializers.ModelSerializer):
-    requestTosspayments = serializers.CharField(source="requestTosspayments.tossOrderId",default=None)
+    landInfo = FarmInfoSerializer(read_only=True)
+    requestTosspayments = serializers.CharField(source="requestTosspayments",default=None)
     reservateTosspayments = serializers.CharField(source="reservateTosspayments.tossOrderId", default=None)
 
     class Meta:
