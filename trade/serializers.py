@@ -39,6 +39,7 @@ class RequestDetailSerializer(serializers.ModelSerializer):
 
 # 신청서 업데이트
 class RequestUpdateSerializer(serializers.ModelSerializer):
+    landInfo = FarmInfoSerializer(read_only=True)
     requestTosspayments = serializers.CharField(source="requestTosspayments.tossOrderId",default=None)
     reservateTosspayments = serializers.CharField(source="reservateTosspayments.tossOrderId", default=None)
 
