@@ -102,7 +102,7 @@ class UserRegistrationAPIView(generics.GenericAPIView):
                 status=status.HTTP_401_UNAUTHORIZED,
             )
         # 방제사라면 인증후 직접 바꾸어줌
-        if request.data["role"] == 3:
+        if request.data["type"] == 3:
             is_active = False
         else:
             is_active = True

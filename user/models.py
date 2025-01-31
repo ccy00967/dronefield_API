@@ -66,9 +66,7 @@ class CustomUserManager(BaseUserManager):
 
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
-    uuid = models.UUIDField(
-        db_index=True, unique=True, default=uuid.uuid4, editable=False
-    )
+    uuid = models.UUIDField(db_index=True, unique=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=16, blank=False, editable=False)
     birthdate = models.CharField(max_length=8, blank=False, editable=False)
     gender = models.CharField(max_length=1, choices=Gender.choices, blank=False, editable=False)
