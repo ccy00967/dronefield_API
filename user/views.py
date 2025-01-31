@@ -240,7 +240,7 @@ def emailValidationSend(request):
             cache_data["email"] = receive_email
             cache_data["validate_key"] = validate_key
             cache_data["isEmailValidate"] = False
-            cache_data.set(token_version_id, cache_data, timeout=1200)  # 5분동안 캐시에 저장
+            cach.set(token_version_id, cache_data, timeout=1200)  # 5분동안 캐시에 저장
         else:
             request.session["email"] = receive_email
             request.session["ValidateKey"] = validate_key
@@ -297,7 +297,7 @@ def validationCheck(request):
         if send_validate_key == validate_key:
             if token_version_id:
                 cache_data["isEmailValidate"] = True
-                cache_data.set(token_version_id, cache_data, timeout=1200)
+                cache.set(token_version_id, cache_data, timeout=1200)
                 return Response({"message": "email validated"}, status=status.HTTP_200_OK)
             else:
                 request.session["isEmailValidate"] = True
