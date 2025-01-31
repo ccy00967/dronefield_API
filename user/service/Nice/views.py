@@ -17,7 +17,7 @@ from datetime import datetime
 from urllib.parse import urlencode
 from django.contrib.sessions.models import Session
 from .utils import (encrypt_data, decrypt_data, clientID, secretKey, APIUrl, productID, access_token, isNicePassDone)
-
+from django.shortcuts import redirect
 
 @api_view(('POST',))
 def niceCrytoToken(request):
@@ -77,9 +77,7 @@ def niceCrytoToken(request):
         "iv": iv,
         "hmac_key": hmac_key,
     }
-    cache.set(token_version_id, chach_data, timeout=1200)  # 5분동안 캐시에 저장
-    #인메모리 DB = 캐시 => RAM= 읽기더빠른데 용량이 적지지 Redis
-    #DB => HDD, SSD => 읽기는 느리지만 용량이 큼
+    cache.set(token_version_id, chach_data, timeout=1200)# 5분동안 캐시에 저장
     
     # 세션에 저장
     request.session["token_version_id"] = token_version_id
@@ -113,22 +111,21 @@ def getNicePassUserData(request):
     """
         url: /user/nice-callback/
     """
-    try:
-        token_version_id = request.GET.get("token_version_id")
-        enc_data = request.GET.get("enc_data")
-        integrity_value = request.GET.get("integrity_value")
-        
-        cache_data = cache.get(token_version_id)
-        
-        if not cache_data:
-            return Response({"message": "해당 token_version_id에 대한 캐시 데이터가 없습니다."}, status=400)
-        
-        key = cache_data.get("key")
-        iv = cache_data.get("iv")
-        hmac_key = cache_data.get("hmac_key")
-        req_no = cache_data.get("req_no")
-    except Session.DoesNotExist:
-        return Response({"message": "세션값이 존재하지 않습니다."}, status = status.HTTP_400_BAD_REQUEST)
+
+    token_version_id = request.GET.get("token_version_id")
+    enc_data = request.GET.get("enc_data")
+    integrity_value = request.GET.get("integrity_value")
+    
+    cache_data = cache.get(token_version_id)
+    
+    if not cache_data:
+        return Response({f"message": f"해당 token_version_id:{token_version_id}에 대한 캐시 데이터가 없습니다."}, status=400)
+    
+    key = cache_data.get("key")
+    iv = cache_data.get("iv")
+    hmac_key = cache_data.get("hmac_key")
+    req_no = cache_data.get("req_no")
+
      
     h = hmac.new(
         key=hmac_key.encode(),
@@ -166,19 +163,16 @@ def getNicePassUserData(request):
         request.session["isNicePassDone"] = True
         request.session.save() 
 
-        return Response({
-            "name": dec_data["name"],
-            "birthdate": dec_data["birthdate"],
-            "request_method":request.method,
-            "request_body": request.data,
-            "request_query": request.query_params,
-            "request_cookies": request.COOKIES,
-            "request_session": request.session,
-            "request_session_key": request.session.session_key,
-        }, status = status.HTTP_200_OK)
-    
+        frontend_url = "https://yourfrontend.com/auth-success/"  # 실제 프론트엔드 URL로 변경
+        params = {'token_version_id': token_version_id}
+        redirect_url = f"{frontend_url}?{urlencode(params)}"
+
+        return redirect(redirect_url)
+        
     except Exception as e:
         return Response({"message": f"에러 발생: {e}"}, status = status.HTTP_400_BAD_REQUEST)
+    
+    
     
 def get_nice_form(request):
     return render(request, 'nice.html')  
