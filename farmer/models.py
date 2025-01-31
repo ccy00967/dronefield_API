@@ -21,17 +21,15 @@ class FarmInfo(models.Model):
     pnu = models.CharField(
         max_length=30, blank=False, null=False, default=""
     )  # 디지털트윈 토지임야정보 API
-    lndpclAr = models.CharField(
-        max_length=50, blank=False, null=False, default=""
-    )  # 농지 고유번호
+    lndpclAr = models.CharField(max_length=50, blank=True, null=True)  # 농지 고유번호
     # 면적 m^2
-    cd = models.CharField(max_length=8, blank=False, null=False, default="")  # 행정구역
+    cd = models.CharField(max_length=10, blank=False, null=False, default="")  # 행정구역
 
     # 농지 추가 정보
     landNickName = models.CharField(max_length=50, blank=False, default="")  # 농지 별칭
     cropsInfo = models.CharField(max_length=50, blank=False, default="")  # 농작물 정보
     additionalPhoneNum = models.CharField(max_length=50, blank=True, default="") # 추가 연락처
-
+    min_price = models.PositiveIntegerField(blank=False, null=False, default=0)# 최소 가격
     def __str__(self):
         return self.landNickName
 

@@ -1,63 +1,163 @@
-from rest_framework import generics
-from rest_framework import permissions
-
-from exterminator.permissions import OnlyOwnerExterminatorCanUpdate
-
+from rest_framework import generics, permissions, status
 from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
+from .models import ExterminatorLicense, Drone
+from .serializers import ExterminatorLicenseSerializer, DroneSerializer
+from .permissions import IsOwner
+from user.models import CustomUser
+from rest_framework.views import APIView
+from django.http import Http404
+from django.http import FileResponse
+from common.utils.pageanation import CustomPagination
+from django.http import JsonResponse
+from django.http import HttpResponseForbidden
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.viewsets import ModelViewSet
+from django.core.files.storage import default_storage
+import uuid
+class ExterminatorLicenseImageView(APIView):
+    """
+    GET /exterminator-license/<uuid>/image/<image_type>/ -> 보호된 이미지 조회
+    """
+    permission_classes = [permissions.IsAuthenticated, IsOwner]
 
-from exterminator.models import Exterminator
-from exterminator.models import ExterminatorLicense
-from exterminator.serializers import ExterminatorSerializer
-from exterminator.serializers import ExterminatorLicenseSerializer
+    def get(self, request, uuid, image_type):
+        # 요청한 사용자가 소유자인지 확인
+        license = get_object_or_404(ExterminatorLicense, uuid=uuid, owner=request.user)
 
+        # 제공할 이미지 타입 결정
+        if image_type == 'license_image':
+            file = license.license_image
+        elif image_type == 'business_registration_image':
+            file = license.business_registration_image
+        else:
+            return Response({"detail": "유효하지 않은 이미지 타입입니다."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if not file:
+            raise Http404("이미지를 찾을 수 없습니다.")
 
-# TODO: 현재 해당 로직은 사용자로부터 라이센스를 받아서 업데이트 할 수 없음. 둘 중 하나로 수정 필요
-# 1. 라이센스 정보를 팩스 등, 수동으로 받아서 DB에 우리가 업로드
-# 2. 라이센스 정보를 사용자로부터 받아서 업데이트
-# a. 어쨌든 두 방법 모두 농민이, 본인 담당 방제사 정보를 불러올때 Exterminator 객체를 불러오게 대규모 수정해야함
+        # 파일 제공
+        return FileResponse(file.open('rb'), content_type='image/jpeg')  # 필요에 따라 content_type 조정
+class ExterminatorLicenseCreateView(generics.CreateAPIView):
+    """
+    POST /exterminator-license/  -> 라이선스 생성
+    """
+    name = "exterminator-license-create"
+    queryset = ExterminatorLicense.objects.all()
+    serializer_class = ExterminatorLicenseSerializer
+    permission_classes = [
+        permissions.IsAuthenticated,         # 생성은 인증된 사용자만 가능
+    ]
 
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+        return super().perform_create(serializer)
 
-# 방제사 정보
-class ExterminatorView(generics.ListCreateAPIView):
-    serializer_class = ExterminatorSerializer
-    name = "exterminator-info"
-    lookup_field = "uuid"
+class ExterminatorLicenseListView(generics.ListAPIView):
+    """
+    GET /exterminator-license/  -> 라이선스 목록 조회
+    """
+    name = "exterminator-license-list"
+    queryset = ExterminatorLicense.objects.all()
+    serializer_class = ExterminatorLicenseSerializer
     permission_classes = [
         permissions.IsAuthenticatedOrReadOnly,
-        OnlyOwnerExterminatorCanUpdate,
     ]
+    pagination_class = CustomPagination
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        try:
+            queryset = queryset.filter(owner=self.request.user)
+        except TypeError:
+            queryset = queryset.none()
+        return queryset
+class ExterminatorLicenseDetailView(generics.RetrieveUpdateDestroyAPIView):
+    """
+    GET /exterminator-license/<uuid>/   -> 라이선스 조회
+    PATCH /exterminator-license/<uuid>/ -> 라이선스 부분 수정
+    PUT /exterminator-license/<uuid>/   -> 라이선스 전체 수정
+    """
+    name = "exterminator-license-detail"
+    queryset = ExterminatorLicense.objects.all()
+    serializer_class = ExterminatorLicenseSerializer
+    permission_classes = [
+        permissions.IsAuthenticatedOrReadOnly,
+    ]
+    lookup_field = "uuid"
+    
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response(
+            {"message": "라이선스가 성공적으로 삭제되었습니다."},
+            status=status.HTTP_200_OK
+        )
+        
+class DroneCreateAPIView(generics.CreateAPIView):
+    """
+    POST /drone/ -> 드론 생성
+    """
+    name = "drone-create"
+    queryset = Drone.objects.all()
+    serializer_class = DroneSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
+
+    def perform_create(self, serializer):
+        return serializer.save(owner=self.request.user)
+class DroneListAPIView(generics.ListAPIView):
+    """
+    GET /drone/ -> 드론 목록 조회
+    """
+    name = "drone-list"
+    serializer_class = DroneSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    pagination_class = CustomPagination
+    parser_classes = [MultiPartParser, FormParser]
 
     def get_queryset(self):
-        # URL에서 uuid 추출 후, 해당 uuid에 해당하는 Exterminator들을 한 번에 조회
-        return Exterminator.objects.filter(user__uuid=self.kwargs['uuid'])
+        """
+        현재 로그인된 사용자의 드론만 반환
+        """
+        return Drone.objects.filter(owner=self.request.user)
 
 
-class ExterminatorLicenseView(generics.RetrieveUpdateAPIView):
-    queryset = Exterminator.objects.all()
-    serializer_class = ExterminatorLicenseSerializer
+class DroneDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
+    """
+    GET /drone/<uuid>/   -> 드론 조회
+    PATCH /drone/<uuid>/ -> 드론 부분 수정
+    PUT /drone/<uuid>/   -> 드론 전체 수정
+    DELETE /drone/<uuid>/ -> 드론 삭제
+    """
+    name = "drone-detail"
+    serializer_class = DroneSerializer
+    permission_classes = [permissions.IsAuthenticated, IsOwner]  # 소유자만 접근 가능
     lookup_field = "uuid"
-    name = "exterminator-license"
+    parser_classes = [MultiPartParser, FormParser]
 
-    def patch(self, request, *args, **kwargs):
-        # 'uuid'를 사용하여 Exterminator 객체를 찾음
-        uuid = kwargs.get("uuid")
-        # user__uuid=uuid는 Exterminator의 user 속성(즉, CustomUser 객체)의 uuid 필드가 요청받은 uuid와 일치하는 Exterminator 객체를 조회
-        exterminator = Exterminator.objects.get(user__uuid=uuid)
+    def get_queryset(self):
+        """
+        소유자의 드론만 조회 가능
+        """
+        return Drone.objects.filter(owner=self.request.user)
 
-        # Exterminator 객체에서 연결된 license 객체를 가져옴
-        license_instance = exterminator.license
+    def perform_update(self, serializer):
+        return super().perform_update(serializer)
 
-        # request의 데이터를 사용하여 license를 업데이트
-        serializer = self.get_serializer(
-            license_instance, data=request.data, partial=True
+
+    def destroy(self, request, *args, **kwargs):
+        """
+        드론 삭제 후 S3 이미지도 삭제
+        """
+        instance = self.get_object()
+        # S3에서 이미지 삭제
+        if instance.image:
+            default_storage.delete(instance.image)
+
+        # 드론 삭제
+        self.perform_destroy(instance)
+        return Response(
+            {"message": "드론이 성공적으로 삭제되었습니다."},
+            status=status.HTTP_200_OK
         )
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        print(request.data)
-        print(serializer.data)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    permission_classes = [
-        permissions.IsAuthenticatedOrReadOnly,
-        OnlyOwnerExterminatorCanUpdate,
-    ]

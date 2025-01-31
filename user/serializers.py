@@ -130,9 +130,11 @@ class ProfileSerializer(BaseUserSerializer):
         ]
 
     def update(self, instance, validated_data):
-        instance.name = validated_data.get("name", instance.name)
-        instance.email = validated_data.get("email", instance.email)
-        instance.mobileno = validated_data.get("mobileno", instance.mobileno)
+        #FIX: 이메일 변경시 중복 확인 필요
+        #instance.mobileno = validated_data.get("mobileno", instance.mobileno)
+        instance.road = validated_data.get("road", instance.road)
+        instance.jibun = validated_data.get("jibun", instance.jibun)
+        instance.detail = validated_data.get("detail", instance.detail)
         instance.save()
         return instance
 
@@ -163,10 +165,7 @@ class UserLoginSerializer(serializers.Serializer):
         email = data["email"]
         password = data["password"]
 
-        # TODO: 비밀번호가 맞지 않아도 로그인이 된다.
-        # 위의 값을 이용해서 유저정보를 찾음, 유저 객체를 반환받음, is_active == False면 None
         user = authenticate(email=email, password=password)
-        # 인증 실패 시, 비밀번호를 체크하여 더 상세한 오류를 처리
         if user is None:
             try:
                 user = CustomUser.objects.get(email=email)

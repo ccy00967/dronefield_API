@@ -1,13 +1,24 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from user.models import CustomUser
-
+from django.utils import timezone
+import uuid
+import os
+from user.models import CustomUser
 
 # Drone Exterminator License
 class ExterminatorLicense(models.Model):
-    license_number = models.CharField(max_length=30, blank=False, null=False)
-    model_number = models.CharField(max_length=30, blank=False, null=False)
-    worker_registration_number = models.CharField(max_length=30, blank=False, null=False)
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    license_title = models.CharField(max_length=30, blank=True, null=True)
+    license_number = models.CharField(max_length=30, blank=True, null=True, default="0000000000")
+    lincense_holder_name = models.CharField(max_length=30, blank=True, null=True, default=CustomUser.objects.get)
+    #model_number = models.CharField(max_length=30, blank=True, null=True)
+    business_registration_type = models.CharField(max_length=30, blank=True, null=True)
+    worker_registration_number = models.CharField(max_length=30, blank=True, null=True)
+    owner = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='exterminator_license')
+    
+    license_image = models.URLField(max_length=500, blank=True, null=True)
+    business_registration_image = models.URLField(max_length=500, blank=True, null=True)
 
     def __str__(self):
         return f"{self.license_number} - {self.model_number}"
@@ -16,23 +27,24 @@ class ExterminatorLicense(models.Model):
         verbose_name = _("Exterminator License")
         verbose_name_plural = _("Exterminator Licenses")
 
+# def drone_image_upload_to(instance, filename):
+#     ext = filename.split('.')[-1]  # 파일 확장자
+#     filename = f"{uuid.uuid4()}.{ext}"  # 고유한 파일 이름 생성
+#     return os.path.join('drones/images', filename)  # 업로드 경로 반환
 
-# Exterminator Model
-class Exterminator(models.Model):
-    user = models.OneToOneField(
-        CustomUser,
-        related_name="exterminator_profile",  # Unique related_name to avoid clashes
-        on_delete=models.PROTECT,
-    )
-    license = models.OneToOneField(
-        ExterminatorLicense,
-        related_name="license_for_exterminator",  # More descriptive to avoid conflicts
-        on_delete=models.CASCADE,
-    )
+class Drone(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    nickname = models.CharField(max_length=30, blank=True, null=True)
+    model_number = models.CharField(max_length=30, blank=True, null=True)
+    capacity = models.CharField(max_length=30,blank=True, null=True)
+    owner = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='drones')
+    image = models.URLField(max_length=500, blank=True, null=True)
+    
 
     def __str__(self):
-        return f"{self.user.name} - {self.license.license_number}"
+        return self.nickname if self.nickname else str(self.uuid)
 
     class Meta:
-        verbose_name = _("Exterminator")
-        verbose_name_plural = _("Exterminators")
+        verbose_name = _("Drone")
+        verbose_name_plural = _("Drones")
+

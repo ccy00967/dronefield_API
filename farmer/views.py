@@ -2,14 +2,16 @@ from rest_framework import generics
 from rest_framework import permissions
 from rest_framework.permissions import IsAuthenticated
 from farmer.permissions import OnlyOwnerCanUpdate
+
 from rest_framework.exceptions import NotFound
 
+import requests
 from django.db.models.functions import Cast
 from django.db.models import FloatField
 from farmer.models import FarmInfo, FarmInfoImage
 from farmer.serializers import FarmInfoSerializer
-from farmer.serializers import FarmInfoUpdateSerializer
-from farmer.serializers import FarmInfoBriefSerializer, FarmInfoImageSerializer
+from farmer.serializers import FarmInfoSerializer, FarmInfoImageSerializer
+#from farmer.serializers import FarmInfoBriefSerializer, FarmInfoImageSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from django.db.models import Sum
@@ -18,11 +20,12 @@ from trade.models import Request
 from rest_framework.exceptions import PermissionDenied
 from rest_framework import viewsets
 from django.shortcuts import render
+from core.settings import CONSUMER_KEY, CONSUMER_SECRET
 
 # 농지목록 조회
 class FarmInfoListView(generics.ListAPIView):
     queryset = FarmInfo.objects.all()
-    serializer_class = FarmInfoBriefSerializer
+    serializer_class = FarmInfoSerializer
     name = "land_info_list"
     permission_classes = [permissions.IsAuthenticatedOrReadOnly,]
     pagination_class = CustomPagination
@@ -32,9 +35,8 @@ class FarmInfoListView(generics.ListAPIView):
         try:
             queryset = queryset.filter(owner=self.request.user)
         except TypeError:  
-            raise PermissionDenied("로그인이 필요합니다.")
-            
             queryset = queryset.none()
+            return queryset
 
         if "owner" in self.request.query_params:
             owner_uuid = self.request.query_params.get("owner")
@@ -52,6 +54,13 @@ class FarmInfoCreateView(generics.CreateAPIView):
     # 신청한 유저 정보를 함께 저장
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
+    
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
+        
+        
+    
+        
 
 
 # 농지 정보 조회, 수정, 삭제
@@ -77,7 +86,7 @@ class FarmInfoAPIView(generics.GenericAPIView):
 
     def patch(self, request, uuid):
         farm_info = self.get_object(uuid)
-        serializer = FarmInfoUpdateSerializer(farm_info, data=request.data, partial=True)
+        serializer = FarmInfoSerializer(farm_info, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
@@ -107,9 +116,7 @@ class TotalLandAreaAPIView(generics.GenericAPIView):
         user_lands = FarmInfo.objects.filter(owner=request.user)
 
        # lndpclAr를 FloatField로 변환한 후 합산하고 None을 0으로 처리
-        total_area = user_lands.aggregate(
-            total_lndpclAr=Sum(Cast('lndpclAr', FloatField()), output_field=FloatField())
-        )['total_lndpclAr'] or 0
+        total_area = user_lands.aggregate(total_lndpclAr=Sum(Cast('lndpclAr', FloatField())))['total_lndpclAr'] or 0
 
         # 응답 데이터 직렬화 및 반환
         return Response({'total_lndpclAr': total_area})

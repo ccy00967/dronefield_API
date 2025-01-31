@@ -87,6 +87,7 @@ class RequestCreateAPIView(generics.CreateAPIView):
             landInfo=landinfo,
             requestAmount=math.ceil(price),
         )
+        
 
     # def get_queryset(self):
     #     user = self.request.user
