@@ -236,7 +236,6 @@ def emailValidationSend(request):
         # 세션에 이메일과 인증번호 저장
         if token_version_id:
             cache_data = cache.get(token_version_id)
-            cache_data = {}
             cache_data["email"] = receive_email
             cache_data["validate_key"] = validate_key
             cache_data["isEmailValidate"] = False
@@ -289,8 +288,7 @@ def validationCheck(request):
     try:
         if token_version_id:
             cache_data = cache.get(token_version_id)
-            cache_data = {}
-            validate_key = cache_data["validate_key"]
+            validate_key = cache_data.get("validate_key")
         elif request.session.get("ValidateKey"):
             validate_key = request.session.get("ValidateKey")
 
