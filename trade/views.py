@@ -193,6 +193,7 @@ class ExterminatorWorkRequestListAPIView(generics.ListAPIView):
 class ExterminatorWorkRequestRetrieveAPIView(generics.RetrieveAPIView):
     queryset = Request.objects.all()
     serializer_class = RequestDetailSerializer
+    lookup_field = "orderId"
     name = "exterminator-work-request-detail"
     permission_classes = (
         permissions.IsAuthenticatedOrReadOnly,
