@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, parser_classes
 from rest_framework.parsers import JSONParser
 from django.conf import settings
+from django.core.cache import cache
 import requests
 import base64
 import hashlib
@@ -68,6 +69,15 @@ def niceCrytoToken(request):
         ).digest()
     
     integrity_value = base64.b64encode(h).decode("utf-8")
+
+    chach_data = {
+        "token_version_id": token_version_id,
+        "req_no": req_no,
+        "key": key,
+        "iv": iv,
+        "hmac_key": hmac_key,
+    }
+    cache.set_many(chach_data, timeout=600)  # 5분동안 캐시에 저장
 
     # 세션에 저장
     request.session["token_version_id"] = token_version_id
