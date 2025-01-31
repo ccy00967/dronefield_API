@@ -123,7 +123,7 @@ def getNicePassUserData(request):
     cache_data = cache.get(token_version_id)
     
     if not cache_data:
-        return Response({f"message": f"해당 token_version_id:{token_version_id}에 대한 캐시 데이터가 없습니다."}, status=400)
+        return Response({f"message": f"해당 token_version_id:{cache_data}에 대한 캐시 데이터가 없습니다."}, status=400)
     
     key = cache_data.get("key")
     iv = cache_data.get("iv")
