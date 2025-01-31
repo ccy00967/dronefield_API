@@ -74,14 +74,14 @@ def niceCrytoToken(request):
     
     integrity_value = base64.b64encode(h).decode("utf-8")
 
-    chach_data = {
+    cache_data  = {
         "token_version_id": token_version_id,
         "req_no": req_no,
         "key": key,
         "iv": iv,
         "hmac_key": hmac_key,
     }
-    cache.set(token_version_id, chach_data, timeout=1200)# 5분동안 캐시에 저장
+    cache.set(token_version_id, cache_data , timeout=1200)# 5분동안 캐시에 저장
     
     # 세션에 저장
     request.session["token_version_id"] = token_version_id
@@ -120,7 +120,9 @@ def getNicePassUserData(request):
         token_version_id = request.GET.get("token_version_id") or request.data.get("token_version_id")
         enc_data = request.GET.get("enc_data") or request.data.get("enc_data")
         integrity_value = request.GET.get("integrity_value") or request.data.get("integrity_value")
-        
+        print(token_version_id)
+        print(enc_data)
+        print(integrity_value)
         if not token_version_id:
             return Response(
                 {"message": "token_version_id가 필요합니다."}, 
@@ -191,11 +193,16 @@ def getNicePassUserData(request):
         request.session.save() 
 
         # 리다이렉션 URL 설정 (프론트엔드 URL 또는 모바일 딥 링크)
-        frontend_url = "https://yourfrontend.com/auth-success/"  # 실제 프론트엔드 URL로 변경
-        params = {'token_version_id': token_version_id}
-        redirect_url = f"{frontend_url}?{urlencode(params)}"
+        # frontend_url = "https://yourfrontend.com/auth-success/"  # 실제 프론트엔드 URL로 변경
+        # params = {'token_version_id': token_version_id}
+        # redirect_url = f"{frontend_url}?{urlencode(params)}"
     
-        return redirect(redirect_url)
+        # return redirect(redirect_url)
+        
+        return Response(
+            {"message": "나이스 인증이 완료되었습니다."}, 
+            status=status.HTTP_200_OK
+        )
     
     except Exception as e:
         return Response(
