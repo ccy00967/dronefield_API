@@ -20,6 +20,9 @@ from .utils import (encrypt_data, decrypt_data, clientID, secretKey, APIUrl, pro
 
 @api_view(('POST',))
 def niceCrytoToken(request):
+    """
+        url: /user/nice-token/
+    """
     base_url = "https://api.dronefield.co.kr"
     returnURL = base_url + "/user/nice-callback/"
     
@@ -40,11 +43,6 @@ def niceCrytoToken(request):
         "dataBody": {"req_dtim": req_dtim, "req_no": req_no, "enc_mode": "1"},
     }
     response = requests.post(url, data=json.dumps(datas), headers=headers)
-
-    # print("=====================================")
-    # print(response.json())
-    # print(response.json()["dataBody"])
-    # print("=====================================")
     
     #응답 받은 데이터 암호화
     sitecode = response.json()["dataBody"]["site_code"]
@@ -100,6 +98,16 @@ def niceCrytoToken(request):
 
 @api_view(('POST','GET'))
 def getNicePassUserData(request):
+    """
+        url: /user/nice-callback/
+    """
+    print("Request Method: ", request.method)
+    print("Request Data: ", request.data)
+    print("Request GET: ", request.GET)
+    print("Request COOKIES: ", request.COOKIES)
+    print("Request session: ", request.session)
+    print("Request session key: ", request.session.session_key)
+    print("QueryDict: ", request.query_params)
     try:
         token_version_id = request.GET.get("token_version_id")
         enc_data = request.GET.get("enc_data")
@@ -142,7 +150,16 @@ def getNicePassUserData(request):
         request.session[isNicePassDone] = True
         request.session.save() 
 
-        return HttpResponse('<script type="text/javascript">'+ 'window.close();' + '</script>', status = status.HTTP_200_OK)
+        return Response({
+            "name": dec_data["name"],
+            "birthdate": dec_data["birthdate"],
+            "request_method":request.method,
+            "request_body": request.data,
+            "request_query": request.query_params,
+            "request_cookies": request.COOKIES,
+            "request_session": request.session,
+            "request_session_key": request.session.session_key,
+        }, status = status.HTTP_200_OK)
     
     except Exception as e:
         return Response({"message": f"에러 발생: {e}"}, status = status.HTTP_400_BAD_REQUEST)

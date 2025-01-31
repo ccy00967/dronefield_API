@@ -133,11 +133,11 @@ class BankAccount(models.Model):
         related_name="bank_owner",
         on_delete=models.PROTECT,
     )
-    bankName = models.CharField(max_length=50, blank=False, default="")
-    accountNumber = models.CharField(max_length=50, blank=False, default="")
-    accountType = models.CharField(max_length=50, blank=False, default="")
-    accountCreated = models.DateTimeField(auto_now_add=True)
-    accountUpdated = models.DateTimeField(auto_now=True)
+    bank_name = models.CharField(max_length=50, blank=False, default="")
+    account_number = models.CharField(max_length=50, blank=False, default="")
+    account_type = models.CharField(max_length=50, blank=False, default="")
+    account_created = models.DateTimeField(auto_now_add=True)
+    account_updated = models.DateTimeField(auto_now=True)
     
     def __str__(self):
         return self.bankName

@@ -46,8 +46,8 @@ def create_test():
     )
     famrmer.set_password("test1234@")
     famrmer.save() 
-    for i in range(20):
-        FarmInfo.objects.create(
+    for i in range(10):
+        farm_info = FarmInfo.objects.create(
             uuid=uuid.uuid4(),
             owner=famrmer,
             road=f"TestRoad{i}",
@@ -61,7 +61,15 @@ def create_test():
             additionalPhoneNum=f"0100000{1000+i:04}",
             min_price=25
         )
-        
+        Request.objects.create(
+            orderId=uuid.uuid4(),
+            owner=famrmer,
+            exterminator=None,
+            landInfo=farm_info,
+            dealmothod=0,
+            startDate=now(),
+            endDate=now(),
+        )
         
     #테스트 방제사
     exter = CustomUser.objects.create(
@@ -82,7 +90,15 @@ def create_test():
     )
     exter.set_password("test1234@")
     exter.save() 
-    for i in range(20):
+    
+    BankAccount.objects.create(
+        uuid=uuid.uuid4(),
+        owner=exter,
+        bank_name="test_은행명칭칭",
+        account_number="1234567890",
+        account_type = "법인명"
+    )
+    for i in range(10):
         ExterminatorLicense.objects.create(
             uuid=uuid.uuid4(),
             license_title=f"license_title{i}",
@@ -103,16 +119,16 @@ def create_test():
             image=drone_image_url,  # S3 URL 저장
         )
      
-    for i in range(50):
+    for i in range(25):
         user = CustomUser.objects.create(
             uuid=uuid.uuid4(),
-            name=f"test{i}",
+            name=f"test_farmer{i}",
             birthdate="19900101",
             gender=random.choice(gender_choices),
             nationalinfo=random.choice(nation_choices),
             mobileno=f"0100000{1000+i:04}",
-            email=f"test{i}@test.com",
-            type=random.choice(type_choices),
+            email=f"test_farmer{i}@test.com",
+            type=4,
             road=f"TestRoad{i}",
             jibun=f"TestJibun{i}",
             detail=f"TestDetail{i}",
@@ -122,8 +138,7 @@ def create_test():
         )
         user.set_password("test1234@")
         user.save()
-
-        for j in range(20):
+        for j in range(10):
             FarmInfo.objects.create(
                 uuid=uuid.uuid4(),
                 owner=user,  # 기존 `CustomUser.objects.get(name=f"test{i}")` 제거
@@ -138,6 +153,33 @@ def create_test():
                 additionalPhoneNum=f"0100000{1000+j:04}",
                 min_price=25
             )
+    for i in range(25):
+        user = CustomUser.objects.create(
+            uuid=uuid.uuid4(),
+            name=f"test_exter{i}",
+            birthdate="19900101",
+            gender=random.choice(gender_choices),
+            nationalinfo=random.choice(nation_choices),
+            mobileno=f"1100000{1100+i:04}",
+            email=f"test_exter{i}@test.com",
+            type=3,
+            road=f"TestRoad{i}",
+            jibun=f"TestJibun{i}",
+            detail=f"TestDetail{i}",
+            is_active=True,
+            sent_agreement=True,
+            sent_agreement_date=now()
+        )    
+        user.set_password("test1234@")
+        user.save()
+        BankAccount.objects.create(
+            uuid=uuid.uuid4(),
+            owner=exter,
+            bank_name="test_은행명칭칭",
+            account_number="1234567890",
+            account_type = "법인명"
+        )
+        for j in range(10):
             ExterminatorLicense.objects.create(
                 uuid=uuid.uuid4(),
                 license_title=f"license_title{j}",
