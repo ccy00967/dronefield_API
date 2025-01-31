@@ -83,7 +83,8 @@ def niceCrytoToken(request):
         "m": "service",
         "token_version_id": token_version_id,
         "enc_data": enc_data,
-        "integrity_value": integrity_value
+        "integrity_value": integrity_value,
+        "session_id": request.session.session_key,
     }
     response_url = f"{base_url}?{urlencode(base_data)}"
     
