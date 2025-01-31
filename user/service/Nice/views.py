@@ -77,7 +77,7 @@ def niceCrytoToken(request):
         "iv": iv,
         "hmac_key": hmac_key,
     }
-    cache.set_many(chach_data, timeout=1200)  # 5분동안 캐시에 저장
+    cache.set(token_version_id, chach_data, timeout=1200)  # 5분동안 캐시에 저장
 
     # 세션에 저장
     request.session["token_version_id"] = token_version_id
@@ -113,13 +113,6 @@ def getNicePassUserData(request):
     """
         url: /user/nice-callback/
     """
-    print("Request Method: ", request.method)
-    print("Request Data: ", request.data)
-    print("Request GET: ", request.GET)
-    print("Request COOKIES: ", request.COOKIES)
-    print("Request session: ", request.session)
-    print("Request session key: ", request.session.session_key)
-    print("QueryDict: ", request.query_params)
     try:
         token_version_id = request.GET.get("token_version_id")
         enc_data = request.GET.get("enc_data")
@@ -135,6 +128,10 @@ def getNicePassUserData(request):
         #     req_no = session_data.get("req_no")
         # elif cache.get("token_version_id"):
         cache_data = cache.get(token_version_id)
+        
+        if not cache_data:
+            return Response({"message": "해당 token_version_id에 대한 캐시 데이터가 없습니다."}, status=400)
+        
         key = cache_data.get("key")
         iv = cache_data.get("iv")
         hmac_key = cache_data.get("hmac_key")
@@ -167,7 +164,7 @@ def getNicePassUserData(request):
         cache_data["nationalinfo"] = dec_data["nationalinfo"]
         cache_data["mobileno"] = dec_data["mobileno"]
         cache_data["isNicePassDone"] = True
-        cache.set_many(cache_data, timeout=1200)  # 5분동안 캐시에 저장
+        cache.set(token_version_id, cache_data, timeout=1200)  # 5분동안 캐시에 저장
         
         
         request.session["name"] = dec_data["name"]
