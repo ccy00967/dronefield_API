@@ -134,11 +134,11 @@ def getNicePassUserData(request):
         #     hmac_key = session_data.get("hmac_key")
         #     req_no = session_data.get("req_no")
         # elif cache.get("token_version_id"):
-        cache_data = cache.get_many(["key", "iv", "hmac_key", "req_no"])
-        key = cache.get("key")
-        iv = cache.get("iv")
-        hmac_key = cache.get("hmac_key")
-        req_no = cache.get("req_no")
+        cache_data = cache.get(token_version_id)
+        key = cache_data.get("key")
+        iv = cache_data.get("iv")
+        hmac_key = cache_data.get("hmac_key")
+        req_no = cache_data.get("req_no")
     except Session.DoesNotExist:
         return Response({"message": "세션값이 존재하지 않습니다."}, status = status.HTTP_400_BAD_REQUEST)
      
@@ -175,7 +175,7 @@ def getNicePassUserData(request):
         request.session["gender"] = dec_data["gender"]
         request.session["nationalinfo"] = dec_data["nationalinfo"]
         request.session["mobileno"] = dec_data["mobileno"]
-        request.session[isNicePassDone] = True
+        request.session["isNicePassDone"] = True
         request.session.save() 
 
         return Response({
