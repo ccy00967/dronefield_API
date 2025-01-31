@@ -240,7 +240,7 @@ def emailValidationSend(request):
             cache_data["email"] = receive_email
             cache_data["validate_key"] = validate_key
             cache_data["isEmailValidate"] = False
-            cach.set(token_version_id, cache_data, timeout=1200)  # 5분동안 캐시에 저장
+            cache.set(token_version_id, cache_data, timeout=1200)  # 5분동안 캐시에 저장
         else:
             request.session["email"] = receive_email
             request.session["ValidateKey"] = validate_key
@@ -406,13 +406,10 @@ def find_id(request):
         gender = request.session.get('gender')
         nationalinfo = request.session.get('nationalinfo')
         mobileno = request.session.get('mobileno')
-        print(request.headers)
-        print(request.session.get('name'))
+
         if request.session.get('name') is None:
             return Response({"message": "세션이 만료되었습니다."}, status=status.HTTP_401_UNAUTHORIZED)
         
-        print( name, birthdate)
-        print(request.session)
         user = CustomUser.objects.filter(
             name=name,
             birthdate=birthdate, 
