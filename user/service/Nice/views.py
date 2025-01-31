@@ -77,7 +77,7 @@ def niceCrytoToken(request):
         "iv": iv,
         "hmac_key": hmac_key,
     }
-    cache.set_many(chach_data, timeout=600)  # 5분동안 캐시에 저장
+    cache.set_many(chach_data, timeout=1200)  # 5분동안 캐시에 저장
 
     # 세션에 저장
     request.session["token_version_id"] = token_version_id
@@ -95,6 +95,7 @@ def niceCrytoToken(request):
         "enc_data": enc_data,
         "integrity_value": integrity_value,
         "session_id": request.session.session_key,
+        
     }
     response_url = f"{base_url}?{urlencode(base_data)}"
     
@@ -123,14 +124,21 @@ def getNicePassUserData(request):
         token_version_id = request.GET.get("token_version_id")
         enc_data = request.GET.get("enc_data")
         integrity_value = request.GET.get("integrity_value")
-        session_id = request.COOKIES.get("sessionid")
-    
-        session = Session.objects.get(session_key=session_id)
-        session_data = session.get_decoded()
-        key = session_data.get("key")
-        iv = session_data.get("iv")
-        hmac_key = session_data.get("hmac_key")
-        req_no = session_data.get("req_no")
+        
+        # if request.COOKIES.get("sessionid"):
+        #     session_id = request.COOKIES.get("sessionid")
+        #     session = Session.objects.get(session_key=session_id)
+        #     session_data = session.get_decoded()
+        #     key = session_data.get("key")
+        #     iv = session_data.get("iv")
+        #     hmac_key = session_data.get("hmac_key")
+        #     req_no = session_data.get("req_no")
+        # elif cache.get("token_version_id"):
+        cache_data = cache.get_many(["key", "iv", "hmac_key", "req_no"])
+        key = cache.get("key")
+        iv = cache.get("iv")
+        hmac_key = cache.get("hmac_key")
+        req_no = cache.get("req_no")
     except Session.DoesNotExist:
         return Response({"message": "세션값이 존재하지 않습니다."}, status = status.HTTP_400_BAD_REQUEST)
      
@@ -153,6 +161,15 @@ def getNicePassUserData(request):
     try:
         dec_data = json.loads(decrypt_data(enc_data, key, iv))
 
+        cache_data["name"] = dec_data["name"]
+        cache_data["birthdate"] = dec_data["birthdate"]
+        cache_data["gender"] = dec_data["gender"]
+        cache_data["nationalinfo"] = dec_data["nationalinfo"]
+        cache_data["mobileno"] = dec_data["mobileno"]
+        cache_data["isNicePassDone"] = True
+        cache.set_many(cache_data, timeout=1200)  # 5분동안 캐시에 저장
+        
+        
         request.session["name"] = dec_data["name"]
         request.session["birthdate"] = dec_data["birthdate"]
         request.session["gender"] = dec_data["gender"]
