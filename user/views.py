@@ -273,9 +273,8 @@ def emailValidationSend(request):
         )
 
     except Exception as e:
-        logger.error(f"Failed to send email to {receive_email}. Error: {str(e)}")
         return Response(
-            {"message": "Failed to send email."},
+            {"message": "Failed to send email.", "error": str(e)},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
     

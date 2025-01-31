@@ -118,15 +118,6 @@ def getNicePassUserData(request):
         enc_data = request.GET.get("enc_data")
         integrity_value = request.GET.get("integrity_value")
         
-        # if request.COOKIES.get("sessionid"):
-        #     session_id = request.COOKIES.get("sessionid")
-        #     session = Session.objects.get(session_key=session_id)
-        #     session_data = session.get_decoded()
-        #     key = session_data.get("key")
-        #     iv = session_data.get("iv")
-        #     hmac_key = session_data.get("hmac_key")
-        #     req_no = session_data.get("req_no")
-        # elif cache.get("token_version_id"):
         cache_data = cache.get(token_version_id)
         
         if not cache_data:
