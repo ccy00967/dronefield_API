@@ -54,6 +54,7 @@ urlpatterns = [
     path("exterminator/", include("exterminator.urls")),
     path("trade/", include("trade.urls")),
     path("payments/", include("payments.urls")),
+    path("common/", include("common.urls")),
     
 ]
 
