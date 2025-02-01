@@ -58,7 +58,7 @@ class Request(models.Model):
     )
     # 날짜
     startDate = models.DateField()
-    endDate = models.DateField(blank=True, default="")
+    endDate = models.DateField(blank=True, null=True, default=None)
     # 농약종류
     pesticide = models.CharField(max_length=50, blank=True, default="")
     # 업체 전달사항
