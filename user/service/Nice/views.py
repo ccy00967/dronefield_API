@@ -74,14 +74,14 @@ def niceCrytoToken(request):
     
     integrity_value = base64.b64encode(h).decode("utf-8")
 
-    chach_data = {
+    cache_data  = {
         "token_version_id": token_version_id,
         "req_no": req_no,
         "key": key,
         "iv": iv,
         "hmac_key": hmac_key,
     }
-    cache.set(token_version_id, chach_data, timeout=1200)# 5분동안 캐시에 저장
+    cache.set(token_version_id, cache_data , timeout=1200)# 5분동안 캐시에 저장
     
     # 세션에 저장
     request.session["token_version_id"] = token_version_id
@@ -115,67 +115,100 @@ def getNicePassUserData(request):
     """
         url: /user/nice-callback/
     """
-
-    token_version_id = request.GET.get("token_version_id")
-    enc_data = request.GET.get("enc_data")
-    integrity_value = request.GET.get("integrity_value")
-    
-    cache_data = cache.get(token_version_id)
-    
-    if not cache_data:
-        return Response({f"message": f"해당 token_version_id:{token_version_id}에 대한 캐시 데이터가 없습니다."}, status=400)
-    
-    key = cache_data.get("key")
-    iv = cache_data.get("iv")
-    hmac_key = cache_data.get("hmac_key")
-    req_no = cache_data.get("req_no")
-
-     
-    h = hmac.new(
-        key=hmac_key.encode(),
-        msg=enc_data.encode("utf-8"),
-        digestmod=hashlib.sha256
-        ).digest()
-    integrity = base64.b64encode(h).decode("utf-8")
-
-    if integrity != integrity_value:
-        return Response({"message": "무결성 값이 다릅니다. 데이터가 변경된 것이 아닌지 확인 바랍니다."}, status = status.HTTP_400_BAD_REQUEST)
-
-    dec_data = json.loads(decrypt_data(enc_data, key, iv))
-    
-    if req_no != dec_data["requestno"]:
-        return HttpResponse('<script type="text/javascript">'+ 'window.close();' + '</script>', status = status.HTTP_400_BAD_REQUEST)
-    
-    
     try:
-        dec_data = json.loads(decrypt_data(enc_data, key, iv))
+        # GET 요청일 때와 POST 요청일 때 모두 파라미터를 가져올 수 있도록 수정
+        token_version_id = request.GET.get("token_version_id") or request.data.get("token_version_id")
+        enc_data = request.GET.get("enc_data") or request.data.get("enc_data")
+        integrity_value = request.GET.get("integrity_value") or request.data.get("integrity_value")
+        print(token_version_id)
+        print(enc_data)
+        print(integrity_value)
+        if not token_version_id:
+            return Response(
+                {"message": "token_version_id가 필요합니다."}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        cache_data = cache.get(token_version_id)
+        
+        if not cache_data:
+            return Response(
+                {"message": f"해당 token_version_id:{token_version_id}에 대한 캐시 데이터가 없습니다."}, 
+                status=400
+            )
+        
+        # 캐시 데이터에서 필요한 값 추출
+        key = cache_data.get("key")
+        iv = cache_data.get("iv")
+        hmac_key = cache_data.get("hmac_key")
+        req_no = cache_data.get("req_no")
+        
+        # 필수 데이터가 모두 있는지 확인
+        if not all([key, iv, hmac_key, req_no]):
+            return Response(
+                {"message": "캐시 데이터에 필요한 정보가 부족합니다."}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # 무결성 검증
+        h = hmac.new(
+            key=hmac_key.encode(),
+            msg=enc_data.encode("utf-8"),
+            digestmod=hashlib.sha256
+        ).digest()
+        integrity = base64.b64encode(h).decode("utf-8")
 
-        cache_data["name"] = dec_data["name"]
-        cache_data["birthdate"] = dec_data["birthdate"]
-        cache_data["gender"] = dec_data["gender"]
-        cache_data["nationalinfo"] = dec_data["nationalinfo"]
-        cache_data["mobileno"] = dec_data["mobileno"]
+        if integrity != integrity_value:
+            return Response(
+                {"message": "무결성 값이 다릅니다. 데이터가 변경된 것이 아닌지 확인 바랍니다."}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # 데이터 복호화 (한 번만 호출)
+        dec_data = json.loads(decrypt_data(enc_data, key, iv))
+        
+        # 요청 번호 검증
+        if req_no != dec_data.get("requestno"):
+            return HttpResponse(
+                '<script type="text/javascript">window.close();</script>', 
+                status=400
+            )
+        
+        # 필요한 데이터 추출 및 캐시 업데이트
+        cache_data["name"] = dec_data.get("name")
+        cache_data["birthdate"] = dec_data.get("birthdate")
+        cache_data["gender"] = dec_data.get("gender")
+        cache_data["nationalinfo"] = dec_data.get("nationalinfo")
+        cache_data["mobileno"] = dec_data.get("mobileno")
         cache_data["isNicePassDone"] = True
         cache.set(token_version_id, cache_data, timeout=1200)  # 5분동안 캐시에 저장
-        
-        
-        request.session["name"] = dec_data["name"]
-        request.session["birthdate"] = dec_data["birthdate"]
-        request.session["gender"] = dec_data["gender"]
-        request.session["nationalinfo"] = dec_data["nationalinfo"]
-        request.session["mobileno"] = dec_data["mobileno"]
+
+        # 세션 업데이트 (선택 사항)
+        request.session["name"] = dec_data.get("name")
+        request.session["birthdate"] = dec_data.get("birthdate")
+        request.session["gender"] = dec_data.get("gender")
+        request.session["nationalinfo"] = dec_data.get("nationalinfo")
+        request.session["mobileno"] = dec_data.get("mobileno")
         request.session["isNicePassDone"] = True
         request.session.save() 
 
-        frontend_url = "https://yourfrontend.com/auth-success/"  # 실제 프론트엔드 URL로 변경
-        params = {'token_version_id': token_version_id}
-        redirect_url = f"{frontend_url}?{urlencode(params)}"
-
-        return redirect(redirect_url)
-        
-    except Exception as e:
-        return Response({"message": f"에러 발생: {e}"}, status = status.HTTP_400_BAD_REQUEST)
+        # 리다이렉션 URL 설정 (프론트엔드 URL 또는 모바일 딥 링크)
+        # frontend_url = "https://yourfrontend.com/auth-success/"  # 실제 프론트엔드 URL로 변경
+        # params = {'token_version_id': token_version_id}
+        # redirect_url = f"{frontend_url}?{urlencode(params)}"
     
+        # return redirect(redirect_url)
+        
+        return Response(
+            {"message": "나이스 인증이 완료되었습니다."}, 
+            status=status.HTTP_200_OK
+        )
+    
+    except Exception as e:
+        return Response(
+            {"message": f"에러 발생: {e}"}, 
+            status=status.HTTP_400_BAD_REQUEST
+        )
     
     
 def get_nice_form(request):

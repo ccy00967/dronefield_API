@@ -1,18 +1,27 @@
-# from django.db import models
-# from django.utils.translation import gettext_lazy as _
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+import uuid
 
+class Notice(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4, unique=True, blank=True, null=True)
+    title = models.CharField(max_length=100)
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
 
-# class Type(models.TextChoices):
-#     HOME = "H", _("Home")
-#     FARM = "F", _("FARM")
+    class Meta:
+        verbose_name = _("Notice")
 
+    def __str__(self):
+        return self.title
 
-# class Address(models.Model):
+class Alarm(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4, unique=True, blank=True, null=True)
+    title = models.CharField(max_length=100)
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
 
-#     type = models.CharField(max_length=1, choices=Type.choices, blank=False)
-#     road = models.CharField(max_length=50, blank=True, default="")
-#     jibun = models.CharField(max_length=50, blank=False, default="")
-#     detail = models.CharField(max_length=50, blank=False, default="")
+    class Meta:
+        verbose_name = _("Alarm")
 
-#     def __str__(self):
-#         return self.name
+    def __str__(self):
+        return self.title
