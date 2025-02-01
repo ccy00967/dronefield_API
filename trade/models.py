@@ -58,9 +58,11 @@ class Request(models.Model):
     )
     # 날짜
     startDate = models.DateField()
-    endDate = models.DateField()
+    endDate = models.DateField(blank=True, default="")
     # 농약종류
     pesticide = models.CharField(max_length=50, blank=True, default="")
+    # 업체 전달사항
+    extraDetails = models.CharField(max_length=50, blank=True, default="")
     # 평단가 - 일반거래 30원 고정
     setAveragePrice = models.IntegerField(blank=False, null=False, default=0)
     # 신청서 가격
