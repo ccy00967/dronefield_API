@@ -127,7 +127,7 @@ def create_test():
                 reservateDepositAmount=1000,
                 requestTosspayments = None,
                 reservateTosspayments = None,
-                requestCancelTransactionKey = None,
+                #requestCancelTransactionKey = None,
 
                 # 방제완료-농민
                 checkState=0,
