@@ -196,7 +196,7 @@ class ExterminatorWorkRequestListAPIView(generics.ListAPIView):
 # 담당중인 신청서 상세 가져오기 - 방제사용
 class ExterminatorWorkRequestRetrieveAPIView(generics.RetrieveAPIView):
     queryset = Request.objects.all()
-    serializer_class = RequestDetailSerializer
+    serializer_class = RequestBriefSerializer
     lookup_field = "orderId"
     name = "exterminator-work-request-detail"
     permission_classes = (

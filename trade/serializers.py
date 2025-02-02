@@ -89,6 +89,7 @@ class RequestBriefSerializer(serializers.ModelSerializer):
     owner_mobileno = serializers.CharField(source="landInfo.owner.mobileno")
     exterminator = ProfileSerializer(read_only=True)
     landNickName = serializers.CharField(source="landInfo.landNickName")
+    landInfo = FarmInfoSerializer(read_only=True)
     cropsInfo = serializers.CharField(source="landInfo.cropsInfo")
     jibun = serializers.CharField(source="landInfo.jibun")
     lndpclAr = serializers.CharField(source="landInfo.lndpclAr")
@@ -103,6 +104,7 @@ class RequestBriefSerializer(serializers.ModelSerializer):
             "cd",
             "exterminator",
             "landNickName",
+            "landInfo",
             "cropsInfo",
             "jibun",
             "lndpclAr",
