@@ -21,7 +21,7 @@ class ExterminatorLicense(models.Model):
     business_registration_image = models.URLField(max_length=500, blank=True, null=True)
 
     def __str__(self):
-        return f"{self.license_number} - {self.model_number}"
+        return f"{self.license_number} - {self.license_number}"
 
     class Meta:
         verbose_name = _("Exterminator License")

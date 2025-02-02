@@ -8,6 +8,7 @@ from common.utils.s3 import s3_upload_file, s3_delete_file
 from farmer.models import FarmInfo
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils.timezone import now
+from datetime import timedelta
 
 gender_choices = ['0', '1'] # 예: 여성, 남성
 nation_choices = ['0', '1'] # 예: 내국인, 외국인인
@@ -27,7 +28,7 @@ drone_image_url = s3_upload_file(drone_file, f"drones/images/{uuid.uuid4()}.png"
 
   
 def create_test():
-    #테스트 농민민
+    #테스트 농민민, 농민민
     famrmer = CustomUser.objects.create(
         uuid=uuid.uuid4(),
         name=f"test_농민",
@@ -45,33 +46,7 @@ def create_test():
         sent_agreement_date=now()
     )
     famrmer.set_password("test1234@")
-    famrmer.save() 
-    for i in range(10):
-        farm_info = FarmInfo.objects.create(
-            uuid=uuid.uuid4(),
-            owner=famrmer,
-            road=f"TestRoad{i}",
-            jibun=f"TestJibun{i}",
-            detail=f"TestDetail{i}",
-            pnu=f"pnu{i}",
-            lndpclAr="20.00",
-            cd=f"cd{i}",
-            landNickName=f"landNickName{i}",
-            cropsInfo=f"cropsInfo{i}",
-            additionalPhoneNum=f"0100000{1000+i:04}",
-            min_price=25
-        )
-        Request.objects.create(
-            orderId=uuid.uuid4(),
-            owner=famrmer,
-            exterminator=None,
-            landInfo=farm_info,
-            dealmothod=0,
-            startDate=now(),
-            endDate=now(),
-        )
-        
-    #테스트 방제사
+    famrmer.save()
     exter = CustomUser.objects.create(
         uuid=uuid.uuid4(),
         name=f"test_방제사",
@@ -89,8 +64,7 @@ def create_test():
         sent_agreement_date=now()
     )
     exter.set_password("test1234@")
-    exter.save() 
-    
+    exter.save()
     BankAccount.objects.create(
         uuid=uuid.uuid4(),
         owner=exter,
@@ -98,22 +72,95 @@ def create_test():
         account_number="1234567890",
         account_type = "법인명"
     )
-    for i in range(10):
+    
+    road_list = [
+    "경기도 이천시 농원로 12",     # 이천 농지 예시
+    "충청북도 청주시 상당구 농업로 45",  # 청주 농지 예시
+    "전라남도 순천시 농업대로 78",    # 순천 농지 예시
+    "경상북도 영덕군 농촌로 22",      # 영덕 농지 예시
+    "강원도 평창군 농로 33"         # 평창 농지 예시
+    ]
+
+    jibun_list = [
+        "경기도 이천시 부발읍 123-4",    # 이천의 지번 주소 예시
+        "충청북도 청주시 상당구 56-7",    # 청주의 지번 주소 예시
+        "전라남도 순천시 89-10",         # 순천의 지번 주소 예시
+        "경상북도 영덕군 11-12",         # 영덕의 지번 주소 예시
+        "강원도 평창군 33-22"           # 평창의 지번 주소 예시
+    ]
+
+    detail_list = [
+        "농지 A (이천지점)",
+        "농지 B (청주지점)",
+        "농지 C (순천지점)",
+        "농지 D (영덕지점)",
+        "농지 E (평창지점)"
+    ]
+    #테스트 농지 및 거래
+    for i in range(5):
+        farm_info = FarmInfo.objects.create(
+            uuid=uuid.uuid4(),
+            owner=famrmer,
+            road=road_list[i],
+            jibun=jibun_list[i],
+            detail= detail_list[i],
+            pnu=f"pnu{i}",
+            lndpclAr="20.00",
+            cd=f"cd{i}",
+            landNickName=f"landNickName{i}",
+            cropsInfo=f"cropsInfo{i}",
+            additionalPhoneNum=f"0100000{1000+i:04}",
+            min_price=25
+        )
+        for j in range(0,3):
+            Request.objects.create(
+                orderId=uuid.uuid4(),
+                owner=famrmer,
+                exterminator=exter,
+                landInfo=farm_info,
+                dealmothod=0,
+                startDate=now(),
+                endDate=now() + timedelta(days=11),
+                pesticide=random.choice(["곰팡이살균제", "일본농약", "구형농약"]),
+                setAveragePrice=30,
+                requestAmount=25,
+                reservateDepositAmount=1000,
+                requestTosspayments = None,
+                reservateTosspayments = None,
+                requestCancelTransactionKey = None,
+
+                # 방제완료-농민
+                checkState=0,
+                requestDepositState = 0,
+
+                # 방제완료-방제사
+                exterminateState= j,#방제상황 0:매칭중, 1:작업준비중, 2:작업중, 3:작업완료
+                reservateDepositState= 0,
+                depositCancelTransactionKey = "uuid값",
+
+                # 관리자용용
+                calculation=0,
+                # 신청금액-방제사
+
+            )
+    
+        license_title_list =["특수드론1종", "경드론2종", "드론정비사", "비행기기운용전문가", "비행기기운용사"]
+    for i in range(5):
         ExterminatorLicense.objects.create(
             uuid=uuid.uuid4(),
-            license_title=f"license_title{i}",
-            license_number=f"license_number{i}",
+            license_title=license_title_list[i],
+            license_number=f"0100000{1000+i:04}",
             lincense_holder_name=f"lincense_holder_name{i}",
-            business_registration_type=f"business_registration_type{i}",
-            worker_registration_number=f"worker_registration_number{i}",
+            business_registration_type=random.choice(["개인", "법인"]),
+            worker_registration_number=f"0100000{1000+i:04}",
             owner=exter,
             license_image=license_image_url,  # S3 URL 저장
             business_registration_image=business_registration_image_url,  # S3 URL 저장
         )
         Drone.objects.create(
             uuid=uuid.uuid4(),
-            nickname=f"nickname{i}",
-            model_number=f"model_number{i}",
+            nickname=f"대형드론론{i}",
+            model_number=f"MSE-{i}",
             capacity="20.00",
             owner=exter,
             image=drone_image_url,  # S3 URL 저장

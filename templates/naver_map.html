@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>주소 경계선 표시</title>
+  <style>
+    /* 지도 표시 영역 스타일 */
+    #map {
+      width: 100%;
+      height: 100vh;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+</head>
+<body>
+  <!-- 지도 컨테이너 -->
+  <div id="map"></div>
+
+  <script>
+    (function() {
+      var map, currentPolygon;
+
+      // 네이버 지도 API 스크립트를 동적으로 로드 (geocoder 포함)
+      function loadNaverMaps(callback) {
+        if (window.naver && window.naver.maps) {
+          callback();
+          return;
+        }
+        var script = document.createElement('script');
+        // 반드시 YOUR_CLIENT_ID를 실제 클라이언트 아이디로 변경하세요.
+        script.src = "https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=hmpfs1a6fl&submodules=geocoder";
+        script.async = true;
+        script.onload = callback;
+        script.onerror = function() {
+          console.error("네이버 지도 API 스크립트 로드 실패");
+        };
+        document.head.appendChild(script);
+      }
+
+      function getQueryParam(param) {
+        var params = new URLSearchParams(window.location.search);
+        return params.get(param);
+      }
+
+      function initMap() {
+        if (!window.naver || !window.naver.maps) {
+          console.error("네이버 지도 API가 로드되지 않았습니다.");
+          return;
+        }
+        var naverMaps = window.naver.maps;
+        map = new naverMaps.Map("map", {
+          center: new naverMaps.LatLng(37.5665, 126.9780),
+          zoom: 15,
+          disableDoubleClickZoom: true,
+          mapTypeControl: false
+        });
+
+        var address = getQueryParam("address");
+        if (!address) {
+          console.error("쿼리 파라미터에 address가 전달되지 않았습니다.");
+          return;
+        }
+        geocodeAddress(address);
+      }
+
+      function geocodeAddress(address) {
+        var naverMaps = window.naver.maps;
+        // 지오코더 모듈(Service)이 있는지 확인
+        if (!naverMaps.Service || typeof naverMaps.Service.geocode !== 'function') {
+          console.error("Geocoder 서비스가 로드되지 않았습니다. 클라이언트 아이디와 submodules=geocoder 파라미터를 확인하세요.");
+          return;
+        }
+        naverMaps.Service.geocode({ query: address }, function(status, response) {
+          if (status !== naverMaps.Service.Status.OK) {
+            console.error("주소 검색 실패:", status);
+            return;
+          }
+          if (response.v2.meta.totalCount === 0) {
+            console.error("주소 검색 결과가 없습니다:", address);
+            return;
+          }
+          var item = response.v2.addresses[0];
+          var point = new naverMaps.Point(item.x, item.y);
+          console.log("검색된 좌표:", point);
+          map.setCenter(point);
+
+          // 테스트용 하드코딩된 폴리곤 데이터
+          var polygonData = [
+            { lat: item.y,         lng: item.x },
+            { lat: item.y + 0.001,   lng: item.x + 0.001 },
+            { lat: item.y + 0.001,   lng: item.x - 0.001 },
+            { lat: item.y - 0.001,   lng: item.x - 0.001 },
+            { lat: item.y - 0.001,   lng: item.x + 0.001 }
+          ];
+          drawPolygon(polygonData);
+        });
+      }
+
+      function drawPolygon(polygonData) {
+        var naverMaps = window.naver.maps;
+        if (currentPolygon) {
+          currentPolygon.setMap(null);
+        }
+        var paths = polygonData.map(function(coord) {
+          return new naverMaps.LatLng(coord.lat, coord.lng);
+        });
+        currentPolygon = new naverMaps.Polygon({
+          map: map,
+          paths: paths,
+          strokeColor: "#FF0000",
+          strokeOpacity: 1,
+          strokeWeight: 2,
+          fillColor: "#FF0000",
+          fillOpacity: 0.3
+        });
+      }
+
+      document.addEventListener("DOMContentLoaded", function() {
+        loadNaverMaps(initMap);
+      });
+    })();
+  </script>
+</body>
+</html>
