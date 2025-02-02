@@ -9,20 +9,25 @@ from user.models import CustomUser
 # Drone Exterminator License
 class ExterminatorLicense(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    owner = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='exterminator_license')
     license_title = models.CharField(max_length=30, blank=True, null=True)
     license_number = models.CharField(max_length=30, blank=True, null=True, default="0000000000")
-    lincense_holder_name = models.CharField(max_length=30, blank=True, null=True, default=CustomUser.objects.get)
+    lincense_holder_name = models.CharField(max_length=30, blank=True, null=True, default="")
     #model_number = models.CharField(max_length=30, blank=True, null=True)
     business_registration_type = models.CharField(max_length=30, blank=True, null=True)
     worker_registration_number = models.CharField(max_length=30, blank=True, null=True)
-    owner = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='exterminator_license')
+    
     
     license_image = models.URLField(max_length=500, blank=True, null=True)
     business_registration_image = models.URLField(max_length=500, blank=True, null=True)
 
     def __str__(self):
         return f"{self.license_number} - {self.license_number}"
-
+    
+    def save(self, *args, **kwargs):
+        if self.owner and not self.lincense_holder_name:
+            self.lincense_holder_name = self.owner.name
+        super().save(*args, **kwargs)
     class Meta:
         verbose_name = _("Exterminator License")
         verbose_name_plural = _("Exterminator Licenses")
