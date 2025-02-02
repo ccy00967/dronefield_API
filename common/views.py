@@ -87,3 +87,44 @@ class AlarmDetailView(generics.RetrieveUpdateDestroyAPIView):
     
     def destroy(self, request, *args, **kwargs):
         return Response({"message": "알림이 성공적으로 삭제되었습니다."}, status=status.HTTP_200_OK)
+    
+
+import requests
+from django.http import JsonResponse
+from django.views.decorators.http import require_GET
+
+@require_GET
+def get_polygon_api(request):
+    # GET 파라미터에서 x, y 좌표 받기
+    x = request.GET.get('x')
+    y = request.GET.get('y')
+    if not (x and y):
+        return JsonResponse({'error': 'x와 y 파라미터가 필요합니다.'}, status=400)
+
+    # API KEY 설정 (실제 키로 교체하세요)
+    KEY = '6C934ED4-5978-324D-B7DE-AC3A0DDC3B38'
+    base_url = "https://api.vworld.kr/req/data"
+
+    # API 호출에 필요한 파라미터 설정
+    params = {
+        "key": KEY,
+        "request": "GetFeature",
+        "data": "LP_PA_CBND_BUBUN",
+        "geomFilter": f"POINT({x} {y})",
+    }
+
+    try:
+        # vworld API에 GET 요청
+        response = requests.get(base_url, params=params)
+        response.raise_for_status()  # HTTP 에러 발생 시 예외 발생
+
+        # JSON 응답 파싱 (vworld API가 JSONP를 반환하는 경우, 별도 처리 필요할 수 있음)
+        result = response.json()
+
+        # polygon 좌표 추출 (응답 구조에 따라 키가 달라질 수 있음)
+        polygon = result["response"]["result"]["featureCollection"]["features"][0]["geometry"]["coordinates"][0]
+
+        return JsonResponse({"polygon": polygon})
+    except Exception as e:
+        # 에러 발생 시 에러 메시지 반환
+        return JsonResponse({"error": str(e)}, status=500)

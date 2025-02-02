@@ -98,6 +98,7 @@ class RequestCreateAPIView(generics.CreateAPIView):
 class FarmerRequestListAPIView(generics.ListAPIView):
     queryset = Request.objects.all()
     serializer_class = RequestBriefSerializer
+    pagination_class = CustomPagination
     name = "request-lists"
     ordering_fields = [
         "landNickName",
@@ -146,6 +147,7 @@ class FarmerRequestListAPIView(generics.ListAPIView):
 class ExterminatorRequestListAPIView(generics.ListAPIView):
     queryset = Request.objects.all()
     serializer_class = RequestBriefSerializer
+    pagination_class = CustomPagination
     name = "exterminator-request-lists"
     pagination_class = CustomPagination
     permission_classes = (
@@ -170,6 +172,7 @@ class ExterminatorRequestListAPIView(generics.ListAPIView):
 class ExterminatorWorkRequestListAPIView(generics.ListAPIView):
     queryset = Request.objects.all()
     serializer_class = RequestBriefSerializer
+    pagination_class = CustomPagination
     name = "exterminator-work-request-lists"
     permission_classes = (
         permissions.IsAuthenticatedOrReadOnly,

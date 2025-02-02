@@ -44,7 +44,9 @@ class RequestDetailSerializer(serializers.ModelSerializer):
 # 신청서 업데이트
 class RequestUpdateSerializer(serializers.ModelSerializer):
     owner = serializers.UUIDField(source="owner.uuid")
-    exterminator = serializers.UUIDField(source="exterminator.uuid", required=False, allow_null=True)
+    owner_name = serializers.CharField(source="owner.name", read_only=True)
+    owner_mobileno = serializers.CharField(source="owner.mobileno", read_only=True)
+    exterminator = ProfileSerializer(read_only=True)
     landInfo = FarmInfoSerializer(read_only=True)
     requestTosspayments = TossPaymentsSerializer(read_only=True)
     reservateTosspayments = TossPaymentsSerializer(read_only=True)
