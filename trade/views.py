@@ -216,9 +216,16 @@ class RequestUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
         OnlyOwnerCanUpdate,
         #isBeforePay,
     )
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response(
+            {"message": "신청서가 성공적으로 삭제되었습니다."},
+            status=status.HTTP_200_OK
+        )
 
 
-# 농민이 방제사가 잘 했나 확인인
+# 농민이 방제사가 잘 했나 확인
 class CheckStateUpdateView(generics.RetrieveUpdateAPIView):
     queryset = Request.objects.all()
     serializer_class = CheckStateSerializer
@@ -231,7 +238,7 @@ class CheckStateUpdateView(generics.RetrieveUpdateAPIView):
 
 
 # 방제 진행 상태 변경
-class ExterminateStateUpdateView(generics.RetrieveUpdateAPIView):
+class ExterminateStateUpdateView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Request.objects.all()
     serializer_class = ExterminateStateSerializer
     lookup_field = "orderId"
