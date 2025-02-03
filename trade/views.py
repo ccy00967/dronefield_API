@@ -185,6 +185,8 @@ class ExterminatorWorkRequestListAPIView(generics.ListAPIView):
     
     def get_queryset(self):
         queryset = Request.objects.filter(exterminator=self.request.user)
+        print(self.request.user)
+        print(queryset)
         return queryset 
     
 
@@ -273,7 +275,7 @@ class ExterminateStateUpdateView(generics.RetrieveUpdateDestroyAPIView):
         permissions.IsAuthenticatedOrReadOnly,
         #OnlyOnChargeExterminator, #TODO: 방제사만 가능하게 다시 수정
     )
-
+    
     def patch(self, request, *args, **kwargs):
         # PATCH 요청의 데이터에서 exterminateState 값을 가져오기
         exterminate_state = request.data.get("exterminateState")
@@ -300,6 +302,15 @@ class ExterminateStateUpdateView(generics.RetrieveUpdateDestroyAPIView):
                 {"error": "Invalid value for exterminateState. It must be one of [1, 2, 3]."},
                 status=400
             )
-    
+        
+        #현재 인스턴스 가져오기
+        instance = self.get_object()
+
+        # exterminator 필드를 현재 로그인한 사용자로 설정
+        instance.exterminator = request.user
+
+        # 인스턴스 상태를 데이터베이스에 저장
+        instance.save()
+        
         # 유효하면 기존의 partial_update 호출
         return self.partial_update(request, *args, **kwargs)
