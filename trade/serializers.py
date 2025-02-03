@@ -117,6 +117,7 @@ class RequestBriefSerializer(serializers.ModelSerializer):
             # "reservateDepositState",
             "checkState",
             "calculation",
+            "dealmothod",
             "requestAmount",
             "requestTosspayments",
             "reservateTosspayments",
