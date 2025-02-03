@@ -102,7 +102,6 @@ class BankAccount(models.Model):
     )
     owner = models.ForeignKey(
         "user.CustomUser",
-        unique=True,
         related_name="bank_owner",
         on_delete=models.PROTECT,
     )

@@ -424,6 +424,7 @@ def find_id(request):
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+#TODO: 계좌는 하나만 가지도록 하기
 class BankAccountAPIView(APIView):
     permission_classes = [IsAuthenticated]
     def post(self, request):
