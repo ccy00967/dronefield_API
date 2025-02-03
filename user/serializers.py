@@ -1,4 +1,4 @@
-from .models import CustomUser, Type
+from .models import CustomUser, Type, BankAccount
 from rest_framework import serializers
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import update_last_login
@@ -202,3 +202,11 @@ class UserLoginSerializer(serializers.Serializer):
             return validation
         except CustomUser.DoesNotExist:
             raise serializers.ValidationError("Invalid login credentials(유저 존재x)")
+        
+    
+class BankAccountSerializer(serializers.ModelSerializer):
+    uuid = serializers.UUIDField(read_only=True, format="hex_verbose")
+    owner = ProfileSerializer(read_only=True)
+    class Meta:
+        model = BankAccount
+        fields = "__all__"

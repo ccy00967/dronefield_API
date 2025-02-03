@@ -5,7 +5,6 @@ from rest_framework import status
 from django.core.mail import EmailMessage
 from django.core.cache import cache
 from django.contrib.sessions.models import Session
-
 from rest_framework.response import Response
 from django.http import HttpResponse
 from rest_framework.decorators import api_view
@@ -34,7 +33,7 @@ from .service.Nice.utils import productID
 from .service.Nice.utils import access_token
 
 # from .nice_fuc import returnURL
-from user.models import CustomUser
+from user.models import CustomUser, BankAccount
 from .permissions import OnlyOwnerCanUpdate
 from rest_framework import generics
 from exterminator.models import ExterminatorLicense
@@ -46,6 +45,7 @@ from user.serializers import (
     ProfileSerializer,
     CustomTokenObtainPairSerializer,
     ManageUserListSerializer,
+    BankAccountSerializer,
     # ExterminatorSerializer,
 )
 
@@ -423,6 +423,39 @@ def find_id(request):
         return Response({"email": user.email}, status=status.HTTP_200_OK)
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class BankAccountAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    def post(self, request):
+        try:
+            serializer = BankAccountSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save(owner=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    def get(self, request):
+        queryset = BankAccount.objects.filter(owner=request.user)
+        serializer = BankAccountSerializer(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    def delete(self, request):
+        try:
+            account = BankAccount.objects.get(uuid=request.data.get("uuid"))
+            account.delete()
+            return Response({"message": "계좌 삭제 완료"}, status=status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    def patch(self, request):
+        try:
+            account = BankAccount.objects.get(uuid=request.data.get("uuid"))
+            serializer = BankAccountSerializer(account, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    
 
 import os
 from django.http import Http404

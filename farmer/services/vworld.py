@@ -21,7 +21,7 @@ def serch_pnu(road: str, jibun: str) -> Dict[str, Any]:
         ValueError: 주소가 없거나, PNU 값이 잘못된 경우.
     """
     # 주소를 결합하고 공백을 정규화
-    adrass = f"{road} {jibun}"
+    adrass = f"{jibun}"
     normalized_address = ' '.join(adrass.split())
     logger.debug(f"Normalized Address: {normalized_address}")
     

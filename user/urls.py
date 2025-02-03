@@ -7,7 +7,8 @@ from .views import (
     validationCheck,
     password_reset,
     #niceCallback,
-    terms_of_service
+    terms_of_service,
+    BankAccountAPIView
 )
 
 from .service.Nice.views import (
@@ -61,6 +62,9 @@ urlpatterns = [
     path("flutter/nice-auth/", flutter_nice_auth_view, name="nice-auth"),
     #이용약관
     path("term/<int:id>/", terms_of_service, name="terms"),  # 이용약관
+    
+    #자신의 계좌
+    path("bankaccount/", BankAccountAPIView.as_view(), name="bankaccount"),  # 계좌 등록, 읽기, 수정, 삭제제
     
     #세션
     path("session/", DeviceSessionView.as_view(), name="session"),  # 세션 생성

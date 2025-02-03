@@ -126,20 +126,4 @@ class Request(models.Model):
     def __str__(self):
         return str(self.orderId)
     
-class BankAccount(models.Model):
-    uuid = models.UUIDField(
-        unique=True, default=uuid.uuid4, editable=False, db_index=True
-    )
-    owner = models.ForeignKey(
-        "user.CustomUser",
-        related_name="bank_owner",
-        on_delete=models.PROTECT,
-    )
-    bank_name = models.CharField(max_length=50, blank=False, default="")
-    account_number = models.CharField(max_length=50, blank=False, default="")
-    account_type = models.CharField(max_length=50, blank=False, default="")
-    account_created = models.DateTimeField(auto_now_add=True)
-    account_updated = models.DateTimeField(auto_now=True)
-    
-    def __str__(self):
-        return self.bankName
+

@@ -1,7 +1,7 @@
-from user.models import CustomUser
+from user.models import CustomUser, BankAccount
 from farmer.models import FarmInfo
 from exterminator.models import ExterminatorLicense, Drone
-from trade.models import Request, BankAccount
+from trade.models import Request
 import uuid
 import random
 from common.utils.s3 import s3_upload_file, s3_delete_file
@@ -221,8 +221,8 @@ def create_test():
         user.save()
         BankAccount.objects.create(
             uuid=uuid.uuid4(),
-            owner=exter,
-            bank_name="test_은행명칭칭",
+            owner=user,
+            bank_name="test_은행명칭",
             account_number="1234567890",
             account_type = "법인명"
         )

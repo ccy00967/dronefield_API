@@ -2,9 +2,11 @@ import math
 from rest_framework import generics
 from rest_framework import permissions
 from rest_framework import status
+from rest_framework import filters
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-
+from common.utils.filters import RequestFilter
 from trade.models import Request
 from trade.serializers import RequestSerializer
 from trade.serializers import RequestDetailSerializer
@@ -108,7 +110,8 @@ class FarmerRequestListAPIView(generics.ListAPIView):
     ordering = [
         "landInfo__landNickName",
     ]
-    pagination_class = CustomPagination
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
+    filterset_class = RequestFilter
     permission_classes = (
         permissions.IsAuthenticatedOrReadOnly,
         # OnlyOwnerCanUpdate,
@@ -174,23 +177,15 @@ class ExterminatorWorkRequestListAPIView(generics.ListAPIView):
     serializer_class = RequestBriefSerializer
     pagination_class = CustomPagination
     name = "exterminator-work-request-lists"
-    permission_classes = (
-        permissions.IsAuthenticatedOrReadOnly,
-    )
-
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly] 
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
+    filterset_class = RequestFilter
+    ordering_fields = ['startDate', 'endDate', 'orderId', 'exterminateState']
+    ordering = ['startDate']
+    
     def get_queryset(self):
         queryset = Request.objects.filter(exterminator=self.request.user)
-        exterminate_state = self.request.query_params.get("exterminateState", None)
-
-        if exterminate_state is not None:
-            try:
-                exterminate_state = int(exterminate_state)
-                if exterminate_state in [0, 1, 2, 3]:
-                    queryset = queryset.filter(exterminateState=exterminate_state)
-            except ValueError:
-                pass  # exterminateState 값이 유효하지 않으면 필터링하지 않음
-
-        return queryset
+        return queryset 
     
 
 # 담당중인 신청서 상세 가져오기 - 방제사용
