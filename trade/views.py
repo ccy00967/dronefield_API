@@ -159,7 +159,7 @@ class ExterminatorRequestListAPIView(generics.ListAPIView):
     )
 
     def get_queryset(self):
-        queryset = Request.objects.filter(requestDepositState=1, exterminateState=0, exterminator=None, checkState=0)
+        queryset = Request.objects.filter(exterminateState=0, exterminator=None, checkState=0)#,requestDepositState=1 TODO: 나중에 검증
         cd = self.request.query_params.get("cd", None)
 
         if cd is not None:
