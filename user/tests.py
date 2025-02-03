@@ -97,7 +97,7 @@ def create_test():
         "농지 E (평창지점)"
     ]
     #테스트 농지 및 거래
-    for i in range(5):
+    for i in range(2):
         farm_info = FarmInfo.objects.create(
             uuid=uuid.uuid4(),
             owner=famrmer,
@@ -113,10 +113,14 @@ def create_test():
             min_price=25
         )
         for j in range(0,3):
+            if j == 0:
+                exterminator=None,
+            else:
+                exterminator=exter,
             Request.objects.create(
                 orderId=uuid.uuid4(),
                 owner=famrmer,
-                exterminator=exter,
+                exterminator=exterminator,
                 landInfo=farm_info,
                 dealmothod=0,
                 startDate=now(),
@@ -135,7 +139,7 @@ def create_test():
 
                 # 방제완료-방제사
                 exterminateState= j,#방제상황 0:매칭중, 1:작업준비중, 2:작업중, 3:작업완료
-                reservateDepositState= 0,
+                reservateDepositState= 1,
                 depositCancelTransactionKey = "uuid값",
 
                 # 관리자용용

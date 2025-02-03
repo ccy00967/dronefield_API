@@ -62,7 +62,7 @@ def count_by_exterminateState(request):
             "before_pay_count": before_pay_count,
             "matching_count": matching_count,
             "preparing_count": preparing_count,
-            "exterminating_count": exterminating_count,
+            "exterminating_count": exterminating_count, #방제결제 이후 아이템 수수
             "done_count": done_count,
         },
         status=200,
@@ -271,7 +271,7 @@ class ExterminateStateUpdateView(generics.RetrieveUpdateDestroyAPIView):
     name = "exterminator-exterminate"
     permission_classes = (
         permissions.IsAuthenticatedOrReadOnly,
-        OnlyOnChargeExterminator,
+        #OnlyOnChargeExterminator, #TODO: 방제사만 가능하게 다시 수정
     )
 
     def patch(self, request, *args, **kwargs):
