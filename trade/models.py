@@ -66,9 +66,9 @@ class Request(models.Model):
     # 평단가 - 일반거래 30원 고정
     setAveragePrice = models.IntegerField(blank=False, null=False, default=0)
     # 신청서 가격
-    requestAmount = models.PositiveIntegerField(blank=False, null=False, default=0)
+    requestAmount = models.PositiveIntegerField(blank=False, null=False, default=0) #
     # 방제사 예약 금액
-    reservateDepositAmount = models.PositiveIntegerField(
+    reservateDepositAmount = models.PositiveIntegerField( #
         blank=False, null=False, default=1000
     )
     # 신청서 토스 결제정보 - 총 가격을 토스 모델이 가짐ex) 신청서 여러개

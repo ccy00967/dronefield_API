@@ -82,8 +82,8 @@ class RequestCreateAPIView(generics.CreateAPIView):
     # TODO: REFACTOR: 시리얼라이저로 옮기기
     def perform_create(self, serializer):
         landinfo = FarmInfo.objects.get(uuid=self.kwargs.get("landuuid"))
-        setAveragePrice = self.request.data["setAveragePrice"]
-        price = servicePriceCal(setAveragePrice, landinfo.lndpclAr)
+        setAveragePrice = self.request.data["setAveragePrice"]#평단가
+        price = (int(servicePriceCal(setAveragePrice, landinfo.lndpclAr))//10)*10
         serializer.save(
             owner=self.request.user,
             landInfo=landinfo,
