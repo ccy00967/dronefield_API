@@ -118,14 +118,14 @@ class FarmerRequestListAPIView(generics.ListAPIView):
     )
 
     def get_queryset(self):
-        queryset = Request.objects.filter(owner=self.request.user)
+        queryset = Request.objects.filter(owner=self.request.user, checkState=0)
 
         # 클라이언트에서 값을 쿼리 파라미터로 받아서 필터링
         exterminate_state = self.request.query_params.get("exterminateState", None)
         requestDeposit_state = self.request.query_params.get(
             "requestDepositState", None
         )
-
+        
         if exterminate_state is not None:
             try:
                 exterminate_state = int(exterminate_state)
@@ -159,7 +159,7 @@ class ExterminatorRequestListAPIView(generics.ListAPIView):
     )
 
     def get_queryset(self):
-        queryset = Request.objects.filter(requestDepositState=1, exterminateState=0, exterminator=None)
+        queryset = Request.objects.filter(requestDepositState=1, exterminateState=0, exterminator=None, checkState=0)
         cd = self.request.query_params.get("cd", None)
 
         if cd is not None:
@@ -230,6 +230,37 @@ class CheckStateUpdateView(generics.RetrieveUpdateAPIView):
         permissions.IsAuthenticatedOrReadOnly,
         OnlyOwnerCanUpdate,
     )
+    #체크포인트 1이면
+    #체크포인트 2이면면
+    def patch(self, request, *args, **kwargs):
+        # PATCH 요청의 데이터에서 checkState 값을 가져오기
+        check_state = request.data.get("checkState")
+    
+        # checkState가 None이거나 빈 문자열인 경우 처리
+        if check_state is None or check_state == "":
+            return Response(
+                {"error": "checkState is required."},
+                status=400
+            )
+    
+        # checkState를 정수로 변환 시도
+        try:
+            check_state = int(check_state)  # 문자열을 정수로 변환
+        except ValueError:
+            return Response(
+                {"error": "Invalid value for checkState. It must be an integer."},
+                status=400
+            )
+    
+        # checkState가 유효한 값(1, 2, 3)인지 확인
+        if check_state not in [1, 2, 3]:
+            return Response(
+                {"error": "Invalid value for checkState. It must be one of [1, 2, 3]."},
+                status=400
+            )
+    
+        # 유효하면 기존의 partial_update 호출
+        return self.partial_update(request, *args, **kwargs)
 
 
 # 방제 진행 상태 변경
