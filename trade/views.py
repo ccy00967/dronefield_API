@@ -188,7 +188,7 @@ class ExterminatorWorkRequestListAPIView(generics.ListAPIView):
         # user = CustomUser.objects.get(email=self.request.user)
         # print(user)
         # queryset = Request.objects.filter(exterminator__email=user)
-        queryset = Request.objects.filter(exterminator__email=self.request.user)
+        queryset = Request.objects.filter(exterminator__email=self.request.user).exclude(checkState=1)
         # if queryset == test_queryset:
         #     print("queryset is same")
         # else:
