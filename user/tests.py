@@ -68,8 +68,8 @@ def create_test():
     BankAccount.objects.create(
         uuid=uuid.uuid4(),
         owner=exter,
-        bank_name="test_은행명칭칭",
-        account_number="1234567890",
+        bank_name="농협",
+        account_number="3025634745867890",
         account_type = "법인명"
     )
     
@@ -96,6 +96,20 @@ def create_test():
         "농지 D (영덕지점)",
         "농지 E (평창지점)"
     ]
+    landNickName_list = [
+        "이천지점 농지",
+        "청주지점 농지",
+        "순천지점 농지",
+        "영덕지점 농지",
+        "평창지점 농지"
+    ]
+    cropsInfo = [
+        "딸기",
+        "사과",
+        "배",
+        "블루베리",
+        "토마토",
+    ]
     #테스트 농지 및 거래
     for i in range(2):
         farm_info = FarmInfo.objects.create(
@@ -104,23 +118,23 @@ def create_test():
             road=road_list[i],
             jibun=jibun_list[i],
             detail= detail_list[i],
-            pnu=f"pnu{i}",
+            pnu=f"pnu{i:04}",
             lndpclAr="20.00",
             cd=f"cd{i}",
-            landNickName=f"landNickName{i}",
-            cropsInfo=f"cropsInfo{i}",
+            landNickName=landNickName_list[i],
+            cropsInfo=cropsInfo[i],
             additionalPhoneNum=f"0100000{1000+i:04}",
             min_price=25
         )
         for j in range(0,3):
             if j == 0:
-                exterminator=None,
+                exterminater_user = None
             else:
-                exterminator=exter,
+                exterminater_user = exter
             Request.objects.create(
                 orderId=uuid.uuid4(),
                 owner=famrmer,
-                exterminator=exterminator,
+                exterminator=exterminater_user,
                 landInfo=farm_info,
                 dealmothod=0,
                 startDate=now(),
@@ -139,7 +153,7 @@ def create_test():
 
                 # 방제완료-방제사
                 exterminateState= j,#방제상황 0:매칭중, 1:작업준비중, 2:작업중, 3:작업완료
-                reservateDepositState= 1,
+                reservateDepositState= 0,
                 depositCancelTransactionKey = "uuid값",
 
                 # 관리자용용

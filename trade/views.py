@@ -14,6 +14,7 @@ from trade.serializers import RequestBriefSerializer
 from trade.serializers import RequestUpdateSerializer
 from trade.serializers import CheckStateSerializer
 from trade.serializers import ExterminateStateSerializer
+from user.models import CustomUser
 
 from farmer.models import FarmInfo
 
@@ -184,9 +185,15 @@ class ExterminatorWorkRequestListAPIView(generics.ListAPIView):
     ordering = ['startDate']
     
     def get_queryset(self):
-        queryset = Request.objects.filter(exterminator=self.request.user)
-        print(self.request.user)
-        print(queryset)
+        # user = CustomUser.objects.get(email=self.request.user)
+        # print(user)
+        # queryset = Request.objects.filter(exterminator__email=user)
+        queryset = Request.objects.filter(exterminator__email=self.request.user)
+        # if queryset == test_queryset:
+        #     print("queryset is same")
+        # else:
+        #     print(queryset)
+        #     print(test_queryset)
         return queryset 
     
 
