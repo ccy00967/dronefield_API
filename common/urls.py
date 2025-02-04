@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import NoticeCreateView, NoticeListView, NoticeDetailView, AlarmCreateView, AlarmListView, AlarmDetailView
-from .views import get_polygon_api, get_naver_map
+from .views import  naver_map_view
 urlpatterns = [
     
     path("notices/", NoticeListView.as_view(), name=NoticeListView.name),
@@ -11,6 +11,6 @@ urlpatterns = [
     path("alarm/", AlarmCreateView.as_view(), name=AlarmCreateView.name),
     path("alarm/<uuid:uuid>/", AlarmDetailView.as_view(), name=AlarmDetailView.name),
     
-    path("polygon/", get_polygon_api, name="get_polygon_api"),
-    path("naver_map/", get_naver_map, name="get_naver_map"),
+    #path("polygon/", get_polygon_api, name="get_polygon_api"),
+    path("naver_map/", naver_map_view, name="get_naver_map"),
 ]

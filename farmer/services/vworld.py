@@ -2,9 +2,6 @@ import requests
 import logging
 from typing import Dict, Any
 
-# 로깅 설정 (필요에 따라 설정 파일에서 관리)
-logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG)
 
 def serch_pnu(road: str, jibun: str) -> Dict[str, Any]:
     """
@@ -23,7 +20,6 @@ def serch_pnu(road: str, jibun: str) -> Dict[str, Any]:
     # 주소를 결합하고 공백을 정규화
     adrass = f"{jibun}"
     normalized_address = ' '.join(adrass.split())
-    logger.debug(f"Normalized Address: {normalized_address}")
     
     # VWorld API 키 및 기본 URL 설정
     vworld_key = "6C934ED4-5978-324D-B7DE-AC3A0DDC3B38"
@@ -45,9 +41,7 @@ def serch_pnu(road: str, jibun: str) -> Dict[str, Any]:
         # 첫 번째 API 요청 (주소 검색)
         response_pnu = requests.get(baseurl_search, params=params_search)
         response_pnu.raise_for_status()
-        logger.debug(f"Search Response: {response_pnu.json()}")
     except requests.exceptions.RequestException as e:
-        logger.error(f"API 요청 실패 (주소 검색): {e}")
         raise ValueError(f"API 요청 실패: {e}")
     
     response_json = response_pnu.json()
@@ -72,7 +66,6 @@ def serch_pnu(road: str, jibun: str) -> Dict[str, Any]:
         "pnu": pnu,
         "adm_cd": pnu[:10]
     }
-    logger.debug(f"PNU: {pnu}, adm_cd: {response_result['adm_cd']}")
     
     # 두 번째 API 요청 파라미터 설정
     baseurl_lndpclAr = "https://api.vworld.kr/ned/data/ladfrlList"
@@ -87,9 +80,7 @@ def serch_pnu(road: str, jibun: str) -> Dict[str, Any]:
         # 두 번째 API 요청 (lndpclAr 조회)
         response_lndpclAr = requests.get(baseurl_lndpclAr, params=params_lndpclAr)
         response_lndpclAr.raise_for_status()
-        logger.debug(f"Land Area Response: {response_lndpclAr.json()}")
     except requests.exceptions.RequestException as e:
-        logger.error(f"API 요청 실패 (lndpclAr 조회): {e}")
         raise ValueError(f"API 요청 실패: {e}")
     
     lndpclAr_json = response_lndpclAr.json()
