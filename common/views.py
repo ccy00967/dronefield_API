@@ -4,6 +4,7 @@ from .serializers import NoticeSerializer, AlarmSerializer
 from common.utils.pageanation import CustomPagination
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
+from django.shortcuts import render
 
 class NoticeCreateView(generics.CreateAPIView):
     """
@@ -128,3 +129,6 @@ def get_polygon_api(request):
     except Exception as e:
         # 에러 발생 시 에러 메시지 반환
         return JsonResponse({"error": str(e)}, status=500)
+
+def get_naver_map(request):
+    return render(request, 'naver_map.html')
