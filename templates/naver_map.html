@@ -14,8 +14,8 @@
     <script>
       function initMap() {
         var map = new naver.maps.Map('map', {
-          center: new naver.maps.LatLng(37.3674001, 127.1181196),
-          zoom: 14
+          center: new naver.maps.LatLng({{ y }}, {{ x  }}),
+          zoom: 18
         });
     
         var polygonPaths = {{ polygon_paths|safe }};
