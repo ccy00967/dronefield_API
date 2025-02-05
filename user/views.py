@@ -188,7 +188,6 @@ class ProfileAPIView(generics.RetrieveUpdateAPIView):
         serializer = self.get_serializer(request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    # TODO: 실명등 nice에서 가져오는 거는 수정이 안되게 해야함
     def patch(self, request):
         try:
             serializer = self.get_serializer(
@@ -423,8 +422,6 @@ def find_id(request):
         return Response({"email": user.email}, status=status.HTTP_200_OK)
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-#TODO: 계좌는 하나만 가지도록 하기
 class BankAccountAPIView(APIView):
     permission_classes = [IsAuthenticated]
     def post(self, request):

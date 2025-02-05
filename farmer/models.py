@@ -38,6 +38,7 @@ class FarmInfo(models.Model):
         return self.landNickName
 
 
+#TODO: 나중에 이미지처리
 class FarmInfoImage(models.Model):
     uuid = models.UUIDField(
         unique=True, default=uuid.uuid4, editable=False, db_index=True
