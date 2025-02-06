@@ -143,8 +143,6 @@ class UserLoginAPIView(generics.GenericAPIView):
         try:
             serializer.is_valid(raise_exception=True)
             response = {
-                "access": serializer.validated_data["access"],
-                "refresh": serializer.validated_data["refresh"],
                 "user": {
                     "access": serializer.validated_data["access"],
                     "refresh": serializer.validated_data["refresh"],

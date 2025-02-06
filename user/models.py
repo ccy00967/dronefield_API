@@ -81,8 +81,9 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
-    sent_agreement = models.BooleanField(default=False)
-    sent_agreement_date = models.DateTimeField(null=True, blank=True)
+    optinal_consent = models.BooleanField(default=False)
+    marketing_agreement_date = models.DateTimeField(null=True, blank=True)
+    required_consent_data = models.DateTimeField(null=True, blank=True)
     
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
