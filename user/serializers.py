@@ -188,15 +188,30 @@ class UserLoginSerializer(serializers.Serializer):
 
             update_last_login(None, user)
             # view에 넘길 데이터들
-            validation = {
+            
+            validation = {  # 토큰 발급
                 "access": access_token,
                 "refresh": refresh_token,
                 "uuid": user.uuid,
+                
                 "name": user.name,
+                "birthdate": user.birthdate,
+                "gender": user.gender,
+                "nationalinfo": user.nationalinfo,
+                "mobileno": user.mobileno,
                 "email": user.email,
                 "type": user.type,
-                "mobileno": user.mobileno,
+                
+                "road": user.road,
+                "jibun": user.jibun,
+                "detail": user.detail,
                 "is_active": user.is_active,
+                "created_at": user.created_at,
+                "updated_at": user.updated_at,
+                
+                "optinal_consent": user.optinal_consent,
+                "marketing_agreement_date": user.marketing_agreement_date,
+                "required_consent_data": user.required_consent_data,
             }
 
             return validation

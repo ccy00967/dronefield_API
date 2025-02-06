@@ -143,12 +143,31 @@ class UserLoginAPIView(generics.GenericAPIView):
         try:
             serializer.is_valid(raise_exception=True)
             response = {
+                "access": serializer.validated_data["access"],
+                "refresh": serializer.validated_data["refresh"],
                 "user": {
                     "access": serializer.validated_data["access"],
                     "refresh": serializer.validated_data["refresh"],
                     "uuid": serializer.validated_data["uuid"],
-                    "type": serializer.validated_data["type"],
+                    
                     "name": serializer.validated_data["name"],
+                    "birthdate": serializer.validated_data["birthdate"],
+                    "gender": serializer.validated_data["gender"],
+                    "nationalinfo": serializer.validated_data["nationalinfo"],
+                    "mobileno": serializer.validated_data["mobileno"],
+                    "email": serializer.validated_data["email"],
+                    "type": serializer.validated_data["type"],
+                    
+                    "road": serializer.validated_data["road"],
+                    "jibun": serializer.validated_data["jibun"],
+                    "detail": serializer.validated_data["detail"],
+                    "is_active": serializer.validated_data["is_active"],
+                    "created_at": serializer.validated_data["created_at"],
+                    "updated_at": serializer.validated_data["updated_at"],
+                    
+                    "optinal_consent" : serializer.validated_data["optinal_consent"],
+                    "marketing_agreement_date" : serializer.validated_data["optinal_consent"],
+                    "required_consent_data" : serializer.validated_data["optinal_consent"],
                 },
             }
             return Response(response, status=status.HTTP_200_OK)
