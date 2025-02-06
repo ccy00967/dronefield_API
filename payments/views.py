@@ -117,33 +117,43 @@ class TossPaymentsUpdateDeleteView(generics.RetrieveUpdateAPIView):
     name = "tosspayments-cancel"
     permission_classes = (
         permissions.IsAuthenticatedOrReadOnly,
+        # TODO: 본인이 결제한 것만 결제 취소 가능하게 퍼미션 추가하기
     )
 
     def post(self, request, *args, **kwargs):
-        tossOrderId = self.kwargs.get('tossOrderId')  # URL에서 tossOrderId를 가져옴
         cancelReason = self.request.data.get("cancelReason")
         orderIdList = self.request.data.get("orderidlist")
         cancelAmount = 0
 
-         # tossOrderId에 해당하는 TossPayments 객체를 찾기
-        toss_payment = TossPayments.objects.filter(tossOrderId=tossOrderId).first()
-        if toss_payment:
-            PAYMENT_KEY = toss_payment.paymentKey  # TossPayments 객체에서 paymentKey를 가져옴
-        else:
-            return Response({"error": "TossPayments object not found."}, status=status.HTTP_404_NOT_FOUND)
+        # # tossOrderId에 해당하는 TossPayments 객체를 찾기
+        # toss_payment = TossPayments.objects.filter(tossOrderId=tossOrderId).first()
+        # if toss_payment:
+        #     PAYMENT_KEY = toss_payment.paymentKey  # TossPayments 객체에서 paymentKey를 가져옴
+        # else:
+        #     return Response({"error": "TossPayments object not found."}, status=status.HTTP_404_NOT_FOUND)
 
+        # 토스 객체 존재 확인
         for orderid in orderIdList:
             try:
                 # orderid를 'orderId'로 수정하여 필드명 일치시킴
                 request_instance = Request.objects.get(orderId=orderid)
                 
                 # requestTosspayments의 tossOrderId가 요청된 tossOrderId와 일치하는지 확인
-                if request_instance.requestTosspayments and request_instance.requestTosspayments.tossOrderId != tossOrderId:
-                    return Response(
-                        {"message": f"orderId {orderid}에 대한 TossOrderId가 일치하지 않습니다."},
-                        status=status.HTTP_400_BAD_REQUEST,
-                    )
-                
+                # 농민
+                if request.user.type == 3:
+                    if request_instance.requestTosspayments.tossOrderId != tossOrderId:
+                        return Response(
+                            {"message": f"농민, orderId: {orderid}에 대한 TossOrderId가 일치하지 않습니다."},
+                            status=status.HTTP_400_BAD_REQUEST,
+                        )
+                # 방제사
+                if request.user.type == 3:
+                    if request_instance.reservateTosspayments.tossOrderId != tossOrderId:
+                        return Response(
+                            {"message": f"방제사, orderId: {orderid}에 대한 TossOrderId가 일치하지 않습니다."},
+                            status=status.HTTP_400_BAD_REQUEST,
+                        )
+            
             except Request.DoesNotExist:
                 return Response(
                     {"message": f"Request with orderId {orderid} does not exist."},

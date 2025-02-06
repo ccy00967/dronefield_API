@@ -18,5 +18,8 @@ class TossPayments(models.Model):
         blank=True, null=True
     )  # 총 결제금액 ex)신청서 여러개, 예약금 여러개일 경우
 
+    # TODO:결제 날짜 추가하기 및 마이그레이션
+    # paymentCompletedDate = models.DateField(auto_now=True)
+
     def __str__(self):
         return self.name
