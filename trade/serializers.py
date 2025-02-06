@@ -98,6 +98,9 @@ class RequestBriefSerializer(serializers.ModelSerializer):
     lndpclAr = serializers.CharField(source="landInfo.lndpclAr")
     cd = serializers.CharField(source="landInfo.cd")
 
+    requestTosspayments = TossPaymentsSerializer(read_only=True)
+    reservateTosspayments = TossPaymentsSerializer(read_only=True)
+
     class Meta:
         model = Request
         fields = "__all__"
