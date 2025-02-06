@@ -15,19 +15,18 @@
       function initMap() {
         var map = new naver.maps.Map('map', {
           center: new naver.maps.LatLng({{ y }}, {{ x  }}),
+          logoControl: false,
+          mapDataControl: false,
+          logoControlOptions: {
+            position: naver.maps.Position.TOP_RIGHT
+          },
+          disableKineticPan: false,
           zoom: 15,
-          //scaleControl: true,
-          //mapDataControl: true,
-          //mapTypeControl: false,
           zoomControl: true,
           zoomControlOptions: {
-            position: naver.maps.Position.BOTTOM_RIGHT,
+            position: naver.maps.Position.RIGHT_BOTTOM,
             style: naver.maps.ZoomControlStyle.SMALL
           },
-          //scaleControlOptions: {
-          //  position: naver.maps.Position.BOTTOM_RIGHT,
-            //style: naver.maps.ScaleControlStyle.SMALL
-          //},
         });
         console.log(map);
         

@@ -203,7 +203,7 @@ def getNicePassUserData(request):
             {"message": "나이스 인증이 완료되었습니다."}, 
             status=status.HTTP_200_OK
         )
-    
+        
     except Exception as e:
         return Response(
             {"message": f"에러 발생: {e}"}, 
