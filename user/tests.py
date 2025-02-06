@@ -2,6 +2,7 @@ from user.models import CustomUser, BankAccount
 from farmer.models import FarmInfo
 from exterminator.models import ExterminatorLicense, Drone
 from trade.models import Request
+from common.models import Alarm, Notice
 import uuid
 import random
 from common.utils.s3 import s3_upload_file, s3_delete_file
@@ -42,8 +43,9 @@ def create_test():
         jibun=f"TestJibun_farmer",
         detail=f"TestDetail_farmer",
         is_active=True,
-        sent_agreement=True,
-        sent_agreement_date=now()
+        optinal_consent=True,
+        marketing_agreement_date=now(),
+        required_consent_data=now()
     )
     famrmer.set_password("test1234@")
     famrmer.save()
@@ -60,8 +62,9 @@ def create_test():
         jibun=f"TestJibun_exterminator",
         detail=f"TestDetail_exterminator",
         is_active=True,
-        sent_agreement=True,
-        sent_agreement_date=now()
+        optinal_consent=True,
+        marketing_agreement_date=now(),
+        required_consent_data=now()
     )
     exter.set_password("test1234@")
     exter.save()
@@ -198,8 +201,9 @@ def create_test():
             jibun=f"TestJibun{i}",
             detail=f"TestDetail{i}",
             is_active=True,
-            sent_agreement=True,
-            sent_agreement_date=now()
+            optinal_consent=True,
+            marketing_agreement_date=now(),
+        required_consent_data=now()
         )
         user.set_password("test1234@")
         user.save()
@@ -232,8 +236,9 @@ def create_test():
             jibun=f"TestJibun{i}",
             detail=f"TestDetail{i}",
             is_active=True,
-            sent_agreement=True,
-            sent_agreement_date=now()
+            optinal_consent=True,
+            marketing_agreement_date=now(),
+        required_consent_data=now()
         )    
         user.set_password("test1234@")
         user.save()
@@ -265,7 +270,21 @@ def create_test():
                 image=drone_image_url,  # S3 URL 저장
             )
         
-        
+    Alarm.objects.create(
+        uuid=uuid.uuid4(),
+        title="매칭이 완료되었습니다.",
+        content=f"{now()}에 매칭이 완료되었습니다.",
+        created_at=now(),
+    ).save()
+    
+    Notice.objects.create(
+        uuid=uuid.uuid4(),
+        title="2월 폭설로 인한 방제 지연 안내",
+        content="2월 폭설로 전남권 대규모 폭설로 인해 방제를 2월 3일까지 연기합니다.",
+        created_at=now(),
+    ).save()
+
+    
 #=========비어있는 계정================    
     user = CustomUser.objects.create(
             uuid=uuid.uuid4(),
@@ -280,8 +299,9 @@ def create_test():
             jibun=f"TestJibun50",
             detail=f"TestDetail50",
             is_active=True,
-            sent_agreement=True,
-            sent_agreement_date=now()
+            optinal_consent=True,
+            marketing_agreement_date=now(),
+            required_consent_data=now()
     )
     user = CustomUser.objects.get(name=f"test50")
     user.set_password("test1234@")
