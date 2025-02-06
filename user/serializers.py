@@ -211,9 +211,9 @@ class UserLoginSerializer(serializers.Serializer):
                 
                 "optinal_consent": user.optinal_consent,
                 "marketing_agreement_date": user.marketing_agreement_date,
-                "required_consent_data": user.required_consent_data,
+                "required_consent_date": user.required_consent_date,
             }
-
+            print(user.marketing_agreement_date)
             return validation
         except CustomUser.DoesNotExist:
             raise serializers.ValidationError("Invalid login credentials(유저 존재x)")

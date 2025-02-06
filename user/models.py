@@ -83,7 +83,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     
     optinal_consent = models.BooleanField(default=False)
     marketing_agreement_date = models.DateTimeField(null=True, blank=True)
-    required_consent_data = models.DateTimeField(null=True, blank=True)
+    required_consent_date = models.DateTimeField(null=True, blank=True)
     
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []

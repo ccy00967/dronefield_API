@@ -22,9 +22,6 @@ def naver_map(address, request):
         raise ValueError(f"API 요청 실패: {e}")
 
     response_json = response.json()
-    print("=====================================")
-    print(response_json)
-    print("=====================================")
     item_x = response_json.get("response", {}).get("result", {}).get("items", [])[0].get("point", {}).get("x")
     item_y = response_json.get("response", {}).get("result", {}).get("items", [])[0].get("point", {}).get("y")
 
@@ -51,12 +48,10 @@ def naver_map(address, request):
     items = []
     items = response_json.get("response", {}).get("result", {}).get(
         "featureCollection", {}).get("features", [])[0].get("geometry", {}).get("coordinates", [])[0]
-    print(response_json)
-    print(items)
-    print("=====================================")
+
     transformed_coordinates = [[[lat, lon]
                                 for lon, lat in path] for path in items]
-    print(transformed_coordinates)
+
     polygon_paths = []
     polygon_paths = transformed_coordinates
     # polygon_paths = [

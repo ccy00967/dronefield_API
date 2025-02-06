@@ -166,8 +166,8 @@ class UserLoginAPIView(generics.GenericAPIView):
                     "updated_at": serializer.validated_data["updated_at"],
                     
                     "optinal_consent" : serializer.validated_data["optinal_consent"],
-                    "marketing_agreement_date" : serializer.validated_data["optinal_consent"],
-                    "required_consent_data" : serializer.validated_data["optinal_consent"],
+                    "marketing_agreement_date" : serializer.validated_data["marketing_agreement_date"],
+                    "required_consent_date" : serializer.validated_data["required_consent_date"],
                 },
             }
             return Response(response, status=status.HTTP_200_OK)

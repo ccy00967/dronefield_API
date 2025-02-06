@@ -13,10 +13,24 @@
     
     <script>
       function initMap() {
+        var locationBtnHtml = '<a href="#" class="btn_mylct"><span class="spr_trff spr_ico_mylct">NAVER 그린팩토리</span></a>';
+
+        var customControl = new naver.maps.CustomControl(locationBtnHtml, {position: naver.maps.Position.TOP_LEFT});
+
         var map = new naver.maps.Map('map', {
           center: new naver.maps.LatLng({{ y }}, {{ x  }}),
-          zoom: 18
+          zoom: 15,
+          scaleControl: true,
+          
+          scaleControlOptions: {
+            position: naver.maps.Position.BOTTOM_RIGHT
+            //style: naver.maps.ScaleControlStyle.SMALL
+          },
         });
+        naver.maps.Event.once(map, 'init', function () {
+          map.addControl(customControl);
+        });
+        console.log(map);
     
         var polygonPaths = {{ polygon_paths|safe }};
     

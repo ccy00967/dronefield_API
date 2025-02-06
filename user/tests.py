@@ -45,7 +45,7 @@ def create_test():
         is_active=True,
         optinal_consent=True,
         marketing_agreement_date=now(),
-        required_consent_data=now()
+        required_consent_date=now()
     )
     famrmer.set_password("test1234@")
     famrmer.save()
@@ -64,7 +64,7 @@ def create_test():
         is_active=True,
         optinal_consent=True,
         marketing_agreement_date=now(),
-        required_consent_data=now()
+        required_consent_date=now()
     )
     exter.set_password("test1234@")
     exter.save()
@@ -164,6 +164,37 @@ def create_test():
                 # 신청금액-방제사
 
             )
+        for j in range(5):
+            Request.objects.create(
+                orderId=uuid.uuid4(),
+                owner=famrmer,
+                exterminator=exter,
+                landInfo=farm_info,
+                dealmothod=0,
+                startDate=now(),
+                endDate=now() + timedelta(days=11),
+                pesticide=random.choice(["곰팡이살균제", "일본농약", "구형농약"]),
+                setAveragePrice=30,
+                requestAmount=25,
+                reservateDepositAmount=1000,
+                requestTosspayments = None,
+                reservateTosspayments = None,
+                #requestCancelTransactionKey = None,
+
+                # 방제완료-농민
+                checkState=1,
+                requestDepositState = 1,
+
+                # 방제완료-방제사
+                exterminateState= 3,#방제상황 0:매칭중, 1:작업준비중, 2:작업중, 3:작업완료
+                reservateDepositState= 0,
+                depositCancelTransactionKey = "uuid값",
+
+                # 관리자용용
+                calculation=0,
+                # 신청금액-방제사
+
+            )
     
         license_title_list =["특수드론1종", "경드론2종", "드론정비사", "비행기기운용전문가", "비행기기운용사"]
     for i in range(5):
@@ -203,7 +234,7 @@ def create_test():
             is_active=True,
             optinal_consent=True,
             marketing_agreement_date=now(),
-        required_consent_data=now()
+        required_consent_date=now()
         )
         user.set_password("test1234@")
         user.save()
@@ -238,7 +269,7 @@ def create_test():
             is_active=True,
             optinal_consent=True,
             marketing_agreement_date=now(),
-        required_consent_data=now()
+        required_consent_date=now()
         )    
         user.set_password("test1234@")
         user.save()
@@ -301,7 +332,7 @@ def create_test():
             is_active=True,
             optinal_consent=True,
             marketing_agreement_date=now(),
-            required_consent_data=now()
+            required_consent_date=now()
     )
     user = CustomUser.objects.get(name=f"test50")
     user.set_password("test1234@")
