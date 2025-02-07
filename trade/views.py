@@ -119,10 +119,10 @@ class FarmerRequestListAPIView(generics.ListAPIView):
     )
 
     def get_queryset(self):
-        queryset = Request.objects.filter(owner=self.request.user, checkState=0)
+        queryset = Request.objects.filter(owner=self.request.user)
 
-        # 클라이언트에서 값을 쿼리 파라미터로 받아서 필터링
-        exterminate_state = self.request.query_params.get("exterminateState", None)
+        # 클라이언트에서 값을 쿼리 파라미터로 받아서 필터링 - exterminateState가 RequestFilter로 이동됨
+        # exterminate_state = self.request.query_params.get("exterminateState", None)
         requestDeposit_state = self.request.query_params.get(
             "requestDepositState", None
         )
