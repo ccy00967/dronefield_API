@@ -127,13 +127,13 @@ class FarmerRequestListAPIView(generics.ListAPIView):
             "requestDepositState", None
         )
         
-        if exterminate_state is not None:
-            try:
-                exterminate_state = int(exterminate_state)
-                if exterminate_state in [0, 1, 2, 3]:
-                    queryset = queryset.filter(exterminateState=exterminate_state)
-            except ValueError:
-                pass  # exterminateState 값이 유효하지 않으면 필터링하지 않음
+        # if exterminate_state is not None:
+        #     try:
+        #         exterminate_state = int(exterminate_state)
+        #         if exterminate_state in [0, 1, 2, 3]:
+        #             queryset = queryset.filter(exterminateState=exterminate_state)
+        #     except ValueError:
+        #         pass  # exterminateState 값이 유효하지 않으면 필터링하지 않음
 
         if requestDeposit_state is not None:
             try:
