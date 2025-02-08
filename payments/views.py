@@ -138,6 +138,12 @@ class TossPaymentsUpdateDeleteView(generics.RetrieveUpdateAPIView):
 
         # 농민
         if request.user.type == 4:
+            if request_instance.requestTosspayments.status != "DONE":
+                return Response(
+                    {"message": f"이미 결제가 취소된 신청서입니다."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
             tossOrderId = request_instance.requestTosspayments.tossOrderId
             paymentKey = request_instance.requestTosspayments.paymentKey
             amout = request_instance.requestAmount
@@ -154,6 +160,11 @@ class TossPaymentsUpdateDeleteView(generics.RetrieveUpdateAPIView):
                 )
         # 방제사
         elif request.user.type == 3:
+            if request_instance.reservateTosspayments.status != "DONE":
+                return Response(
+                    {"message": f"이미 결제가 취소된 신청서입니다."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
             tossOrderId = request_instance.reservateTosspayments.tossOrderId
             paymentKey = request_instance.reservateTosspayments.paymentKey
             amout = request_instance.reservateDepositAmount  # 방제사의 수수료 == 1000원
