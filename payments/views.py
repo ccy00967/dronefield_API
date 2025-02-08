@@ -159,9 +159,9 @@ class TossPaymentsUpdateDeleteView(generics.RetrieveUpdateAPIView):
             amout = request_instance.reservateDepositAmount  # 방제사의 수수료 == 1000원
 
         # # tossOrderId에 해당하는 TossPayments 객체를 찾기
-        if toss_payment:
-            toss_payment = TossPayments.objects.filter(tossOrderId=tossOrderId).first()
-        else:
+        toss_payment = TossPayments.objects.filter(tossOrderId=tossOrderId).first()
+
+        if not toss_payment:
             return Response(
                 {"error": "신청서에 연결된 결제 정보를 찾을 수 없습니다!, 결제가 정상적으로 이루어진 신청서가 아닙니다."},
                 status=status.HTTP_404_NOT_FOUND,
