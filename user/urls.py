@@ -23,7 +23,8 @@ from .service.SMS.views import (
     find_id_sendcode,
     find_id_checkcode,
     reset_password_sendcode,
-    reset_password_checkcode
+    reset_password_checkcode,
+    reset_password_confirm
 )
 
 from .views import (
@@ -53,6 +54,7 @@ urlpatterns = [
     path("findid/checkcode/", find_id_checkcode, name="findid_checkcode"),  # 아이디 찾기
     path("resetpassword/sendcode/", reset_password_sendcode, name="resetpassword_sendcode"),
     path("resetpassword/checkcode/", reset_password_checkcode, name="resetpassword_checkcode"),
+    path("resetpassword/confirm/", reset_password_confirm, name="resetpassword_confirm"),  # 비밀번호 재설정
     
     
     #나이스

@@ -130,6 +130,7 @@ def reset_password_sendcode(request):
     validate_key = str(uuid.uuid4().int)[:6]
     
     request.session["validate_key"] = validate_key
+    request.session["validate_check"] = False
     request.session["email"] = email
     request.session["name"] = name
     request.session["birthdate"] = birthdate
@@ -161,9 +162,9 @@ def reset_password_sendcode(request):
 
 @api_view(("POST",))
 def reset_password_checkcode(request):
-    if not request.session.session_key:
+    if request.session.session_key:
         sessionid = request.session.session_key
-    if request.data.get("sessionid"):
+    elif request.data.get("sessionid"):
         sessionid = request.data.get("sessionid")
     else:
         return Response({"message": "sessionid가 없습니다."}, status=status.HTTP_400_BAD_REQUEST)
@@ -172,39 +173,57 @@ def reset_password_checkcode(request):
     session_store = SessionStore(session_key=sessionid)
     validate_key = session_store.get("validate_key")
     
+    
     if not validate_key:
         return Response({"message": "validate_key가 필요합니다."}, status=status.HTTP_400_BAD_REQUEST)
     
     if validate_key == request.data.get("validate_key"):
-        email = session_store.get("email")
-        name = session_store.get("name")
-        birthdate = session_store.get("birthdate")
-        mobileno = session_store.get("mobileno")
-        password = request.data.get("password")
+        session_store["validate_check"] = True
+        Response( {"message": "인증번호가 일치합니다."}, status=status.HTTP_200_OK)
+    else:
+        Response( {"message": "인증번호가 일치하지 않습니다."}, status=status.HTTP_400_BAD_REQUEST)
         
-        if not (email and name and birthdate and mobileno):
-            return Response({"message": "세션에 필요한 정보가 없습니다."}, status=status.HTTP_400_BAD_REQUEST)
-
-        user = CustomUser.objects.filter(
-            email=email,
-            name=name,
-            birthdate=birthdate,
-            mobileno=mobileno,
-        ).first()
-
-        if not user:
-            return Response(
-                {"message": "해당 정보로 가입된 사용자를 찾을 수 없습니다."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
         
-        user.set_password(password)
-        user.save()
-        session_store.delete()
-        
+@api_view(("POST",))
+def reset_password_confirm(request):
+    if not request.session.session_key:
+        sessionid = request.session.session_key
+    if request.data.get("sessionid"):
+        sessionid = request.data.get("sessionid")
+    else:
+        return Response({"message": "sessionid가 없습니다."}, status=status.HTTP_400_BAD_REQUEST)
+    
+    session_store = SessionStore(session_key=sessionid)
+    validate_key = session_store.get("validate_key")
+    
+    email = session_store.get("email")
+    name = session_store.get("name")
+    birthdate = session_store.get("birthdate")
+    mobileno = session_store.get("mobileno")
+    
+    password = request.data.get("password")
+    
+    if not (email and name and birthdate and mobileno):
+        return Response({"message": "세션에 필요한 정보가 없습니다."}, status=status.HTTP_400_BAD_REQUEST)
+    
+    user = CustomUser.objects.filter(
+        email=email,
+        name=name,
+        birthdate=birthdate,
+        mobileno=mobileno,
+    ).first()
+    
+    if not user:
         return Response(
-            {"message": "비밀번호 변경이 되었습니다."},
-            status=status.HTTP_200_OK
+            {"message": "해당 정보로 가입된 사용자를 찾을 수 없습니다."},
+            status=status.HTTP_404_NOT_FOUND,
         )
     
+    user.set_password(password)
+    user.save()
+    session_store.delete()
     
+    return Response(
+        {"message": "비밀번호 변경이 되었습니다."},
+        status=status.HTTP_200_OK
+    )
