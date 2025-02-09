@@ -2,6 +2,7 @@ from user.models import CustomUser, BankAccount
 from farmer.models import FarmInfo
 from exterminator.models import ExterminatorLicense, Drone
 from trade.models import Request
+from payments.models import TossPayments
 from common.models import Alarm, Notice
 import uuid
 import random
@@ -129,11 +130,50 @@ def create_test():
             additionalPhoneNum=f"0100000{1000+i:04}",
             min_price=25
         )
+        # j값은 exterminateState에 연결됨.
+        # 고로 j 값에 따라서 다른 속성들의 값이 어느 정도 결정된다.
         for j in range(0,3):
+            # j가 0인 경우 == 방제사가 예약전임
+            # 신청서는 농민이 결제전, 결제후 두가지 상태를 가진다.
             if j == 0:
+                # 농민이 결제전인 신청서 상태
                 exterminater_user = None
+                request_tosspayments = None
+                reservate_tosspayments = None
+                request_depositState = 0
+                reservate_depositState = 0
+                
+                # 농민이 결제는 완료한 신청서 상태
+                if random.choice(0,1) == 1:
+                    request_tosspayments = TossPayments.objects.create(
+                    tossOrderId=uuid.uuid4(),
+                    paymentKey=uuid.uuid4(),
+                    method="CARD" ,
+                    status="Test" ,
+                    totalAmount=1,
+                    )
+                    request_depositState = 1
+            # j가 0이 아닌 경우, 방제사가 방제를 시작함.
+            # 농민이 결제완료, 방제사가 결제 완료.
             else:
                 exterminater_user = exter
+                request_tosspayments = TossPayments.objects.create(
+                    tossOrderId=uuid.uuid4(),
+                    paymentKey=uuid.uuid4(),
+                    method="CARD" ,
+                    status="Test" ,
+                    totalAmount=1,
+                )
+                reservate_tosspayments = TossPayments.objects.create(
+                    tossOrderId=uuid.uuid4(),
+                    paymentKey=uuid.uuid4(),
+                    method="CARD" ,
+                    status="Test" ,
+                    totalAmount=1,
+                )
+                request_depositState = 1
+                reservate_depositState = 1
+
             Request.objects.create(
                 orderId=uuid.uuid4(),
                 owner=famrmer,
@@ -146,23 +186,22 @@ def create_test():
                 setAveragePrice=30,
                 requestAmount=25,
                 reservateDepositAmount=1000,
-                requestTosspayments = None,
-                reservateTosspayments = None,
-                #requestCancelTransactionKey = None,
+                requestTosspayments = request_tosspayments,
+                reservateTosspayments = reservate_tosspayments,
+                #requestCancelTransactionKey = "",
 
                 # 방제완료-농민
                 checkState=0,
-                requestDepositState = 0,
+                requestDepositState = request_depositState,
 
                 # 방제완료-방제사
                 exterminateState= j,#방제상황 0:매칭중, 1:작업준비중, 2:작업중, 3:작업완료
-                reservateDepositState= 0,
-                depositCancelTransactionKey = "uuid값",
+                reservateDepositState= reservate_depositState,
+                depositCancelTransactionKey = "",
 
                 # 관리자용용
                 calculation=0,
                 # 신청금액-방제사
-
             )
         for j in range(5):
             Request.objects.create(
