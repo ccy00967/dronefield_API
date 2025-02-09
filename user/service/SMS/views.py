@@ -179,9 +179,9 @@ def reset_password_checkcode(request):
     
     if validate_key == request.data.get("validate_key"):
         session_store["validate_check"] = True
-        Response( {"message": "인증번호가 일치합니다."}, status=status.HTTP_200_OK)
+        return Response( {"message": "인증번호가 일치합니다."}, status=status.HTTP_200_OK)
     else:
-        Response( {"message": "인증번호가 일치하지 않습니다."}, status=status.HTTP_400_BAD_REQUEST)
+        return Response( {"message": "인증번호가 일치하지 않습니다."}, status=status.HTTP_400_BAD_REQUEST)
         
         
 @api_view(("POST",))
