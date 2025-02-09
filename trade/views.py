@@ -156,7 +156,9 @@ class ExterminatorRequestListAPIView(generics.ListAPIView):
     )
 
     def get_queryset(self):
+        # TODO: 결제된 신청서만 보이게 필터링하는 코드
         #queryset = Request.objects.filter(exterminateState=0, exterminator=None, checkState=0, requestDepositState=1)
+        queryset = Request.objects.filter()
         cd = self.request.query_params.get("cd", None)
 
         if cd is not None:
