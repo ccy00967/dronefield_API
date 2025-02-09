@@ -92,10 +92,6 @@ class RequestCreateAPIView(generics.CreateAPIView):
         )
         
 
-    # def get_queryset(self):
-    #     user = self.request.user
-    #     return CustomerRequest.objects.filter(owner=user)
-
 
 # 신청서 목록 - 농민용
 class FarmerRequestListAPIView(generics.ListAPIView):

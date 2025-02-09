@@ -20,4 +20,10 @@ urlpatterns = [
         views.TossPaymentsUpdateDeleteView.as_view(),
         name=views.TossPaymentsUpdateDeleteView.name,
     ),
+    # 결제를 건너뛰고 방제사 등록
+    path(
+        "/exterminator-info-upload",
+        views.RequestTossCreateAPIView.as_view(),
+        name=views.RequestTossCreateAPIView.name,
+    ),
 ]
