@@ -1,6 +1,7 @@
 from rest_framework import generics
 from rest_framework import permissions
 from rest_framework import status
+import uuid
 
 from payments.serializers import RequestTossUpdateSerializer
 from payments.serializers import TossPaymentsSerializer
@@ -313,8 +314,8 @@ class RequestTossExterminatorCreateAPIView(generics.CreateAPIView):
 
         # 토스 결제확인 데이터 저장
         tosspaymentsObj = TossPayments.objects.create(
-            tossOrderId="test_tossOrderId",
-            paymentKey="test_paymentKey",
+            tossOrderId=uuid.uuid4(),
+            paymentKey=uuid.uuid4(),
             method="CARD",
             totalAmount=1000,
             status="test_status",
