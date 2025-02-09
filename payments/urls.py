@@ -23,7 +23,7 @@ urlpatterns = [
     # 결제를 건너뛰고 방제사 등록
     path(
         "/exterminator-info-upload",
-        views.RequestTossCreateAPIView.as_view(),
-        name=views.RequestTossCreateAPIView.name,
+        views.RequestTossExterminatorCreateAPIView.as_view(),
+        name=views.RequestTossExterminatorCreateAPIView.name,
     ),
 ]
