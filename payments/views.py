@@ -33,9 +33,7 @@ class RequestTossCreateAPIView(generics.CreateAPIView):
     queryset = Request.objects.all()
     serializer_class = RequestTossUpdateSerializer
     name = "request-tosspayments-update"
-    permission_classes = (
-        permissions.IsAuthenticatedOrReadOnly,
-    )
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
     def post(self, request):
         # 사용자로부터 받음
@@ -62,11 +60,15 @@ class RequestTossCreateAPIView(generics.CreateAPIView):
                 TotalAMOUNT += serializer.data.get("reservateDepositAmount", 1000)
             elif request.user.type == 4:
                 TotalAMOUNT += serializer.data.get("requestAmount", 0)
-                TotalAMOUNT += 10000
+                TotalAMOUNT += 10000  # 농민의 수수료 == 1만원
 
         # 값 검증하기
         url = "https://api.tosspayments.com/v1/payments/confirm"
-        data = {"paymentKey": PAYMENT_KEY, "orderId": TOSSORDERID, "amount": TotalAMOUNT}
+        data = {
+            "paymentKey": PAYMENT_KEY,
+            "orderId": TOSSORDERID,
+            "amount": TotalAMOUNT,
+        }
         payload = json.dumps(data)
         response = requests.post(url, headers=HEADERS, data=payload)
 
@@ -113,37 +115,157 @@ class RequestTossCreateAPIView(generics.CreateAPIView):
 class TossPaymentsUpdateDeleteView(generics.RetrieveUpdateAPIView):
     queryset = TossPayments.objects.all()
     serializer_class = TossPaymentsSerializer
-    lookup_field = "tossOrderId"
     name = "tosspayments-cancel"
     permission_classes = (
         permissions.IsAuthenticatedOrReadOnly,
+        # TODO: 본인이 결제한 것만 결제 취소 가능하게 퍼미션 추가하기
     )
 
     def post(self, request, *args, **kwargs):
-        tossOrderId = self.kwargs.get('tossOrderId')  # URL에서 tossOrderId를 가져옴
+        cancelReason = self.request.data.get("cancelReason")
+        orderid = self.request.data.get("orderid")  # 신청서 UUID
+        paymentKey = ""
+        amout = 0
+        tossOrderId = ""
+
+        try:
+            request_instance = Request.objects.get(orderId=orderid)
+        except Exception as e:
+            return Response(
+                {"message": f"신청서 정보를 찾을 수 없습니다! : 유효하지 않은 orderid"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        # 농민
+        if request.user.type == 4:
+            if request_instance.requestCancelTransactionKey != "":
+                return Response(
+                    {"message": f"이미 결제가 취소된 신청서입니다."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            tossOrderId = request_instance.requestTosspayments.tossOrderId
+            paymentKey = request_instance.requestTosspayments.paymentKey
+            amout = request_instance.requestAmount
+            amout += 10000  # 농민의 수수료 == 10000원
+
+            # 방제가 진행중인, 방제사가 예약한 신청서는 에러를 던지기
+            if (
+                request_instance.exterminator is not None
+                and request_instance.reservateDepositState != 0
+            ):
+                return Response(
+                    {"message": "방제가 진행중인 신청서 입니다. 환불이 불가합니다."},
+                    status=status.HTTP_406_NOT_ACCEPTABLE,
+                )
+        # 방제사
+        elif request.user.type == 3:
+            if request_instance.depositCancelTransactionKey != "":
+                return Response(
+                    {"message": f"이미 결제가 취소된 신청서입니다."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            tossOrderId = request_instance.reservateTosspayments.tossOrderId
+            paymentKey = request_instance.reservateTosspayments.paymentKey
+            amout = request_instance.reservateDepositAmount  # 방제사의 수수료 == 1000원
+
+        # # tossOrderId에 해당하는 TossPayments 객체를 찾기
+        toss_payment = TossPayments.objects.filter(tossOrderId=tossOrderId).first()
+
+        if not toss_payment:
+            return Response(
+                {"error": "신청서에 연결된 결제 정보를 찾을 수 없습니다!, 결제가 정상적으로 이루어진 신청서가 아닙니다."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        # 부분 환불하기
+        url = "https://api.tosspayments.com/v1/payments/" + paymentKey + "/cancel"
+        data = {
+            "cancelReason": cancelReason,
+            "cancelAmount": amout,
+        }
+        payload = json.dumps(data)
+        headers = HEADERS
+        response = requests.post(url, headers=headers, data=payload)
+
+        if 400 <= response.status_code < 500:
+            error = response.json()
+            return Response(
+                {"code": error["code"], "message": error["message"]},
+                status=response.status_code,
+            )
+
+        # 토스 결제확인 데이터
+        tosspayData = response.json()
+
+        # toss_payment 인스턴스를 직접 수정하고 저장하기
+        toss_payment.status = tosspayData["status"]
+        toss_payment.save()
+
+        # 해당 신청서 업데이트
+        if request.user.type == 3:
+            Request.objects.filter(orderId=orderid).update(
+                exterminator=None,
+                exterminateState=0,
+                reservateTosspayments=None,
+                reservateDepositState=0,
+                depositCancelTransactionKey=tosspayData.get("cancels")[0].get(
+                    "transactionKey"
+                ),
+            )
+        elif request.user.type == 4:
+            Request.objects.filter(orderId=orderid).update(
+                requestDepositState=2,
+                requestCancelTransactionKey=tosspayData.get("cancels")[0].get(
+                    "transactionKey"
+                ),
+            )
+
+        return Response(
+            {"message": "결제가 취소되었습니다."}, status=status.HTTP_200_OK
+        )
+
+
+    """ 
+    #여러개 결제하기 로직임
+    def post(self, request, *args, **kwargs):
         cancelReason = self.request.data.get("cancelReason")
         orderIdList = self.request.data.get("orderidlist")
         cancelAmount = 0
 
-         # tossOrderId에 해당하는 TossPayments 객체를 찾기
-        toss_payment = TossPayments.objects.filter(tossOrderId=tossOrderId).first()
-        if toss_payment:
-            PAYMENT_KEY = toss_payment.paymentKey  # TossPayments 객체에서 paymentKey를 가져옴
-        else:
-            return Response({"error": "TossPayments object not found."}, status=status.HTTP_404_NOT_FOUND)
+        # 환불 정보를 가진 딕셔너리
+        dicForPaymentCancle = {
+            "totalAmout" : 0,
+            "paymentKeys" : set()
+        }
 
+        # 환불을 위한 정보 가져오기
         for orderid in orderIdList:
+            paymentKey = ""
+            amout = 0
             try:
-                # orderid를 'orderId'로 수정하여 필드명 일치시킴
                 request_instance = Request.objects.get(orderId=orderid)
                 
-                # requestTosspayments의 tossOrderId가 요청된 tossOrderId와 일치하는지 확인
-                if request_instance.requestTosspayments and request_instance.requestTosspayments.tossOrderId != tossOrderId:
-                    return Response(
-                        {"message": f"orderId {orderid}에 대한 TossOrderId가 일치하지 않습니다."},
-                        status=status.HTTP_400_BAD_REQUEST,
-                    )
-                
+                # 농민
+                if request.user.type == 4:
+                    paymentKey = request_instance.requestTosspayments.paymentKey
+                    amout = request_instance.requestAmount
+                    amout += 10000  # 농민의 수수료 == 10000원
+
+                    # 방제가 진행중인, 방제사가 예약한 신청서는 에러를 던지기
+                    if request_instance.exterminator is not None and request_instance.reservateDepositState != 0:
+                        return Response(
+                            {"message": "방제가 진행중인 신청서 입니다. 환불이 불가합니다."},
+                            status=status.HTTP_406_NOT_ACCEPTABLE,
+                        )
+                # 방제사
+                elif request.user.type == 3:
+                    paymentKey = request_instance.reservateTosspayments.paymentKey
+                    amout = request_instance.reservateDepositAmount  # 방제사의 수수료 == 1000원
+
+                dicForPaymentCancle["paymentKeys"].add(paymentKey)
+                dicForPaymentCancle["totalAmout"] += amout
+            
             except Request.DoesNotExist:
                 return Response(
                     {"message": f"Request with orderId {orderid} does not exist."},
@@ -208,3 +330,4 @@ class TossPaymentsUpdateDeleteView(generics.RetrieveUpdateAPIView):
         return Response(
             {"message": "결제가 취소되었습니다."}, status=status.HTTP_200_OK
         )
+    """

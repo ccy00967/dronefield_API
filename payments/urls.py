@@ -10,7 +10,7 @@ urlpatterns = [
     ),
     # 결제 취소 요청
     path(
-        "cancel/<uuid:tossOrderId>/",
+        "cancel/",
         views.TossPaymentsUpdateDeleteView.as_view(),
         name=views.TossPaymentsUpdateDeleteView.name,
     ),

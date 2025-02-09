@@ -119,21 +119,21 @@ class FarmerRequestListAPIView(generics.ListAPIView):
     )
 
     def get_queryset(self):
-        queryset = Request.objects.filter(owner=self.request.user, checkState=0)
+        queryset = Request.objects.filter(owner=self.request.user)
 
-        # 클라이언트에서 값을 쿼리 파라미터로 받아서 필터링
-        exterminate_state = self.request.query_params.get("exterminateState", None)
+        # 클라이언트에서 값을 쿼리 파라미터로 받아서 필터링 - exterminateState가 RequestFilter로 이동됨
+        # exterminate_state = self.request.query_params.get("exterminateState", None)
         requestDeposit_state = self.request.query_params.get(
             "requestDepositState", None
         )
         
-        if exterminate_state is not None:
-            try:
-                exterminate_state = int(exterminate_state)
-                if exterminate_state in [0, 1, 2, 3]:
-                    queryset = queryset.filter(exterminateState=exterminate_state)
-            except ValueError:
-                pass  # exterminateState 값이 유효하지 않으면 필터링하지 않음
+        # if exterminate_state is not None:
+        #     try:
+        #         exterminate_state = int(exterminate_state)
+        #         if exterminate_state in [0, 1, 2, 3]:
+        #             queryset = queryset.filter(exterminateState=exterminate_state)
+        #     except ValueError:
+        #         pass  # exterminateState 값이 유효하지 않으면 필터링하지 않음
 
         if requestDeposit_state is not None:
             try:
@@ -160,7 +160,7 @@ class ExterminatorRequestListAPIView(generics.ListAPIView):
     )
 
     def get_queryset(self):
-        queryset = Request.objects.filter(exterminateState=0, exterminator=None, checkState=0)#,requestDepositState=1 TODO: 나중에 검증
+        queryset = Request.objects.filter(exterminateState=0, exterminator=None, checkState=0, requestDepositState=1)
         cd = self.request.query_params.get("cd", None)
 
         if cd is not None:
