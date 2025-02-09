@@ -46,6 +46,20 @@ class RequestTossCreateAPIView(generics.CreateAPIView):
             try:
                 # orderid를 'orderId'로 수정하여 필드명 일치시킴
                 request_instance = Request.objects.get(orderId=orderid)
+                
+                if request.user.type == 3:
+                    if request_instance.requestTosspayments != None:
+                        return Response(
+                            {"message": f"이미 결제가 완료된 신청서입니다."},
+                            status=status.HTTP_400_BAD_REQUEST,
+                        )
+                elif request.user.type == 4:
+                    if request_instance.reservateTosspayments != None:
+                        return Response(
+                            {"message": f"이미 결제가 완료된 신청서입니다."},
+                            status=status.HTTP_400_BAD_REQUEST,
+                        )
+
             except Request.DoesNotExist:
                 return Response(
                     {"message": f"Request with orderId {orderid} does not exist."},
@@ -223,6 +237,106 @@ class TossPaymentsUpdateDeleteView(generics.RetrieveUpdateAPIView):
 
         return Response(
             {"message": "결제가 취소되었습니다."}, status=status.HTTP_200_OK
+        )
+
+
+# 테스트용 결제 없이 방제사 정보 등록하기
+class RequestTossExterminatorCreateAPIView(generics.CreateAPIView):
+    queryset = Request.objects.all()
+    serializer_class = RequestTossUpdateSerializer
+    name = "request-test-for-exterminator"
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+    def post(self, request):
+        # 사용자로부터 받음
+        PAYMENT_KEY = request.data.get("paymentKey")
+        TOSSORDERID = request.data.get("tossOrderId")
+        orderIdList = request.data.get("orderidlist")
+        TotalAMOUNT = 0
+
+        for orderid in orderIdList:
+            try:
+                # orderid를 'orderId'로 수정하여 필드명 일치시킴
+                request_instance = Request.objects.get(orderId=orderid)
+                
+                if request.user.type == 3:
+                    if request_instance.requestTosspayments != None:
+                        return Response(
+                            {"message": f"이미 결제가 완료된 신청서입니다."},
+                            status=status.HTTP_400_BAD_REQUEST,
+                        )
+                elif request.user.type == 4:
+                    if request_instance.reservateTosspayments != None:
+                        return Response(
+                            {"message": f"이미 결제가 완료된 신청서입니다."},
+                            status=status.HTTP_400_BAD_REQUEST,
+                        )
+
+            except Request.DoesNotExist:
+                return Response(
+                    {"message": f"Request with orderId {orderid} does not exist."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            # RequestSerializer 인스턴스 생성
+            serializer = self.get_serializer(request_instance)
+
+            # 사용자 타입에 따른 금액 계산
+            if request.user.type == 3:
+                TotalAMOUNT += serializer.data.get("reservateDepositAmount", 1000)
+            elif request.user.type == 4:
+                TotalAMOUNT += serializer.data.get("requestAmount", 0)
+                TotalAMOUNT += 10000  # 농민의 수수료 == 1만원
+
+        '''
+        # 값 검증하기
+        url = "https://api.tosspayments.com/v1/payments/confirm"
+        data = {
+            "paymentKey": PAYMENT_KEY,
+            "orderId": TOSSORDERID,
+            "amount": TotalAMOUNT,
+        }
+        payload = json.dumps(data)
+        response = requests.post(url, headers=HEADERS, data=payload)
+
+        if 400 <= response.status_code < 500:
+            error = response.json()
+            return Response(
+                {"code": error["code"], "message": error["message"]},
+                status=response.status_code,
+            )
+
+        # 토스 결제확인 데이터
+        tosspayData = response.json()
+
+        '''
+
+        # 토스 결제확인 데이터 저장
+        tosspaymentsObj = TossPayments.objects.create(
+            tossOrderId="test_tossOrderId",
+            paymentKey="test_paymentKey",
+            method="CARD",
+            totalAmount=1000,
+            status="test_status",
+        )
+
+        # 해당 신청서들 업데이트
+        for orderid in orderIdList:
+            if request.user.type == 3:
+                Request.objects.filter(orderId=orderid).update(
+                    exterminator=request.user,
+                    exterminateState=1,
+                    reservateTosspayments=tosspaymentsObj,
+                    reservateDepositState=1,
+                )
+            elif request.user.type == 4:
+                Request.objects.filter(orderId=orderid).update(
+                    requestTosspayments=tosspaymentsObj,
+                    requestDepositState=1,
+                )
+
+        return Response(
+            {"message": "결제가 완료되었습니다."}, status=status.HTTP_201_CREATED
         )
 
 
