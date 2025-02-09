@@ -46,6 +46,20 @@ class RequestTossCreateAPIView(generics.CreateAPIView):
             try:
                 # orderid를 'orderId'로 수정하여 필드명 일치시킴
                 request_instance = Request.objects.get(orderId=orderid)
+                
+                if request.user.type == 3:
+                    if request_instance.requestTosspayments != None:
+                        return Response(
+                            {"message": f"이미 결제가 완료된 신청서입니다."},
+                            status=status.HTTP_400_BAD_REQUEST,
+                        )
+                elif request.user.type == 4:
+                    if request_instance.reservateTosspayments != None:
+                        return Response(
+                            {"message": f"이미 결제가 완료된 신청서입니다."},
+                            status=status.HTTP_400_BAD_REQUEST,
+                        )
+
             except Request.DoesNotExist:
                 return Response(
                     {"message": f"Request with orderId {orderid} does not exist."},
@@ -244,6 +258,20 @@ class RequestTossExterminatorCreateAPIView(generics.CreateAPIView):
             try:
                 # orderid를 'orderId'로 수정하여 필드명 일치시킴
                 request_instance = Request.objects.get(orderId=orderid)
+                
+                if request.user.type == 3:
+                    if request_instance.requestTosspayments != None:
+                        return Response(
+                            {"message": f"이미 결제가 완료된 신청서입니다."},
+                            status=status.HTTP_400_BAD_REQUEST,
+                        )
+                elif request.user.type == 4:
+                    if request_instance.reservateTosspayments != None:
+                        return Response(
+                            {"message": f"이미 결제가 완료된 신청서입니다."},
+                            status=status.HTTP_400_BAD_REQUEST,
+                        )
+
             except Request.DoesNotExist:
                 return Response(
                     {"message": f"Request with orderId {orderid} does not exist."},
