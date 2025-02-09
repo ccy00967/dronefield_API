@@ -287,8 +287,8 @@ class RequestTossExterminatorCreateAPIView(generics.CreateAPIView):
         tosspaymentsObj = TossPayments.objects.create(
             tossOrderId="test_tossOrderId",
             paymentKey="test_paymentKey",
-            method="Test",
-            totalAmount=1,
+            method="CARD",
+            totalAmount=1000,
             status="test_status",
         )
 
