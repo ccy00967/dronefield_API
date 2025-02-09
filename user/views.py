@@ -46,6 +46,7 @@ from user.serializers import (
     CustomTokenObtainPairSerializer,
     ManageUserListSerializer,
     BankAccountSerializer,
+    UserChurnReasonSerializer
     # ExterminatorSerializer,
 )
 
@@ -69,6 +70,8 @@ class UserRegistrationAPIView(generics.GenericAPIView):
         token_version_id = request.data.get("token_version_id")
         if token_version_id:
             cache_data = cache.get(token_version_id)
+            if cache_data is None:
+                return Response({"message": "token_version_id가 잘못되었습니다."}, status=status.HTTP_400_BAD_REQUEST)
             isNicePassDone = cache_data.get("isNicePassDone")
             isEmailValidate = cache_data.get("isEmailValidate")
             name = cache_data.get("name")
@@ -217,22 +220,37 @@ class ProfileAPIView(generics.RetrieveUpdateAPIView):
             return Response(
                 {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-class UserDeleteView(APIView):
+class UserDeleteView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
+    
     def delete(self, request):
         user = request.user
+        reason = request.data.get("reason")
         
         try:
-            user.is_active = False
-            user.save()
             refresh_token = request.data.get("refresh_token")
             if refresh_token:
                 token = RefreshToken(refresh_token)
                 token.blacklist()
-
-            return Response({"message": "회원 탈퇴가 완료되었습니다."}, status=status.HTTP_204_NO_CONTENT)
+            
+            # user 값을 데이터에 포함하지 않고, 나중에 serializer.save() 시 전달
+            serializer_data = {'reason': reason}
+            serializer = UserChurnReasonSerializer(data=serializer_data)
+            
+            if serializer.is_valid():
+                # user 값을 명시적으로 할당
+                serializer.save(user=user)
+                
+                user.is_active = False
+                user.save()
+                return Response({"message": "회원 탈퇴가 완료되었습니다."}, status=status.HTTP_205_RESET_CONTENT)
+            
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 
 @api_view(('POST',))

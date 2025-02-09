@@ -114,3 +114,15 @@ class BankAccount(models.Model):
     
     def __str__(self):
         return self.bank_name
+    
+class UserChurnReason(models.Model):
+    uuid = models.UUIDField(unique=True, default=uuid.uuid4, editable=False)
+    #TODO: 나중에 유저 탈퇴 정책 정하고 추가가
+    user = models.ForeignKey(
+        "user.CustomUser", related_name="churn_user", on_delete=models.CASCADE)
+    
+    reason = models.TextField(null = True, blank=True, default="")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.user.email

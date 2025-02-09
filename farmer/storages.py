@@ -3,6 +3,7 @@ from django.core.files.storage import FileSystemStorage
 from django.conf import settings
 import os
 
+#TODO: 이미지 저장소 설정 수정해야함 S3로 변경
 class LocalImageStorage(FileSystemStorage):
     def __init__(self, *args, **kwargs):
         # 기본적으로 MEDIA_ROOT를 기준으로 파일을 저장

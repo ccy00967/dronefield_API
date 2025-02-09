@@ -186,9 +186,10 @@ def reset_password_checkcode(request):
         
 @api_view(("POST",))
 def reset_password_confirm(request):
-    if not request.session.session_key:
+    
+    if request.session.session_key:
         sessionid = request.session.session_key
-    if request.data.get("sessionid"):
+    elif request.data.get("sessionid"):
         sessionid = request.data.get("sessionid")
     else:
         return Response({"message": "sessionid가 없습니다."}, status=status.HTTP_400_BAD_REQUEST)
