@@ -230,7 +230,7 @@ class TossPaymentsUpdateDeleteView(generics.RetrieveUpdateAPIView):
 class RequestTossExterminatorCreateAPIView(generics.CreateAPIView):
     queryset = Request.objects.all()
     serializer_class = RequestTossUpdateSerializer
-    name = "request-tosspayments-update"
+    name = "request-test-for-exterminator"
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
     def post(self, request):
