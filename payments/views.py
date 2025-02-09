@@ -138,7 +138,7 @@ class TossPaymentsUpdateDeleteView(generics.RetrieveUpdateAPIView):
 
         # 농민
         if request.user.type == 4:
-            if request_instance.requestTosspayments.status != "DONE":
+            if request_instance.requestCancelTransactionKey != "":
                 return Response(
                     {"message": f"이미 결제가 취소된 신청서입니다."},
                     status=status.HTTP_400_BAD_REQUEST,
@@ -160,7 +160,7 @@ class TossPaymentsUpdateDeleteView(generics.RetrieveUpdateAPIView):
                 )
         # 방제사
         elif request.user.type == 3:
-            if request_instance.reservateTosspayments.status != "DONE":
+            if request_instance.depositCancelTransactionKey != "":
                 return Response(
                     {"message": f"이미 결제가 취소된 신청서입니다."},
                     status=status.HTTP_400_BAD_REQUEST,
