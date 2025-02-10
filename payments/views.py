@@ -342,10 +342,10 @@ class RequestTossExterminatorCreateAPIView(generics.CreateAPIView):
 
 
 # 테스트용 결제 취소 - 실제 토스에 요청없이 결제취소를 흉내낸다,
-class TossPaymentsUpdateDeleteView(generics.RetrieveUpdateAPIView):
+class TossPaymentsExterminatorDeleteView(generics.RetrieveUpdateAPIView):
     queryset = TossPayments.objects.all()
     serializer_class = TossPaymentsSerializer
-    name = "tosspayments-cancel"
+    name = "tosspayments-test-cancel"
     permission_classes = (
         permissions.IsAuthenticatedOrReadOnly,
         # TODO: 본인이 결제한 것만 결제 취소 가능하게 퍼미션 추가하기
