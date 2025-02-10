@@ -112,10 +112,10 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
 
 class ProfileSerializer(BaseUserSerializer):
-    name = serializers.CharField(required=False)
-    email = serializers.EmailField(required=False)
-    mobileno = serializers.CharField(required=False)
-    birthdate = serializers.CharField(required=False)
+    name = serializers.CharField(required=False, read_only=True)
+    email = serializers.EmailField(required=False, read_only=True)
+    mobileno = serializers.CharField(required=False, read_only=True)
+    birthdate = serializers.CharField(required=False, read_only=True)
     road = serializers.CharField(required=False)
     jibun = serializers.CharField(required=False)
     detail = serializers.CharField(required=False)
@@ -124,30 +124,19 @@ class ProfileSerializer(BaseUserSerializer):
     
     class Meta:
         model = CustomUser
-        fields = [
-            "name",
-            "birthdate",
-            "mobileno",
-            "email",
-            "road",
-            "jibun",
-            "detail",
-            "optional_consent",
-        ]
+        exclude = ["password","groups", "user_permissions", "last_login", "created_at", "updated_at", "is_superuser"]
 
     def update(self, instance, validated_data):
-        instance.name = validated_data.get("name", instance.name)
-        instance.email = validated_data.get("email", instance.email)
-        instance.mobileno = validated_data.get("mobileno", instance.mobileno)
-        instance.birthdate = validated_data.get("birthdate", instance.birthdate)
-        
         instance.road = validated_data.get("road", instance.road)
         instance.jibun = validated_data.get("jibun", instance.jibun)
         instance.detail = validated_data.get("detail", instance.detail)
         
-        if (instance.optional_consent == False) and (validated_data.get("optional_consent", False) == True):
+        if (instance.optional_consent == False) and (validated_data.get("optional_consent") == True):
             instance.optional_consent = True
             instance.marketing_agreement_date = now()
+        elif (instance.optional_consent == True) and (validated_data.get("optional_consent") == False):
+            instance.optional_consent = False
+            instance.marketing_agreement_date = None
 
         
         instance.optional_consent = validated_data.get("optional_consent", instance.optional_consent)
