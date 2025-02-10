@@ -120,7 +120,7 @@ class ProfileSerializer(BaseUserSerializer):
     jibun = serializers.CharField(required=False)
     detail = serializers.CharField(required=False)
     
-    optional_consent= serializers.BooleanField(required=False)
+    optional_consent = serializers.BooleanField(required=False)
     
     class Meta:
         model = CustomUser
@@ -132,7 +132,7 @@ class ProfileSerializer(BaseUserSerializer):
             "road",
             "jibun",
             "detail",
-            "optinal_consent",
+            "optional_consent",
         ]
 
     def update(self, instance, validated_data):
@@ -145,12 +145,12 @@ class ProfileSerializer(BaseUserSerializer):
         instance.jibun = validated_data.get("jibun", instance.jibun)
         instance.detail = validated_data.get("detail", instance.detail)
         
-        if (instance.optional_consent== False) and (validated_data.get("optinal_consent", False) == True):
-            instance.optional_consent= True
+        if (instance.optional_consent == False) and (validated_data.get("optional_consent", False) == True):
+            instance.optional_consent = True
             instance.marketing_agreement_date = now()
 
         
-        instance.optional_consent= validated_data.get("optinal_consent", instance.optinal_consent)
+        instance.optional_consent = validated_data.get("optional_consent", instance.optional_consent)
         
         instance.save()
         return instance
@@ -231,7 +231,7 @@ class UserLoginSerializer(serializers.Serializer):
                 "created_at": user.created_at,
                 "updated_at": user.updated_at,
                 
-                "optinal_consent": user.optinal_consent,
+                "optional_consent": user.optional_consent,
                 "marketing_agreement_date": user.marketing_agreement_date,
                 "required_consent_date": user.required_consent_date,
                 

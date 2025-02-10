@@ -37,7 +37,7 @@ class Migration(migrations.Migration):
                 ('is_active', models.BooleanField(default=False)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
-                ('optinal_consent', models.BooleanField(default=False)),
+                ('optional_consent', models.BooleanField(default=False)),
                 ('marketing_agreement_date', models.DateTimeField(default=None)),
                 ('required_consent_date', models.DateTimeField(default=datetime.datetime(2025, 2, 10, 21, 41, 5, 890890))),
                 ('groups', models.ManyToManyField(blank=True, help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.', related_name='user_set', related_query_name='user', to='auth.group', verbose_name='groups')),

@@ -111,7 +111,7 @@ class UserRegistrationAPIView(generics.GenericAPIView):
         else:
             is_active = True
         
-        optional_consent= request.data.get("optinal_consent")
+        optional_consent = request.data.get("optional_consent")
 
         try:
             serializer = UserRegistrationSerializer(data=request.data)
@@ -124,8 +124,8 @@ class UserRegistrationAPIView(generics.GenericAPIView):
                 mobileno=mobileno,
                 email=email,
                 is_active=is_active,
-                optinal_consent=optinal_consent,
-                marketing_agreement_date = now() if optional_consentelse None,
+                optional_consent=optional_consent,
+                marketing_agreement_date = now() if optional_consent else None,
                 required_consent_date = now(),
             )
 
@@ -174,7 +174,7 @@ class UserLoginAPIView(generics.GenericAPIView):
                     "created_at": serializer.validated_data["created_at"],
                     "updated_at": serializer.validated_data["updated_at"],
                     
-                    "optinal_consent" : serializer.validated_data["optinal_consent"],
+                    "optional_consent" : serializer.validated_data["optional_consent"],
                     "marketing_agreement_date" : serializer.validated_data["marketing_agreement_date"],
                     "required_consent_date" : serializer.validated_data["required_consent_date"],
                     

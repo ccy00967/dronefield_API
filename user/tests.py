@@ -44,7 +44,7 @@ def create_test():
         jibun=f"TestJibun_farmer",
         detail=f"TestDetail_farmer",
         is_active=True,
-        optinal_consent=True,
+        optional_consent=True,
         marketing_agreement_date=now(),
         required_consent_date=now()
     )
@@ -63,7 +63,7 @@ def create_test():
         jibun=f"TestJibun_exterminator",
         detail=f"TestDetail_exterminator",
         is_active=True,
-        optinal_consent=True,
+        optional_consent=True,
         marketing_agreement_date=now(),
         required_consent_date=now()
     )
@@ -271,7 +271,7 @@ def create_test():
             jibun=f"TestJibun{i}",
             detail=f"TestDetail{i}",
             is_active=True,
-            optinal_consent=True,
+            optional_consent=True,
             marketing_agreement_date=now(),
         required_consent_date=now()
         )
@@ -306,7 +306,7 @@ def create_test():
             jibun=f"TestJibun{i}",
             detail=f"TestDetail{i}",
             is_active=True,
-            optinal_consent=True,
+            optional_consent=True,
             marketing_agreement_date=now(),
         required_consent_date=now()
         )    
@@ -369,7 +369,7 @@ def create_test():
             jibun=f"TestJibun50",
             detail=f"TestDetail50",
             is_active=True,
-            optinal_consent=True,
+            optional_consent=True,
             marketing_agreement_date=now(),
             required_consent_date=now()
     )
