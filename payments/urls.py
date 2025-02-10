@@ -22,14 +22,14 @@ urlpatterns = [
     ),
     # 결제를 건너뛰고 방제사 등록
     path(
-        "exterminator-info-upload/",
-        views.RequestTossExterminatorCreateAPIView.as_view(),
-        name=views.RequestTossExterminatorCreateAPIView.name,
+        "test-success/",
+        views.RequestTossTestCreateAPIView.as_view(),
+        name=views.RequestTossTestCreateAPIView.name,
     ),
     # 테스트용 결제취소
     path(
-        "exterminator-cancel/",
-        views.TossPaymentsExterminatorDeleteView.as_view(),
-        name=views.TossPaymentsExterminatorDeleteView.name,
+        "test-cancel/",
+        views.TossPaymentsTestDeleteView.as_view(),
+        name=views.TossPaymentsTestDeleteView.name,
     ),
 ]

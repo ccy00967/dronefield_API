@@ -242,7 +242,7 @@ class TossPaymentsUpdateDeleteView(generics.RetrieveUpdateAPIView):
 
 
 # 테스트용 결제 없이 방제사 정보 등록하기
-class RequestTossExterminatorCreateAPIView(generics.CreateAPIView):
+class RequestTossTestCreateAPIView(generics.CreateAPIView):
     queryset = Request.objects.all()
     serializer_class = RequestTossUpdateSerializer
     name = "request-test-for-exterminator"
@@ -342,7 +342,7 @@ class RequestTossExterminatorCreateAPIView(generics.CreateAPIView):
 
 
 # 테스트용 결제 취소 - 실제 토스에 요청없이 결제취소를 흉내낸다,
-class TossPaymentsExterminatorDeleteView(generics.RetrieveUpdateAPIView):
+class TossPaymentsTestDeleteView(generics.RetrieveUpdateAPIView):
     queryset = TossPayments.objects.all()
     serializer_class = TossPaymentsSerializer
     name = "tosspayments-test-cancel"
@@ -399,7 +399,6 @@ class TossPaymentsExterminatorDeleteView(generics.RetrieveUpdateAPIView):
             paymentKey = request_instance.reservateTosspayments.paymentKey
             amout = request_instance.reservateDepositAmount  # 방제사의 수수료 == 1000원
 
-        '''
         # # tossOrderId에 해당하는 TossPayments 객체를 찾기
         toss_payment = TossPayments.objects.filter(tossOrderId=tossOrderId).first()
 
@@ -409,6 +408,7 @@ class TossPaymentsExterminatorDeleteView(generics.RetrieveUpdateAPIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
+        '''
         # 부분 환불하기
         url = "https://api.tosspayments.com/v1/payments/" + paymentKey + "/cancel"
         data = {
@@ -432,10 +432,10 @@ class TossPaymentsExterminatorDeleteView(generics.RetrieveUpdateAPIView):
         # toss_payment 인스턴스를 직접 수정하고 저장하기
         toss_payment.status = tosspayData["status"]
         toss_payment.save()
+        '''
 
         toss_payment.status = "CANCEL"
         toss_payment.save()
-        '''
 
         # 해당 신청서 업데이트
         if request.user.type == 3:
