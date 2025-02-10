@@ -19,6 +19,7 @@ from rest_framework import status
 from django.http import JsonResponse
 from rest_framework_simplejwt.views import TokenBlacklistView
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.utils.timezone import now
 
 # from drf_yasg.utils import swagger_auto_schema
 from . import swagger_doc
@@ -80,6 +81,7 @@ class UserRegistrationAPIView(generics.GenericAPIView):
             nationalinfo = cache_data.get("nationalinfo")
             mobileno = cache_data.get("mobileno")
             email = cache_data.get("email")
+            optinal_consent = cache_data.get("optinal_consent")
         else:
             isNicePassDone = request.session.get(isNicePassDone)
             isEmailValidate = request.session.get(isEmailValidate)
@@ -89,6 +91,7 @@ class UserRegistrationAPIView(generics.GenericAPIView):
             nationalinfo = request.session.get("nationalinfo")
             mobileno = request.session.get("mobileno")
             email = request.session.get("email")
+            optinal_consent = request.session.get("optinal_consent")
             
         if isNicePassDone != True:
             return Response(
@@ -121,6 +124,9 @@ class UserRegistrationAPIView(generics.GenericAPIView):
                 mobileno=mobileno,
                 email=email,
                 is_active=is_active,
+                optinal_consent=optinal_consent,
+                marketing_agreement_date = now() if optinal_consent else None,
+                required_consent_date = now(),
             )
 
             request.session.flush()  # 세션의 모든 것을 삭제
