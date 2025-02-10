@@ -171,6 +171,9 @@ class UserLoginAPIView(generics.GenericAPIView):
                     "optinal_consent" : serializer.validated_data["optinal_consent"],
                     "marketing_agreement_date" : serializer.validated_data["marketing_agreement_date"],
                     "required_consent_date" : serializer.validated_data["required_consent_date"],
+                    
+                    "bank_name": serializer.validated_data["bank_name"],
+                    "bank_account_number": serializer.validated_data["bank_account_number"],
                 },
             }
             return Response(response, status=status.HTTP_200_OK)
@@ -243,7 +246,7 @@ class UserDeleteView(generics.GenericAPIView):
                 
                 user.is_active = False
                 user.save()
-                return Response({"message": "회원 탈퇴가 완료되었습니다."}, status=status.HTTP_205_RESET_CONTENT)
+                return Response({"message": "회원 탈퇴가 완료되었습니다."}, status=status.HTTP_204_NO_CONTENT)
             
             else:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

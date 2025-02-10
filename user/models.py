@@ -7,7 +7,7 @@ from django.contrib.auth.models import (
 )
 import re
 from django.utils.translation import gettext_lazy as _
-
+from django.utils import timezone
 
 class Type(models.IntegerChoices):
     ADMIN = 1, _("Admin")
@@ -82,8 +82,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     updated_at = models.DateTimeField(auto_now=True)
     
     optinal_consent = models.BooleanField(default=False)
-    marketing_agreement_date = models.DateTimeField(null=True, blank=True)
-    required_consent_date = models.DateTimeField(null=True, blank=True)
+    marketing_agreement_date = models.DateTimeField(default=None)
+    required_consent_date = models.DateTimeField(default=timezone.now())
     
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []

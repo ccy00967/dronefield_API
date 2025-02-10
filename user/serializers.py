@@ -179,12 +179,17 @@ class UserLoginSerializer(serializers.Serializer):
             # 사용자가 비활성 상태일 때 처리
             if not user.is_active:
                 raise serializers.ValidationError("인증을 확인중입니다.")
-
+        try:
+            bank = BankAccount.objects.get(owner=user)
+        except BankAccount.DoesNotExist:
+            bank = None
+            
         try:
             # refresh = RefreshToken.for_user(user)
             refresh = CustomTokenObtainPairSerializer.get_token(user)
             refresh_token = str(refresh)
             access_token = str(refresh.access_token)
+            
 
             update_last_login(None, user)
             # view에 넘길 데이터들
@@ -212,6 +217,9 @@ class UserLoginSerializer(serializers.Serializer):
                 "optinal_consent": user.optinal_consent,
                 "marketing_agreement_date": user.marketing_agreement_date,
                 "required_consent_date": user.required_consent_date,
+                
+                "bank_name": bank.bank_name if bank else None,
+                "bank_account_number": bank.account_number if bank else None,
             }
             print(user.marketing_agreement_date)
             return validation
