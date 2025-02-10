@@ -81,7 +81,6 @@ class UserRegistrationAPIView(generics.GenericAPIView):
             nationalinfo = cache_data.get("nationalinfo")
             mobileno = cache_data.get("mobileno")
             email = cache_data.get("email")
-            optinal_consent = cache_data.get("optinal_consent")
         else:
             isNicePassDone = request.session.get(isNicePassDone)
             isEmailValidate = request.session.get(isEmailValidate)
@@ -91,7 +90,6 @@ class UserRegistrationAPIView(generics.GenericAPIView):
             nationalinfo = request.session.get("nationalinfo")
             mobileno = request.session.get("mobileno")
             email = request.session.get("email")
-            optinal_consent = request.session.get("optinal_consent")
             
         if isNicePassDone != True:
             return Response(
@@ -112,6 +110,8 @@ class UserRegistrationAPIView(generics.GenericAPIView):
             is_active = False
         else:
             is_active = True
+        
+        optinal_consent = request.data.get("optinal_consent")
 
         try:
             serializer = UserRegistrationSerializer(data=request.data)

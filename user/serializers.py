@@ -135,6 +135,7 @@ class ProfileSerializer(BaseUserSerializer):
             "road",
             "jibun",
             "detail",
+            "optinal_consent",
         ]
 
     def update(self, instance, validated_data):
