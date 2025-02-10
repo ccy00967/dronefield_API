@@ -318,7 +318,7 @@ class RequestTossTestCreateAPIView(generics.CreateAPIView):
             paymentKey=uuid.uuid4(),
             method="CARD",
             totalAmount=1000,
-            status="test_status",
+            status="DONE",
         )
 
         # 해당 신청서들 업데이트
