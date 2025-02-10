@@ -116,6 +116,14 @@ class ProfileSerializer(BaseUserSerializer):
     email = serializers.EmailField(required=False)
     mobileno = serializers.CharField(required=False)
     birthdate = serializers.CharField(required=False)
+    road = serializers.CharField(required=False)
+    jibun = serializers.CharField(required=False)
+    detail = serializers.CharField(required=False)
+    
+    optinal_consent = serializers.BooleanField(required=False)
+    
+
+    
 
     class Meta:
         model = CustomUser
@@ -130,11 +138,20 @@ class ProfileSerializer(BaseUserSerializer):
         ]
 
     def update(self, instance, validated_data):
-        #FIX: 이메일 변경시 중복 확인 필요
-        #instance.mobileno = validated_data.get("mobileno", instance.mobileno)
+        instance.name = validated_data.get("name", instance.name)
+        instance.email = validated_data.get("email", instance.email)
+        instance.mobileno = validated_data.get("mobileno", instance.mobileno)
+        instance.birthdate = validated_data.get("birthdate", instance.birthdate)
+        
         instance.road = validated_data.get("road", instance.road)
         instance.jibun = validated_data.get("jibun", instance.jibun)
         instance.detail = validated_data.get("detail", instance.detail)
+        
+        if instance.optinal_consent == False:
+          pass  
+        
+        instance.optinal_consent = validated_data.get("optinal_consent", instance.optinal_consent)
+        
         instance.save()
         return instance
 

@@ -144,7 +144,7 @@ def create_test():
                 reservate_depositState = 0
                 
                 # 농민이 결제는 완료한 신청서 상태
-                if random.choice(0,1) == 1:
+                if random.choice([0,1]) == 1:
                     request_tosspayments = TossPayments.objects.create(
                     tossOrderId=uuid.uuid4(),
                     paymentKey=uuid.uuid4(),
