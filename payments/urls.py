@@ -26,4 +26,10 @@ urlpatterns = [
         views.RequestTossExterminatorCreateAPIView.as_view(),
         name=views.RequestTossExterminatorCreateAPIView.name,
     ),
+    # 테스트용 결제취소
+    path(
+        "exterminator-cancel/",
+        views.RequestTossExterminatorCreateAPIView.as_view(),
+        name=views.RequestTossExterminatorCreateAPIView.name,
+    ),
 ]
