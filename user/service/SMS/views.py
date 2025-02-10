@@ -179,6 +179,7 @@ def reset_password_checkcode(request):
     
     if validate_key == request.data.get("validate_key"):
         session_store["validate_check"] = True
+        session_store.save()
         return Response( {"message": "인증번호가 일치합니다."}, status=status.HTTP_200_OK)
     else:
         return Response( {"message": "인증번호가 일치하지 않습니다."}, status=status.HTTP_400_BAD_REQUEST)
@@ -195,7 +196,6 @@ def reset_password_confirm(request):
         return Response({"message": "sessionid가 없습니다."}, status=status.HTTP_400_BAD_REQUEST)
     
     session_store = SessionStore(session_key=sessionid)
-    validate_key = session_store.get("validate_key")
     
     email = session_store.get("email")
     name = session_store.get("name")
