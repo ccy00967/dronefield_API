@@ -3,7 +3,7 @@ from rest_framework import serializers
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import update_last_login
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-
+from django.utils.timezone import now
 from user.models import CustomUser
 from . import swagger_doc
 
@@ -120,11 +120,8 @@ class ProfileSerializer(BaseUserSerializer):
     jibun = serializers.CharField(required=False)
     detail = serializers.CharField(required=False)
     
-    optinal_consent = serializers.BooleanField(required=False)
+    optional_consent= serializers.BooleanField(required=False)
     
-
-    
-
     class Meta:
         model = CustomUser
         fields = [
@@ -148,10 +145,12 @@ class ProfileSerializer(BaseUserSerializer):
         instance.jibun = validated_data.get("jibun", instance.jibun)
         instance.detail = validated_data.get("detail", instance.detail)
         
-        if instance.optinal_consent == False:
-          pass  
+        if (instance.optional_consent== False) and (validated_data.get("optinal_consent", False) == True):
+            instance.optional_consent= True
+            instance.marketing_agreement_date = now()
+
         
-        instance.optinal_consent = validated_data.get("optinal_consent", instance.optinal_consent)
+        instance.optional_consent= validated_data.get("optinal_consent", instance.optinal_consent)
         
         instance.save()
         return instance
