@@ -302,8 +302,7 @@ class ExterminateStateUpdateView(generics.RetrieveUpdateDestroyAPIView):
             )
     
         # exterminateState가 유효한 값(1, 2, 3)인지 확인
-        #if exterminate_state not in [1, 2, 3]:
-        if exterminate_state not in [0, 1, 2, 3]: # 테스트용으로 0도 허용  
+        if exterminate_state not in [1, 2, 3]:
             return Response(
                 {"error": "Invalid value for exterminateState. It must be one of [1, 2, 3]."},
                 status=400
