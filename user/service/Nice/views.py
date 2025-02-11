@@ -199,7 +199,7 @@ def getNicePassUserData(request):
     
         # return redirect(redirect_url)
         
-        return redirect("<script type='text/javascript'>window.close();</script>")
+        return HttpResponse("<script>window.close();</script>")
         
     except Exception as e:
         return Response(
