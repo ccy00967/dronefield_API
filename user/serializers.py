@@ -137,8 +137,6 @@ class ProfileSerializer(BaseUserSerializer):
         elif (instance.optional_consent == True) and (validated_data.get("optional_consent") == False):
             instance.optional_consent = False
             instance.marketing_agreement_date = None
-
-        
         instance.optional_consent = validated_data.get("optional_consent", instance.optional_consent)
         
         instance.save()

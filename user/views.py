@@ -212,19 +212,46 @@ class ProfileAPIView(generics.RetrieveUpdateAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = ProfileSerializer
     permission_classes = [IsAuthenticated, OnlyOwnerCanUpdate]
-
+    
     def get(self, request):
         serializer = self.get_serializer(request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def patch(self, request):
-        try:
-            serializer = self.get_serializer(
-                request.user, data=request.data, partial=True
-            )
+        try:     
+            bank_account = BankAccount.objects.filter(owner=request.user.id).first()
+            bank_data = {"bank_name": request.data.get("bank_name"), 
+                        "account_number": request.data.get("bank_account_number"),
+                        "account_type": request.data.get("bank_account_type")}
+            if bank_account is None:
+                bank_serializer = BankAccount.objects.create(
+                    owner=request.user,
+                    bank_name=request.data.get("bank_name"),
+                    account_number=request.data.get("bank_account_number"),
+                    account_type=request.data.get("bank_account_type"),
+                )
+                bank_serializer.save()
+            else:    
+                bank_serializer = BankAccountSerializer(bank_account, data=bank_data, partial=True)
+                bank_serializer.is_valid(raise_exception=True)
+                bank_serializer.save()
+ 
+  
+            serializer = self.get_serializer(request.user, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            response = []
+            combined_data = {}
+            combined_data.update(serializer.data)
+            combined_data["bank_name"] = bank_serializer.data["bank_name"]
+            combined_data["bank_account_number"] = bank_serializer.data["account_number"]
+            combined_data["bank_account_type"] = bank_serializer.data["account_type"]
+
+            response.append(combined_data)
+
+            print(response)
+            
+            return Response(response, status=status.HTTP_200_OK)
         except Exception as e:
             return Response(
                 {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -466,6 +493,7 @@ def find_id(request):
         return Response({"email": user.email}, status=status.HTTP_200_OK)
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
 class BankAccountAPIView(APIView):
     permission_classes = [IsAuthenticated]
     def post(self, request):

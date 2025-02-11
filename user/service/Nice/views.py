@@ -199,10 +199,7 @@ def getNicePassUserData(request):
     
         # return redirect(redirect_url)
         
-        return Response(
-            {"message": "나이스 인증이 완료되었습니다."}, 
-            status=status.HTTP_200_OK
-        )
+        return redirect("<script type='text/javascript'>window.close();</script>")
         
     except Exception as e:
         return Response(
