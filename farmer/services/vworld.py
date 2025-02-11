@@ -71,7 +71,7 @@ def serch_pnu(road: str, jibun: str) -> Dict[str, Any]:
     baseurl_lndpclAr = "https://api.vworld.kr/ned/data/ladfrlList"
     params_lndpclAr = {
         "domain": "https://dronefield.co.kr",
-        "pnu": response_result["adm_cd"],
+        "pnu": response_result["pnu"],
         "format": "json",
         "key": vworld_key
     }
