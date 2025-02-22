@@ -142,6 +142,8 @@ venv.bak/
 bin/
 pyvenv.cfg
 requirements.txt
+.idea
+.platform
 
 # Spyder project settings
 .spyderproject
