@@ -218,44 +218,48 @@ class ProfileAPIView(generics.RetrieveUpdateAPIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def patch(self, request):
-        try:     
-            bank_account = BankAccount.objects.filter(owner=request.user.id).first()
-            bank_data = {"bank_name": request.data.get("bank_name"), 
-                        "account_number": request.data.get("bank_account_number"),
-                        "account_type": request.data.get("bank_account_type")}
-            if bank_account is None:
-                bank_serializer = BankAccount.objects.create(
-                    owner=request.user,
-                    bank_name=request.data.get("bank_name"),
-                    account_number=request.data.get("bank_account_number"),
-                    account_type=request.data.get("bank_account_type"),
-                )
-                bank_serializer.save()
-            else:    
-                bank_serializer = BankAccountSerializer(bank_account, data=bank_data, partial=True)
-                bank_serializer.is_valid(raise_exception=True)
-                bank_serializer.save()
- 
-  
+        try:
+            # 사용자 정보 업데이트
             serializer = self.get_serializer(request.user, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
             serializer.save()
-            response = []
+
             combined_data = {}
             combined_data.update(serializer.data)
-            combined_data["bank_name"] = bank_serializer.data["bank_name"]
-            combined_data["bank_account_number"] = bank_serializer.data["account_number"]
-            combined_data["bank_account_type"] = bank_serializer.data["account_type"]
 
-            response.append(combined_data)
+            bank_account = BankAccount.objects.filter(owner=request.user).first()
 
-            print(response)
-            
-            return Response(response, status=status.HTTP_200_OK)
+            bank_data = {
+                "bank_name": request.data.get("bank_name", "").strip(),
+                "account_number": request.data.get("bank_account_number", "").strip(),
+                "account_type": request.data.get("bank_account_type", "").strip(),
+            }
+
+            if bank_account:
+                update_data = {}
+                if bank_data["bank_name"]:  
+                    update_data["bank_name"] = bank_data["bank_name"]
+                if bank_data["account_number"]:
+                    update_data["account_number"] = bank_data["account_number"]
+                if bank_data["account_type"]:
+                    update_data["account_type"] = bank_data["account_type"]
+
+                if update_data:
+                    bank_serializer = BankAccountSerializer(bank_account, data=update_data, partial=True)
+                    bank_serializer.is_valid(raise_exception=True)
+                    bank_serializer.save()
+
+            combined_data["bank_name"] = getattr(bank_account, "bank_name", "")
+            combined_data["bank_account_number"] = getattr(bank_account, "account_number", "")
+            combined_data["bank_account_type"] = getattr(bank_account, "account_type", "")
+
+            return Response(combined_data, status=status.HTTP_200_OK)
+
         except Exception as e:
             return Response(
                 {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+            
 class UserDeleteView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
     

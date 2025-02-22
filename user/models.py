@@ -106,9 +106,9 @@ class BankAccount(models.Model):
         related_name="bank_owner",
         on_delete=models.PROTECT,
     )
-    bank_name = models.CharField(max_length=50, blank=False, default="")
-    account_number = models.CharField(max_length=50, blank=False, default="")
-    account_type = models.CharField(max_length=50, blank=False, default="")
+    bank_name = models.CharField(max_length=50, blank=True, null=True, default="")
+    account_number = models.CharField(max_length=50, blank=True, null=True, default="")
+    account_type = models.CharField(max_length=50, blank=True, null=True, default="")
     account_created = models.DateTimeField(auto_now_add=True)
     account_updated = models.DateTimeField(auto_now=True)
     
