@@ -257,12 +257,31 @@ AWS_S3_REGION_NAME = config('AWS_S3_REGION_NAME', 'ap-northeast-2')
 AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com'
 
 
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+MEDIA_ROOT = '/media/'
 STATIC_URL  = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
+STATIC_ROOT = '/static/'
 
+import logging
 
+# 로거 설정
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG)  # 로그 레벨 설정
+
+# S3 설정을 로그로 출력
+logger.debug(f"DEFAULT_FILE_STORAGE: {DEFAULT_FILE_STORAGE}")
+if 'AWS_ACCESS_KEY_ID' in globals():
+    logger.debug(f"AWS_ACCESS_KEY_ID: {AWS_ACCESS_KEY_ID}")
+if 'AWS_SECRET_ACCESS_KEY' in globals():
+    logger.debug(f"AWS_SECRET_ACCESS_KEY: {AWS_SECRET_ACCESS_KEY}")
+if 'AWS_STORAGE_BUCKET_NAME' in globals():
+    logger.debug(f"AWS_STORAGE_BUCKET_NAME: {AWS_STORAGE_BUCKET_NAME}")
+if 'AWS_S3_REGION_NAME' in globals():
+    logger.debug(f"AWS_S3_REGION_NAME: {AWS_S3_REGION_NAME}")
+if 'AWS_S3_CUSTOM_DOMAIN' in globals():
+    logger.debug(f"AWS_S3_CUSTOM_DOMAIN: {AWS_S3_CUSTOM_DOMAIN}")
+    
+    
 #from django.conf import settings
 #from django.utils.module_loading import import_string
 

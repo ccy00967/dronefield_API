@@ -122,55 +122,19 @@ class TotalLandAreaAPIView(generics.GenericAPIView):
         return Response({'total_lndpclAr': total_area})
 
 
-class FarmInfoImageAPIView(generics.GenericAPIView):
+
+from rest_framework import generics
+from .models import FarmInfoImage
+from .serializers import FarmInfoImageSerializer
+class FarmInfoImageListCreateView(generics.ListCreateAPIView):
     queryset = FarmInfoImage.objects.all()
     serializer_class = FarmInfoImageSerializer
-    permission_classes = [permissions.IsAuthenticated]
 
-    def get_farm(self, uuid):
-        from rest_framework.exceptions import NotFound
-        try:
-            return FarmInfo.objects.get(uuid=uuid)
-        except FarmInfo.DoesNotExist:
-            raise NotFound("해당 농지 정보가 존재하지 않습니다.")
+class FarmInfoImageDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = FarmInfoImage.objects.all()
+    serializer_class = FarmInfoImageSerializer
+    lookup_field = 'uuid'  # URL에서 UUID를 사용하여 인스턴스를 식별합니다.
 
-    def get_queryset(self):
-        """해당 농지에 연결된 이미지들만 필터링"""
-        farm_uuid = self.kwargs.get('uuid')
-        return FarmInfoImage.objects.filter(land_info__uuid=farm_uuid)
-
-    # 예: GET /land/<uuid>/image/ => 이미지 목록
-    def get(self, request, uuid):
-        images = self.get_queryset()
-        serializer = self.get_serializer(images, many=True)
-        return Response(serializer.data)
-
-    # 예: POST /land/<uuid>/image/ => 이미지 새로 업로드
-    def post(self, request, uuid):
-        farm_info = self.get_farm(uuid)
-        image_file = request.FILES.get('image')  # 단일 업로드 예시
-        
-        if not image_file:
-            return Response({"detail": "이미지 파일이 필요합니다."},
-                            status=status.HTTP_400_BAD_REQUEST)
-        try:
-            new_image = FarmInfoImage.objects.create(farm_info=farm_info, image=image_file)
-            serializer = FarmInfoImageSerializer(new_image)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        except Exception as e:
-            return Response({"detail": f"이미지 업로드 실패: {e}"},
-                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-    # 예: DELETE /land/<uuid>/image/<pk>/
-    def delete(self, request, uuid, pk=None):
-        try:
-            image_obj = FarmInfoImage.objects.get(pk=pk, land_info__uuid=uuid)
-        except FarmInfoImage.DoesNotExist:
-            return Response({"detail": "이미지를 찾을 수 없습니다."},
-                            status=status.HTTP_404_NOT_FOUND)
-        
-        image_obj.delete()
-        return Response({"message": "이미지 삭제 완료"}, status=status.HTTP_204_NO_CONTENT)
 
 def daum_post_view(request):
     return render(request, 'daum_postcode.html')

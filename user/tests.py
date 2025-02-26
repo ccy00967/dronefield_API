@@ -17,7 +17,7 @@ nation_choices = ['0', '1'] # 예: 내국인, 외국인인
 type_choices = [3, 4]  # 예: 1=어드민, 2=매니저, 3=드론조종사, 4=농지소유주
 # 🔹 `/media/test.png`을 파일 객체로 변환 후 S3에 업로드
 
-TEST_IMAGE_PATH = "/home/git/dronefield_API/media/test_license.png"
+TEST_IMAGE_PATH = "media/test.png"
 def get_uploaded_file(file_path, file_name="test.png"):
     with open(file_path, "rb") as f:
         return SimpleUploadedFile(name=file_name, content=f.read(), content_type="image/png")

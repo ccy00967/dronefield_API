@@ -1,6 +1,5 @@
 from django.db import models
 import uuid
-from .storages import LocalImageStorage
 
 # 농지 정보
 
@@ -46,13 +45,5 @@ class FarmInfoImage(models.Model):
     farm_info = models.ForeignKey(
         FarmInfo, related_name="images", on_delete=models.CASCADE
     )
-    image = models.ImageField(
-        upload_to="images/farminfo/",
-        storage=LocalImageStorage(),
-        blank=False,
-        null=False,
-    )
-    create_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{self.farm_info.landNickName} - {self.image.name}"
+    image = models.ImageField(upload_to="farm_info/images/")
+    created_at = models.DateTimeField(auto_now_add=True)
