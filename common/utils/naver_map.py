@@ -1,6 +1,7 @@
 from django.shortcuts import render
 import requests
 import json
+from decouple import config
 def naver_map(address, request):
     normalized_address = ' '.join(address.split())
     vworld_key = "C5DD4C9E-0189-3CBF-8AFA-7BE8B0D09DF6"
@@ -77,7 +78,7 @@ def naver_map(address, request):
     # ]
 
     context = {
-        'naver_client_id': 'hmpfs1a6fl',
+        'naver_client_id': config('NAVER_CLIENT_ID'),
         'vworld_api_key': "6C934ED4-5978-324D-B7DE-AC3A0DDC3B38",
         "x": item_x,
         "y": item_y,

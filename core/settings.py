@@ -243,6 +243,28 @@ ALIGO_SENDER = config("ALIGO_SENDER")
 CONSUMER_KEY = config("CONSUMER_KEY")
 CONSUMER_SECRET = config("CONSUMER_SECRET")
 
+
+# STORAGES = {
+#     "default": {
+#         "BACKEND": "storages.backends.s3.S3Storage",
+#         "OPTIONS": {
+#             "access_key": config("AWS_ACCESS_KEY_ID"),
+#             "secret_key": "AWS_SECRET_ACCESS_KEY",
+#             "bucket_name": config("AWS_STORAGE_BUCKET_NAME"),
+#             "region_name": config('AWS_S3_REGION_NAME', 'ap-northeast-2'),
+#             "default_acl": "public-read",
+#             "querystring_auth": False,
+#         },
+#     },
+#     "staticfiles": {
+#         "BACKEND": "storages.backends.s3.S3Storage",
+#         "OPTIONS": {
+#             "access_key": "AWS_ACCESS_KEY_ID",
+#             "secret_key": "AWS_SECRET_ACCESS_KEY",
+#             "bucket_name": config("AWS_STORAGE_BUCKET_NAME"),
+#         },
+#     },
+# }
 # ===========================
 # S3 설정
 # ===========================
@@ -256,47 +278,12 @@ AWS_STORAGE_BUCKET_NAME = config("AWS_STORAGE_BUCKET_NAME")
 AWS_S3_REGION_NAME = config('AWS_S3_REGION_NAME', 'ap-northeast-2')
 AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com'
 
-
-MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
+MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/'
 MEDIA_ROOT = '/media/'
-STATIC_URL  = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
-STATIC_ROOT = '/static/'
+STATIC_URL  = '/static/'
 
-import logging
-
-# 로거 설정
-logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG)  # 로그 레벨 설정
-
-# S3 설정을 로그로 출력
-logger.debug(f"DEFAULT_FILE_STORAGE: {DEFAULT_FILE_STORAGE}")
-if 'AWS_ACCESS_KEY_ID' in globals():
-    logger.debug(f"AWS_ACCESS_KEY_ID: {AWS_ACCESS_KEY_ID}")
-if 'AWS_SECRET_ACCESS_KEY' in globals():
-    logger.debug(f"AWS_SECRET_ACCESS_KEY: {AWS_SECRET_ACCESS_KEY}")
-if 'AWS_STORAGE_BUCKET_NAME' in globals():
-    logger.debug(f"AWS_STORAGE_BUCKET_NAME: {AWS_STORAGE_BUCKET_NAME}")
-if 'AWS_S3_REGION_NAME' in globals():
-    logger.debug(f"AWS_S3_REGION_NAME: {AWS_S3_REGION_NAME}")
-if 'AWS_S3_CUSTOM_DOMAIN' in globals():
-    logger.debug(f"AWS_S3_CUSTOM_DOMAIN: {AWS_S3_CUSTOM_DOMAIN}")
-    
-    
-#from django.conf import settings
-#from django.utils.module_loading import import_string
-
-# Import S3 Storage Class
-#storage_class = import_string(settings.DEFAULT_FILE_STORAGE)
-#default_storage = storage_class()
-
-# print("==============s3================")
-# print(f"DEFAULT_FILE_STORAGE: {settings.DEFAULT_FILE_STORAGE}")
-# print(f"Default storage: {default_storage}")
-# print("==============s3================")
-# from django.core.files.storage import default_storage
-
-# # 테스트 파일 업로드
-# with default_storage.open('test.txt', 'w') as file:
-#     file.write('Hello, S3!')
-
-# print("File uploaded to S3")
+AWS_S3_SIGNATURE_VERSION = 's3v4'
+AWS_S3_FILE_OVERWRITE = False
+AWS_DEFAULT_ACL = None
+AWS_S3_VERITY = True
+AWS_QUERYSTRING_AUTH = False
