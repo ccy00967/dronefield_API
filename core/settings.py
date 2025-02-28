@@ -243,6 +243,12 @@ ALIGO_SENDER = config("ALIGO_SENDER")
 CONSUMER_KEY = config("CONSUMER_KEY")
 CONSUMER_SECRET = config("CONSUMER_SECRET")
 
+# ===========================
+# naver API 설정
+# ===========================
+NAVER_CLIENT_ID = config("NAVER_CLIENT_ID")
+NAVER_CLIENT_SECRET = config("NAVER_CLIENT_SECRET")
+
 
 # STORAGES = {
 #     "default": {
