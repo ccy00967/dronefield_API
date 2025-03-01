@@ -23,7 +23,10 @@ from rest_framework.response import Response
 # 터미널에 아래 명령어를 입력하면 인코딩된 값이 반환된다 - base64 임포트하거나 해서 사용하기
 # echo -n 'test_sk_L~~~' | base64
 HEADERS = {
-    "Authorization": "Basic dGVzdF9za19Ma0tFeXBOQXJXV1lveEs5eldKQXJsbWVheFlHOg==",
+    # 결제창 시크릿 키
+    #"Authorization": "Basic dGVzdF9za19Ma0tFeXBOQXJXV1lveEs5eldKQXJsbWVheFlHOg==",
+    # 결제위젯 시크릿 키
+    "Authorization": "dGVzdF9nc2tfZG9jc19PYVB6OEw1S2RtUVhrelJ6M3k0N0JNdzY6",
     "Content-Type": "application/json",
 }
 
