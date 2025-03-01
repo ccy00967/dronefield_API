@@ -24,10 +24,9 @@ from rest_framework.response import Response
 # echo -n 'test_sk_L~~~' | base64
 HEADERS = {
     # 결제창 시크릿 키
-    "Authorization": "Basic dGVzdF9za19Ma0tFeXBOQXJXV1lveEs5eldKQXJsbWVheFlHOg==",
+    #"Authorization": "Basic dGVzdF9za19Ma0tFeXBOQXJXV1lveEs5eldKQXJsbWVheFlHOg==",
     # 결제위젯 시크릿 키
-    #"Authorization": "dGVzdF9nc2tfZG9jc19PYVB6OEw1S2RtUVhrelJ6M3k0N0JNdzY6",
-    #"Authorization": "dGVzdF9nc2tfZG9jc19PYVB6OEw1S2RtUVhrelJ6M3k0N0JNdzY=",
+    "Authorization": "dGVzdF9nc2tfZG9jc19PYVB6OEw1S2RtUVhrelJ6M3k0N0JNdzY6",
     "Content-Type": "application/json",
 }
 
