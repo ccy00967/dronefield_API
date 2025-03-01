@@ -1,5 +1,7 @@
 from django.db import models
 import uuid
+from django.utils.timezone import now
+from datetime import timedelta
 
 
 DEAL_METHOD_CHOICES = (
@@ -116,14 +118,21 @@ class Request(models.Model):
     depositCancelTransactionKey = models.CharField(
         max_length=80, blank=True, default=""
     )
-   
+
 
     # 드론평야용 - 정산상황 - 대금 정산완료 시 여기값을 1로 변경
     calculation = models.PositiveSmallIntegerField(
         choices=CALCULATION, blank=False, default=0
     )
 
-    def __str__(self):
-        return str(self.orderId)
+    # 방제 신청서 생성일자
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+    def is_expired(self):
+        """신청서 생성 후 24시간이 지나고도 requestDepositState가 1이 아니면 만료"""
+        return (now() - self.created_at) > timedelta(hours=24) and self.requestDepositState != 1
     
 
+    def __str__(self):
+        return str(self.orderId)
