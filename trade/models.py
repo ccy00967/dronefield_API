@@ -1,7 +1,5 @@
 from django.db import models
 import uuid
-from django.utils.timezone import now
-from datetime import timedelta
 
 
 DEAL_METHOD_CHOICES = (
@@ -124,14 +122,6 @@ class Request(models.Model):
     calculation = models.PositiveSmallIntegerField(
         choices=CALCULATION, blank=False, default=0
     )
-
-    # 방제 신청서 생성일자
-    created_at = models.DateTimeField(auto_now_add=True)
-
-
-    def is_expired(self):
-        """신청서 생성 후 24시간이 지나고도 requestDepositState가 1이 아니면 만료"""
-        return (now() - self.created_at) > timedelta(hours=24) and self.requestDepositState != 1
     
 
     def __str__(self):
