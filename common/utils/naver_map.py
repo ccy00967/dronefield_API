@@ -2,10 +2,10 @@ from django.shortcuts import render
 import requests
 import json
 from decouple import config
-from core.settings import CONSUMER_KEY, NAVER_CLIENT_ID
+from core.settings import VWORLD_KEY, NAVER_CLIENT_ID
 def naver_map(address, request):
     normalized_address = ' '.join(address.split())
-    vworld_key = CONSUMER_KEY
+    vworld_key = VWORLD_KEY
     baseurl_search = "https://api.vworld.kr/req/search"
 
     parms_search = {
@@ -47,6 +47,7 @@ def naver_map(address, request):
         raise ValueError(f"API 요청 실패: {e}")
 
     response_json = response.json()
+    print(response_json)
     items = []
     items = response_json.get("response", {}).get("result", {}).get(
         "featureCollection", {}).get("features", [])[0].get("geometry", {}).get("coordinates", [])[0]
@@ -80,7 +81,7 @@ def naver_map(address, request):
 
     context = {
         'naver_client_id': NAVER_CLIENT_ID,
-        'vworld_api_key': CONSUMER_KEY,
+        'vworld_api_key': VWORLD_KEY,
         "x": item_x,
         "y": item_y,
         "polygon_paths": json.dumps(polygon_paths)  # JSON 형식으로 변환

@@ -242,6 +242,7 @@ ALIGO_SENDER = config("ALIGO_SENDER")
 # ===========================
 CONSUMER_KEY = config("CONSUMER_KEY")
 CONSUMER_SECRET = config("CONSUMER_SECRET")
+VWORLD_KEY = config("VWORLD_KEY")
 
 # ===========================
 # naver API 설정
