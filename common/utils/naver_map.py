@@ -47,7 +47,6 @@ def naver_map(address, request):
         raise ValueError(f"API 요청 실패: {e}")
 
     response_json = response.json()
-    print(response_json)
     items = []
     items = response_json.get("response", {}).get("result", {}).get(
         "featureCollection", {}).get("features", [])[0].get("geometry", {}).get("coordinates", [])[0]

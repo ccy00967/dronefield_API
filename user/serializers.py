@@ -225,7 +225,6 @@ class UserLoginSerializer(serializers.Serializer):
                 "bank_name": bank.bank_name if bank else None,
                 "bank_account_number": bank.account_number if bank else None,
             }
-            print(user.marketing_agreement_date)
             return validation
         except CustomUser.DoesNotExist:
             raise serializers.ValidationError("Invalid login credentials(유저 존재x)")
