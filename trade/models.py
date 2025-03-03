@@ -116,14 +116,13 @@ class Request(models.Model):
     depositCancelTransactionKey = models.CharField(
         max_length=80, blank=True, default=""
     )
-   
+
 
     # 드론평야용 - 정산상황 - 대금 정산완료 시 여기값을 1로 변경
     calculation = models.PositiveSmallIntegerField(
         choices=CALCULATION, blank=False, default=0
     )
+    
 
     def __str__(self):
         return str(self.orderId)
-    
-
